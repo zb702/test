@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <style>
+        [v-cloak]{
+            display: none;
+        }
+        input{
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="login" class="text-c pad-0-10">
+        <div class="logoArea flex-center mar-t-30">
+            <img class="w-h-24 circ-50" style="border:1px solid #f6f6f6;" src="../../image/logo.png" alt="">
+        </div>
+        <div class="inputArea mar-t-18">
+            <div class="inputLine flex-sb bord-b-f5" style="height: 12vw;">
+                <div class="inputLeft text-4 text-bold text-l" style="width: 20vw;">
+                    <span>手机号</span>
+                </div>
+                <div class="inputMiddle" style="width: 36vw;">
+                    <input class="text-l" v-model="loginForm.phone" maxlength="11" type="number" placeholder="输入手机号码">
+                </div>
+                <div class="inputRight" style="width: 24vw;"></div>
+            </div>
+            <div class="inputLine flex-sb bord-b-f5" style="height: 12vw;">
+                <div class="inputLeft text-4 text-bold text-l" style="width: 20vw;">
+                    <span>用户名</span>
+                </div>
+                <div class="inputMiddle" style="width: 36vw;">
+                    <input class="text-l" v-model="loginForm.nickname" maxlength="10" type="text" placeholder="输入用户名称">
+                </div>
+                <div class="inputRight text-4 col-blue text-r" style="width: 24vw;"></div>
+            </div>
+        </div>
+        <div class="tipArea flex-fe text-3 col-666" style="height: 14vw;">
+            <!-- <span @click="gotoForgetPassword">忘记密码</span> -->
+        </div>
+        <div class="btnArea">
+            <p class="bigBtn" @click="gotoTarBar">登录</p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: 'rgba(255,255,255,0)'
+        });
+        var vue = new Vue({
+            el: '#login',
+            data: {
+                loginForm:{
+                    phone:'',
+                    nickname:'天瑞用户',
+                }
+            },
+            created(){},
+            methods:{
+                gotoForgetPassword(){
+                    api.openWin({
+                        name: 'forgetPasswordHeader',
+                        url:'./forgetPasswordHeader.html',
+                        pageParam: {}
+                    });
+                },
+                gotoTarBar(){
+                    if(this.loginForm.phone==''){
+                        api.toast({
+                            msg:'请填写手机号',
+                            duration: 2000,
+                            location: 'middle'
+                        })
+                        return
+                    }else if(this.loginForm.nickname==''){
+                        api.toast({
+                            msg:'请填写用户名称',
+                            duration: 2000,
+                            location: 'middle'
+                        })
+                        return
+                    }else if(this.loginForm.nickname.length>10){
+                        api.toast({
+                            msg:'用户名称不得大于10个字符',
+                            duration: 2000,
+                            location: 'middle'
+                        })
+                        return
+                    }else{
+                        api.toast({
+                            msg:'登录成功',
+                            duration: 1200,
+                            location: 'middle'
+                        })
+                        let userInfo = {
+                            id:String(new Date().getFullYear())+String(new Date().getMonth()+1)+String(new Date().getDate())+this.loginForm.phone.substr(-4),
+                            nickname:this.loginForm.nickname,
+                            phone:this.loginForm.phone,
+                            token:String(new Date().getTime())+this.loginForm.phone,
+                            loginTime:new Date().getTime()
+                        };
+                        console.log('当前参数'+JSON.stringify(userInfo))
+                        api.setPrefs({
+                            key: 'userInfo',
+                            value: JSON.stringify(userInfo),
+                        });
+                        setTimeout(()=>{
+                            api.openFrame({
+                                name: 'index',
+                                url:'../mainPage/index.html',
+                                bounces: false,
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: 'auto', // main页面的宽度 自适应屏幕宽度
+                                    h: 'auto'
+                                }
+                            })
+                        },800)
+                    }
+                }
+            }
+        })
+      };
+  </script>
+</html>

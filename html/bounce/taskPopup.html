@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>任务项</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+    <style>
+        body,
+        html {
+            background: rgba(255, 255, 255, 0);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="taskPopup">
+        <div class="all-bounce">
+            <div class="all-bounce-mark"></div>
+            <div class="all-bounce-form" style="height: 94vw;margin-top:-45vw">
+                <div class="all-bounce-form-title">
+                    <span>任务{{fromType==1?'编辑':'新增'}}</span>
+                    <img @click="go_back" src="../../image/icon/closeIcon.png" alt="">
+                </div>
+                <div class="all-bounce-form-content" style="height: 62vw;">
+                    <p class="all-bounce-form-line bord-b-f5">
+                        <span class="text-3">任务名称</span>
+                        <input type="text" placeholder="请填写任务名称" v-model="taskInf.tasks_name">
+                    </p>
+                    <p class="all-bounce-form-line bord-b-f5" @click="selecteStandard">
+                        <span class="text-3">关联标准</span>
+                        <input type="text" placeholder="请选择关联标准" disabled v-model="taskInf.relatedStandardsName">
+                    </p>
+                    <p class="all-bounce-form-line bord-b-f5">
+                        <span class="text-3">执行单位</span>
+                        <input type="text" placeholder="请填写执行单位" v-model="taskInf.tasks_department">
+                    </p>
+                    <p class="all-bounce-form-line bord-b-f5">
+                        <span class="text-3">执行编号</span>
+                        <input type="text" placeholder="请填写执行编号" disabled v-model="taskInf.tasks_code">
+                    </p>
+                    <p class="all-bounce-form-line bord-b-f5" @click="selecteDate(1)">
+                        <span class="text-3">开始时间</span>
+                        <input type="text" placeholder="请选择开始时间" disabled v-model="start_time">
+                    </p>
+                    <p class="all-bounce-form-line bord-b-f5" @click="selecteDate(2)">
+                        <span class="text-3">结束时间</span>
+                        <input type="text" placeholder="请选择结束时间" disabled v-model="end_time">
+                    </p>
+                </div>
+                <div class="all-bounce-form-bottom" @click="saveInf">保存</div>
+            </div>
+        </div>
+        <van-popup v-model="startDateShow" round position="bottom">
+            <van-datetime-picker v-model="startDate" type="datehour" title="选择开始时间" :min-date="minDate1"
+                :max-date="maxDate1" @confirm="startSure" @cancel="startDateShow = false" />
+        </van-popup>
+        <van-popup v-model="endDateShow" round position="bottom">
+            <van-datetime-picker v-model="endDate" type="datehour" title="选择结束时间" :min-date="minDate2"
+                :max-date="maxDate2" @confirm="endSure" @cancel="endDateShow = false" />
+        </van-popup>
+        <van-popup v-model="showStandard" round position="bottom">
+            <van-picker
+                title="关联标准"
+                show-toolbar
+                value-key="standard_Name"
+                :columns="standard_list"
+                @confirm="standardConfirm"
+                @cancel="showStandard = false"
+            />
+        </van-popup>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript">
+    var db;
+    apiready = function () {
+        db = api.require('db');
+        var vue = new Vue({
+            el: '#taskPopup',
+            data: {
+                fromType: 0,//0新增1编辑
+                taskInf: {},//任务信息
+                userinfo: {},
+                startDateShow: false,
+                endDateShow: false,
+                startDate: '',
+                start_time:'',//开始时间格式化
+                minDate1: new Date(),
+                maxDate1: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                endDateShow: false,
+                endDate: '',
+                end_time:'',//结束时间格式化
+                minDate2: new Date(),
+                maxDate2: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                showStandard:false,
+                standard_list:[],
+                yqinfData:{},//仪器信息
+            },
+            created() {
+                this.taskInf = api.pageParam.taskParams
+                this.fromType = api.pageParam.type
+                this.userinfo = getPrefs('userInfo')
+                this.standard_list = select2('tr_voc_standard', {})
+                console.log('标准列表'+JSON.stringify(this.standard_list))
+            },
+            mounted(){
+                
+                //读取仪器信息
+                let yqinf = api.readFile({
+                    sync: true,
+                    path: 'fs://instrumentInformation.txt'
+                });
+                if(yqinf){
+                    this.yqinfData = JSON.parse(yqinf)
+                }else{
+                    api.alert({
+                        msg: '请前往仪器设置页面进行设置'
+                    });
+                }
+                    // console.log('本仪器信息'+JSON.stringify(this.yqinfData))
+            },
+            methods: {
+                //取消返回
+                go_back() {
+                    api.closeFrame()
+                },
+                //保存信息
+                saveInf() {
+                    if (this.arrEmptyVer(this.taskInf)) {
+                        //数据中status 0 未开始 1 进行中 2 已取消 3 已完成
+                        
+                        api.toast({
+                            msg: '保存成功',
+                            duration: 2000,
+                            location: 'middle'
+                        });
+                        if (this.fromType == 1) {//编辑修改
+                            update2('tr_voc_tasks', {
+                                id: this.taskInf.id,
+                                tenant_id: 0,
+                                enterprise_id: 0,
+                                instrument_code: this.yqinfData.code,
+                                add_userid: this.userinfo.id,
+                                operator: this.userinfo.nickname,
+                                createtime: this.taskInf.createtime,
+                                tasks_name: this.taskInf.tasks_name,
+                                relatedStandardsName: this.taskInf.relatedStandardsName,
+                                relatedStandardsId: this.taskInf.relatedStandardsId,
+                                tasks_code: this.taskInf.tasks_code,
+                                tasks_department: this.taskInf.tasks_department,
+                                finishtime: this.taskInf.finishtime,
+                                is_upload: 0,
+                                status:0,
+                                isEdit: this.taskInf.isEdit ? 1 : 0,
+                            })
+                        } else {//新增
+                            var taskAddResult = insert2('tr_voc_tasks', {
+                                tenant_id: 0,
+                                enterprise_id: 0,
+                                instrument_code: this.yqinfData.code,
+                                add_userid: this.userinfo.id,
+                                operator: this.userinfo.nickname,
+                                createtime: this.taskInf.createtime,
+                                tasks_name: this.taskInf.tasks_name,
+                                relatedStandardsName: this.taskInf.relatedStandardsName,
+                                relatedStandardsId: this.taskInf.relatedStandardsId,
+                                tasks_code: this.taskInf.tasks_code,
+                                tasks_department: this.taskInf.tasks_department,
+                                finishtime: this.taskInf.finishtime,
+                                status:0,
+                                is_upload: 0,
+                                isEdit: this.taskInf.isEdit ? 1 : 0,
+                                // updatetime bigint(11)
+                            });
+                            // console.log('任务新增结果' + JSON.stringify(taskAddResult))
+                        }
+                        api.sendEvent({
+                            name: 'taskInfChange',
+                            extra: {
+                                isUpdateData: true,
+                            }
+                        });
+                        api.closeFrame()
+                    }
+                },
+                //选择标准
+                selecteStandard(){
+                    this.showStandard = true
+                },
+                //选择日期
+                selecteDate(num){
+                    // console.log('那个日期'+num+'-'+this.startDate+'--'+this.endDate)
+                    if(num==1){//开始时间
+                        this.startDateShow = true
+                    }else {//结束时间
+                        if(this.startDate===''||this.startDate==null){
+                            api.toast({
+                                msg:'请优先选择开始时间',
+                                duration: 2000,
+                                location: 'middle'
+                            })
+                        }else{
+                            this.endDateShow = true
+                        }
+                    }
+                },
+                //起始日期确认
+                startSure(date) {
+                    if ((this.startDate != null || this.startDate != '') && (this.endDate != null || this.endDate != '')) {
+                        if (new Date(this.startDate).getTime() > new Date(this.endDate).getTime()) {
+                            api.toast({
+                                msg: '开始时间不得大于结束时间',
+                                duration: 2000,
+                                location: 'middle'
+                            })
+                        } else {
+                            this.start_time = this.formatDate(this.startDate)
+                            this.taskInf.createtime = new Date(this.startDate).getTime()
+                            this.startDateShow = false
+                        }
+                    } else {
+                        this.start_time = this.formatDate(this.startDate)
+                        this.taskInf.createtime = new Date(this.startDate).getTime()
+                        this.startDateShow = false
+                    }
+                },
+                //截止日期确认
+                endSure(date) {
+                    if ((this.startDate != null || this.startDate != '') && (this.endDate != null || this.endDate != '')) {
+                        if (new Date(this.startDate).getTime() > new Date(this.endDate).getTime()) {
+                            api.toast({
+                                msg: '结束时间不得小于开始时间',
+                                duration: 2000,
+                                location: 'middle'
+                            })
+                        } else {
+                            this.end_time = this.formatDate(this.endDate)
+                            this.taskInf.finishtime = new Date(this.endDate).getTime()
+                            this.endDateShow = false
+                        }
+                    } else {
+                        this.end_time = this.formatDate(this.endDate)
+                        this.taskInf.finishtime = new Date(this.endDate).getTime()
+                        this.endDateShow = false
+                    }
+                },
+                //标准选择确认
+                standardConfirm(e){
+                    this.$set(this.taskInf,'relatedStandardsName',e.standard_Name)
+                    this.$set(this.taskInf,'relatedStandardsId',e.id)
+                    this.showStandard = false
+                },
+                formatDate(date) {
+                    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:00`;
+                },
+                arrEmptyVer(obj) {
+                    let emptyType = true;
+                    Object.keys(obj).forEach(e => {
+                        if (obj[e] === '') {
+                            api.toast({
+                                msg: '请完善所有信息' + e,
+                                duration: 2000,
+                                location: 'middle'
+                            });
+                            emptyType = false
+                            return emptyType
+                        }
+                    })
+                    return emptyType
+                }
+            }
+        })
+    }
+</script>
+
+</html>

@@ -1,0 +1,2678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+    <style>
+        body {
+            /* background: linear-gradient(0deg, #FFFFFF 0%, #F5F6FA 54%); */
+            background: #F5F6FA;
+        }
+
+        .simpleNameSelected {
+            height: 6.5vw;
+            width: 38.2vw;
+            border: 1px solid #DADEE6;
+            border-radius: 1vw;
+            padding-left: 4vw;
+        }
+
+        .simpleNameSelected img {
+            width: 5vw;
+            height: 7vw;
+        }
+
+        .selectItem {
+            width: 43vw;
+            height: 7vw;
+            border: 1px solid #DADEE6;
+            border-radius: 1vw;
+            background-color: #FFFFFF;
+            padding: 0 3vw;
+        }
+
+        .basicItem {
+            width: 37vw;
+            height: 9vw;
+            border-radius: 1vw;
+        }
+
+        .smallSelect {
+            width: 20vw;
+            height: 7vw;
+            background-color: #ffffff;
+            border: none;
+            outline: none;
+            color: #0081FF;
+            font-size: 4vw;
+            font-family: Source Han Sans CN;
+            font-weight: bold;
+        }
+
+        .smallBlueBlock {
+            width: 2vw;
+            height: 2vw;
+            background: #1D89FB;
+            border-radius: 1vw;
+        }
+
+        .resetBtn {
+            width: 15vw;
+            height: 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #0081FF;
+            border-radius: 1vw;
+            font-size: 3vw;
+            font-weight: 500;
+            color: #1D89FB
+        }
+
+        .dataTabItem {
+            width: 24vw;
+            height: 8vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4vw;
+            font-size: 3vw;
+            font-family: Source Han Sans CN;
+            font-weight: bold;
+            color: #71737C;
+        }
+
+        .dataTabItemActive {
+            background: #0081FF;
+            width: 24vw;
+            height: 8vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4vw;
+            font-size: 3vw;
+            font-family: Source Han Sans CN;
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+
+        .dataShow {
+            width: 90vw;
+            height: auto;
+            background-color: #FFFFFF;
+            border-radius: 3vw;
+        }
+
+        .dataShows {
+            width: 94vw;
+            height: auto;
+            background-color: #FFFFFF;
+            border-radius: 3vw;
+        }
+
+        .mapTips {
+            line-height: 10vw;
+        }
+
+        .mapBtn {
+            display: inline-block;
+            height: 10vw;
+            width: 40vw;
+            color: #ffffff;
+            background-color: #0081FF;
+            border-radius: 5vw;
+            font-size: 4vw;
+            line-height: 10vw;
+            text-align: center;
+            margin-top: 6vw;
+        }
+
+        #graphEcharts {
+            width: 100%;
+            height: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeItem {
+            width: 35vw;
+            height: 13vw;
+            background: #EFF5FF;
+            border-radius: 1vw;
+            padding: 0 3vw;
+            font-family: Source Han Sans CN;
+        }
+
+        .tableArea {
+            width: 90vw;
+            overflow-x: auto;
+        }
+
+        .tableTitle {
+            width: 105vw;
+            height: 11vw;
+            background: #FAFAFA;
+        }
+
+        .tableBody {
+            width: 105vw;
+        }
+
+        select {
+            font-size: 3.2vw;
+        }
+
+        .reportPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 900;
+        }
+
+        .reportMask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background-color: rgba(0, 0, 0, .3);
+        }
+
+        .reportContent {
+            position: fixed;
+            /* top: 50%; */
+            top: 3vw;
+            left: 50%;
+            width: 60vw;
+            height: 34vw;
+            z-index: 1100;
+            /* margin-top: -17vw; */
+            margin-left: -30vw;
+            background-color: #ffffff;
+            border-radius: 3vw;
+            text-align: center;
+        }
+
+        .reportContents {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 60vw;
+            height: 34vw;
+            z-index: 1100;
+            margin-top: -17vw;
+            margin-left: -30vw;
+            background-color: #ffffff;
+            border-radius: 3vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reportContent img {
+            width: 40vw;
+            height: 8.6vw;
+            object-fit: cover;
+            margin: 4vw 0 1vw 0;
+            animation: load 6.2s linear infinite;
+        }
+
+        @keyframes load {
+            0% {
+                width: 0vw;
+                height: 8.6vw;
+            }
+
+            50% {
+                width: 40vw;
+                height: 8.6vw;
+            }
+
+            100% {
+                width: 0vw;
+                height: 8.6vw;
+            }
+        }
+
+        .reportContent p {
+            font-size: 4.4vw;
+            color: #333333;
+            line-height: 6.4vw;
+            margin: 2vw 7vw;
+        }
+
+        .simpleNamePopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 400;
+        }
+
+        .simpleNameMask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 500;
+            background-color: rgba(0, 0, 0, .3);
+        }
+
+        .simpleNameContents {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 70vw;
+            height: 100vw;
+            z-index: 600;
+            margin-top: -50vw;
+            margin-left: -35vw;
+            background-color: #ffffff;
+            border-radius: 2vw;
+        }
+
+        .searchSimple {
+            height: 18vw;
+        }
+
+        .simpleNameList {
+            height: 80vw;
+            margin-bottom: 2vw;
+            overflow-y: auto;
+            border-radius: 0 0 2vw 2vw;
+        }
+
+        .averageItem {
+            width: 33vw;
+        }
+
+        .end_task {
+            position: fixed;
+            z-index: 999;
+            right: 6vw;
+            bottom: 8vw;
+            width: 16vw;
+            height: 10vw;
+            padding: 0 4vw;
+            background: #6C707B;
+            box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+            border-radius: 5vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .basicDataShow {
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            width: 94vw;
+            height: 110vw;
+            border: 3vw solid #808080;
+            border-radius: 3vw;
+            background-color: #ffffff;
+        }
+
+        .detectionArea {
+            /* padding: 0 2vw; */
+            position: relative;
+            height: 100%;
+        }
+
+        .detectionLiness {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 34vw;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detectionLine {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 14vw;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detectionLines {
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            color: #333333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6vw;
+            height: 18vw;
+            /* border-top: 1px solid #f0f0f0; */
+        }
+
+        .detectionLiness .detectionItem {
+            font-size: 6vw;
+            text-align: center;
+        }
+
+        .detectionLine .detectionItem {
+            font-size: 4vw;
+            text-align: center;
+        }
+
+        .detectionBlock {
+            width: 100%;
+            height: 90vw;
+            overflow-y: scroll;
+            overflow-x: scroll;
+        }
+
+        .blockHeader {
+            height: 14vw;
+            width: 200vw;
+            background-color: #f3f3f3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .headerItem {
+            width: 25vw;
+            text-align: center;
+        }
+
+        .blockBody {
+            height: 14vw;
+            width: 200vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f3f3f3;
+        }
+
+        .bodyItem {
+            width: 25vw;
+            text-align: center;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="frame1" v-cloak>
+        <div class="operationArea flex-sa" style="height: 30vw;background-color: #ffffff;">
+            <div class="operationItem text-c" @click="switchAirPump">
+                <img class="w-h-12 mar-b-2"
+                    :src="pumpType?'../../image/icon/switchActiveIcon.png':'../../image/icon/switchIcon.png'" alt="">
+                <p class="text-3 col-333">{{pumpType?'关泵':'开泵'}}</p>
+            </div>
+            <div class="operationItem text-c" @click="toggleReport">
+                <img class="w-h-12 mar-b-2"
+                    :src="isJl?'../../image/icon/reportOpenIcon.png':'../../image/icon/reportPauseIcon.png'" alt="">
+                <p class="text-3 col-333 mar-c">{{isJl?'停止记录':'开始记录'}}</p>
+            </div>
+            <div class="operationItem text-c" @click="gotoCalibration">
+                <img class="w-h-12 mar-b-2" src="../../image/icon/calibrationIcon.png" alt="">
+                <p class="text-3 col-333 mar-c">校准</p>
+            </div>
+            <div class="operationItem text-c" @click="gotoCreate">
+                <img class="w-h-12 mar-b-2" src="../../image/icon/createIcon.png" alt="">
+                <p class="text-3 col-333 mar-c">创建</p>
+            </div>
+        </div>
+        <div class="reportArea pad-0-5" style="background-color: #ffffff;">
+            <div class="selectedArea flex-sb mar-b-4">
+                <p class="flex-sb simpleNameSelected" @click="showSimpleName">
+                    <input type="text" style="width:25vw;font-size: 3.2vw;" disabled v-model="selectedValue"
+                        placeholder="请选择">
+                    <img src="../../image/icon/smallArrowDownIcon.png" alt="">
+                </p>
+                <select class="selectItem" v-model="selectedClass2" :disabled="pumpType" @change="selectClass2(event)">
+                    <option value="请选择">请选择任务：</option>
+                    <option :value="item.id" v-for="(item,index) in monitoringTasks">{{item.tasks_name}}</option>
+                </select>
+            </div>
+            <!-- <div class="basicDataArea flex-sb text-3 mar-b-4">
+                <p class="basicItem flex-sb pad-0-3"
+                    :style="{background: ((jbSetup.isJbSetup&& (Number(PID) >= Number(jbSetup.stelLimit)))?'#FFEAE8':'#ECF6FF')}">
+                    <span>STEL</span>
+                    <span class="text-bold text-3"
+                        :style="{color:((jbSetup.isJbSetup&& (Number(PID) >= Number(jbSetup.stelLimit)))?'#FF3F2B':'#333333')}">{{jbSetup.stelLimit==''?'暂无设置':jbSetup.stelLimit}}</span>
+                </p>
+                <p class="basicItem flex-sb pad-0-3"
+                    :style="{background:((jbSetup.isJbSetup && (Number(PID) >= Number(jbSetup.twaLimit)))?'#FFEAE8':'#ECF6FF')}">
+                    <span>TWA</span>
+                    <span class="text-bold text-3"
+                        :style="{color:((jbSetup.isJbSetup&& (Number(PID) >= Number(jbSetup.twaLimit)))?'#FF3F2B':'#333333')}">{{jbSetup.twaLimit==''?'暂无设置':jbSetup.twaLimit}}</span>
+                </p>
+            </div> -->
+            <div class="detectionValueArea flex-sb">
+                <span class="text-5 text-bold">检测值</span>
+                <p class="basicItem flex-center text-5" style="width: 50vw;" @dblclick="dblBtnClick"
+                    :style="{backgroundColor:((jbSetup.upLimit!=''&&(Number(PID) >= Number(jbSetup.upLimit)))?'#FFEAE8':'#ECF6FF')}">
+                    <span
+                        :style="{color: ((jbSetup.upLimit!=''&&(Number(PID) >= Number(jbSetup.upLimit)))?'#FF3F2B':'#333333')}">{{detectionValue}}</span>
+                </p>
+                <select class="smallSelect" v-model="detectionValueUnit" @change="selectValue(event)">
+                    <option :value="item.value" v-for="(item,index) in pidUnitList" :key="index">{{item.value}}</option>
+                </select>
+            </div>
+            <div class="averageValue flex-sb" style="height: 14vw;">
+                <div class="leftAverage" style="width:50%;">
+                    <div class="averageItem flex-fs">
+                        <p class="smallBlueBlock mar-r-1"></p>
+                        <span class="text-4 col-333">最大值:{{AllPid_max}}</span>
+                    </div>
+                    <div class="averageItem flex-fs">
+                        <p class="smallBlueBlock mar-r-1"></p>
+                        <span class="text-4 col-333">最小值:{{AllPid_min}}</span>
+                    </div>
+                </div>
+                <div class="rightAverage" style="width:50%;">
+                    <div class="averageItem flex-fs">
+                        <p class="smallBlueBlock mar-r-1"></p>
+                        <span class="text-4 col-333">平均值:{{AllPid_ave}}</span>
+                    </div>
+                    <div class="averageItem flex-fs">
+                        <p class="smallBlueBlock mar-r-1"></p>
+                        <span class="text-4 col-333">信号值:{{receivePID}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dataArea pad-0-2">
+            <div class="dataTabArea flex-fs" style="height: 14vw;">
+                <div :class="curIndex==0?'dataTabItemActive':'dataTabItem'" @click="toggleIndex(0)">检测信息</div>
+                <div :class="curIndex==1?'dataTabItemActive':'dataTabItem'" @click="toggleIndex(1)">趋势图</div>
+                <div :class="curIndex==2?'dataTabItemActive':'dataTabItem'" @click="toggleIndex(2)">地图信息</div>
+            </div>
+            <div class="dataShow pad-4-3" :style="{display:curIndex==0?'block':'none'}" v-show="curIndex==0">
+                <div class="timeArea flex-sb mar-b-2">
+                    <p class="timeItem flex-sb">
+                        <span class="text-3 col-blue text-bold">实时时长</span>
+                        <span class="text-4 text-bold"
+                            style="display: inline-block;width:20vw;overflow-x:auto;">{{reportNum | timeFormate}}</span>
+                    </p>
+                    <p class="timeItem flex-sb">
+                        <span class="text-3 col-blue text-bold">累计时长</span>
+                        <span class="text-4 text-bold"
+                            style="display: inline-block;width:20vw;overflow-x:auto;">{{timeTotal/1000+reportNum |
+                            timeFormate}}</span>
+                    </p>
+                </div>
+                <div class="tableArea">
+                    <div class="tableTitle flex-sb col-333">
+                        <p style="width: 25vw;" class="text-l text-3 text-bold pad-l-2">时间</p>
+                        <p style="width: 20vw;" class="text-3 text-c text-bold">最大值</p>
+                        <p style="width: 20vw;" class="text-3 text-c text-bold">最小值</p>
+                        <p style="width: 20vw;" class="text-3 text-c text-bold">平均值</p>
+                        <p style="width: 20vw;" class="text-3 text-c text-bold">监测结果</p>
+                    </div>
+                    <div class="tableBody">
+                        <ul>
+                            <li v-for="(item,index) in reportList" class="bord-b-f5 flex-sb" style="height: 12vw;">
+                                <p class=" text-3 pad-l-2 col-666" style="width: 25vw;">
+                                    {{item.createtime | normalTime}}
+                                </p>
+                                <p class=" text-3 text-c col-666" style="width: 20vw;">
+                                    {{item.max_value}}
+                                </p>
+                                <p class=" text-3 text-c col-666" style="width: 20vw;">
+                                    {{item.min_value}}
+                                </p>
+                                <p class=" text-3 text-c col-666" style="width: 20vw;">
+                                    {{Number(item.averageValue).toFixed(1)}}
+                                </p>
+                                <p class=" text-3 text-c col-666" style="width: 20vw;"
+                                    :class="item.standard_limit==''?'col-red':Number(item.max_value)>=Number(item.standard_limit)?'col-red':'col-green'">
+                                    {{item.standard_limit==''?'无法判断':Number(item.max_value)>=Number(item.standard_limit)?'超标':'合格'}}
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="dataShow pad-4-3" :style="{display:curIndex==1?'block':'none'}" v-show="curIndex==1">
+                <div id="graphEcharts">暂无数据</div>
+            </div>
+            <div class="dataShows pad-1" :style="{display:curIndex==2?'block':'none'}" v-show="curIndex==2">
+                <div id="mapArea" style="width:100%;height:100vw;" v-show="curLon!=''&&curLat!=''"></div>
+                <div style="width:100%;height:100vw;text-align: center;" v-show="curLon==''&&curLat==''">
+                    <p class="mapTips" v-if="mapReload==3">GPS信号弱，请移至空旷地带，再次尝试！</p>
+                    <p class="mapBtn" v-if="mapReload==3" @click="rePosition">重新定位</p>
+                    <p class="mapBtn" v-else>正在定位中...</p>
+                </div>
+                <div v-if="curLon!=''&&curLat!=''">
+                    <p>经度：{{curLon}}</p>
+                    <p>纬度：{{curLat}}</p>
+                    <p>具体地址：{{curCity}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="greyLine" style="height: 4vw;"></div>
+        <!-- 记录设置次数弹框 -->
+        <div class="reportPopup" v-if="isReportPopup">
+            <div class="reportMask"></div>
+            <div class="reportContent">
+                <img src="../../image/normalLogo.png" alt="">
+                <p>正在进行第{{testTimes}}次记录，请勿其他操作</p>
+            </div>
+        </div>
+        <!-- 离线地图下载弹框 -->
+        <div class="reportPopup" v-if="isOffLineMapPopup">
+            <div class="reportMask"></div>
+            <div class="reportContents">
+                <p>{{offLineCity}}离线地图下载进度：{{downRatio}}%</p>
+            </div>
+        </div>
+        <!-- 样品数据弹框 -->
+        <div class="simpleNamePopup" v-show="isSimpleNamePopup">
+            <div class="simpleNameMask"></div>
+            <div class="simpleNameContents">
+                <div class="searchSimple flex-sb pad-0-3">
+                    <img class="w-h-5" @click="isSimpleNamePopup = false" src="../../image/icon/arrowLeftIcon.png"
+                        alt="">
+                    <input type="text" v-model="keyWord"
+                        style="height: 8vw;border: 1px solid #f3f3f3;border-radius: 2vw;text-align:center;width: 40vw;"
+                        placeholder="请输入关键词">
+                    <span @click="clickSearch">搜索</span>
+                </div>
+                <div class="simpleNameList">
+                    <van-radio-group v-model="selectedClass1">
+                        <van-cell-group>
+                            <van-cell :title="item.name+'--'+item.coefficient" clickable @click="selectSimpleName(item)"
+                                v-for="(item,index) in pideqaList" :key="index">
+                                <template #right-icon>
+                                    <van-radio :name="item.id" />
+                                </template>
+                            </van-cell>
+                        </van-cell-group>
+                    </van-radio-group>
+                </div>
+            </div>
+        </div>
+        <div class="end_task" id="moveDiv" v-if="isEndTaskShow" @click="endShow = true" @touchstart='mouseup'
+            @touchmove='mousemove' @touchend='mousedown'>
+            <p class="col-whi text-3">结束任务</p>
+        </div>
+        <!-- 任务提示弹框 -->
+        <van-dialog v-model="endShow" title="提示" show-cancel-button @confirm="endSure" @cancel="endShow = false">
+            <p style="text-align: center;line-height: 20vw;">确定要结束该任务?</p>
+        </van-dialog>
+        <van-dialog v-model="raskShow" title="提示" show-cancel-button @confirm="nextStep" @cancel="cancelShow">
+            <p style="text-align: center;line-height: 20vw;">{{raskTip}}</p>
+        </van-dialog>
+        <!-- 检测值弹框 -->
+        <div class="basicDataShow" v-if="detectionShow">
+            <div class="detectionArea">
+                <div class="detectionLiness">
+                    <span class="detectionItem" style="width:25%;">检测值</span>
+                    <span class="detectionItem" style="width:50%;">{{detectionValue}}</span>
+                    <span class="detectionItem" style="width:25%;">{{detectionValueUnit}}</span>
+                </div>
+                <div class="detectionLine">
+                    <span class="detectionItem" style="width:50%;">最大值</span>
+                    <span class="detectionItem" style="width:50%;">{{AllPid_max}}</span>
+                </div>
+                <div class="detectionLine">
+                    <span class="detectionItem" style="width:50%;">最小值</span>
+                    <span class="detectionItem" style="width:50%;">{{AllPid_min}}</span>
+                </div>
+                <div class="detectionLine">
+                    <span class="detectionItem" style="width:50%;">信号值</span>
+                    <span class="detectionItem" style="width:50%;">{{receivePID}}</span>
+                </div>
+                <div class="detectionLine">
+                    <span class="detectionItem" style="width:50%;">平均值</span>
+                    <span class="detectionItem" style="width:50%;">{{AllPid_ave}}</span>
+                </div>
+                <div class="detectionLines" @click="detectionShow = false">
+                    <span style="font-size: 5.4vw;">返回</span>
+                </div>
+            </div>
+        </div>
+        <!-- 记录结束值显示弹框 -->
+        <div class="basicDataShow" v-if="reportValueEndShow">
+            <div class="detectionArea">
+                <div class="detectionBlock">
+                    <div class="blockHeader">
+                        <div class="headerItem">序号</div>
+                        <div class="headerItem">样品名称</div>
+                        <div class="headerItem">仪器编号</div>
+                        <div class="headerItem">开始时间</div>
+                        <div class="headerItem">结束时间</div>
+                        <div class="headerItem">最大值</div>
+                        <div class="headerItem">最小值</div>
+                        <div class="headerItem">平均值</div>
+                    </div>
+                    <div class="blockBody" v-for="(item,index) in reportValueEndData" :key="index">
+                        <div class="bodyItem">{{index+1}}</div>
+                        <div class="bodyItem">{{item.NAME}}</div>
+                        <div class="bodyItem">{{item.instrument_code}}</div>
+                        <div class="bodyItem">{{item.createtime-item.test_duration | normalTime}}</div>
+                        <div class="bodyItem">{{item.createtime | normalTime}}</div>
+                        <div class="bodyItem">{{item.max_value}}</div>
+                        <div class="bodyItem">{{item.min_value}}</div>
+                        <div class="bodyItem">{{item.averageValue}}</div>
+                    </div>
+                </div>
+                <div class="detectionLines" @click="reportValueEndShow = false">
+                    <span style="font-size: 5.4vw;">返回</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript" src="../../script/serialPort.js"></script>
+<script type="text/javascript" src="../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var db, serialPort, switchModule, map, cxgBluetoothBase;
+    apiready = function () {
+        db = api.require('db');
+        serialPort = api.require("fvvSerialPort");//引入串口模块
+        switchModule = api.require("APIModuleGpioLib");//引入开关泵模块
+        cxgBluetoothBase = api.require('cxgBluetoothBase')
+        cxgBluetoothClient = api.require('cxgBluetoothClient')
+        cxgBluetoothServer = api.require('cxgBluetoothServer')
+        map = api.require('bMap');
+        map.setAgreePrivacy({
+            agree: true
+        });
+        api.addEventListener({
+            name: 'openblue'
+        }, function (ret) {
+            var blueon = ret.value.blueon
+            if (blueon) {
+                cxgBluetoothServer.syncServersInfo({},
+                    function (ret, err) {
+                        if (!err) {
+                            // 具体使用方法见demo
+                            // console.log(JSON.stringify(ret.data));
+                            var list = ret.data
+                            api.openFrame({
+                                name: 'connect_ble',
+                                url: './connect_ble.html',
+                                bgColor: 'rgba(0,0,0,0)',
+                                pageParam: {
+                                    list: list,
+                                    blueon: blueon
+                                }
+                            })
+                            api.hideProgress()
+
+                        } else {
+                            api.hideProgress()
+                        }
+                    })
+            } else {
+                api.openFrame({
+                    name: 'connect_ble',
+                    url: './connect_ble.html',
+                    bgColor: 'rgba(0,0,0,0)',
+                    pageParam: {
+                        blueon: blueon,
+                        list: []
+                    }
+                })
+                api.hideProgress()
+            }
+
+
+        })
+
+        cxgBluetoothBase.isEnabledBluetooth({}, function (ret, err) {
+            if (!err) {
+                if (ret) {
+                    api.sendEvent({
+                        name: 'blueon',
+                        extra: {
+                            blueon: ret.state
+                        }
+                    })
+                }
+                if (ret && ret.state == false) {
+                    api.confirm({
+                        title: '蓝牙未开启',
+                        msg: '是否立即开启蓝牙？',
+                        buttons: ['确定', '取消']
+                    }, function (ret, err) {
+                        var index = ret.buttonIndex;
+                        if (index == 1) {
+                            cxgBluetoothBase.openBluetooth({}, function (ret, err) {
+                                if (!err) {
+                                } else {
+                                }
+                            });
+                        }
+                    });
+                }
+            } else {
+                console.log("code: " + err.code + " msg: " + err.msg);
+            }
+        });
+
+        cxgBluetoothBase.listenBluetoothStatus({}, function (ret, err) {
+            if (!err) {
+                console.log();
+                if (ret && ret.status == 'STATE_OFF') {
+                    api.toast({
+                        title: '蓝牙已关闭',
+                        location: 'middle'
+                    })
+                    api.sendEvent({
+                        name: 'blueon',
+                        extra: {
+                            blueon: false
+                        }
+                    })
+                }
+                if (ret && ret.status == 'STATE_ON') {
+                    api.sendEvent({
+                        name: 'blueon',
+                        extra: {
+                            blueon: true
+                        }
+                    })
+                    startServer()
+                }
+            } else {
+                console.log("code: " + err.code + " msg: " + err.msg);
+            }
+        });
+        startServer()
+        function startServer(params) {
+            cxgBluetoothServer.startServer({
+                isNewStartServer: false,
+                Server_UUID: "00001101-0000-1000-8000-00805F9B34FB"
+            }, function (ret, err) {
+                if (!err) {
+                    if (ret.data === true) {
+                        console.log("创建服务成功");
+                    }
+                    if (typeof ret.data == "object") {
+                        console.log(JSON.stringify(ret.data));
+                    }
+                    if (ret.data.disconnectAddress) {
+                        console.log("外设断开");
+                    }
+                } else {
+                    console.log("code: " + err.code + " msg: " + err.msg);
+                    cxgBluetoothServer.stopServer()
+                }
+            });
+        }
+        // 关闭蓝牙
+        api.addEventListener({
+            name: 'closeBlue'
+        }, function (ret) {
+            cxgBluetoothBase.closeBluetooth()
+        })
+        // 开启蓝牙
+        api.addEventListener({
+            name: 'openBlue'
+        }, function (ret) {
+            cxgBluetoothBase.openBluetooth()
+        })
+        // 退出app，关泵
+        api.addEventListener({
+            name: 'closePump'
+        }, function (ret) {
+            vue.switchFire()
+        })
+
+        //监听是否是上传数据关泵
+        api.addEventListener({
+            name: 'uploadDataPumpChange'
+        }, (ret) => {
+            console.log('监听上传数据返回信息' + JSON.stringify(ret))
+            if (ret.value.isClosePump) {//关泵
+                vue.switchFire()
+            }
+        })
+        //实时接受监听串口数据返回
+        api.addEventListener({
+            name: "FvvSerialPort"
+        }, (ret, err) => {
+            // console.log('监听返回信息' + JSON.stringify(ret) + JSON.stringify(err))
+            if (ret) {
+                vue.receivePID = filterPid(ret.value.msg) ? (filterPid(ret.value.msg) / 1000).toFixed(2) : vue.receivePID;//Pid过滤器，传入字符串或对象，过滤出来pid字符串 
+                //往校准页面发送 实时信号值
+                api.sendEvent({
+                    name: 'signalValuesend',
+                    extra: { signalValue: vue.receivePID }
+                })
+                // 蓝牙广播
+                let num = vue.bjzSetup.bjzValue == '' ? (Number(vue.pid_epa) * getValueBySignal(vue.historyJZ, vue.receivePID)).toFixed(1) : ((Number(vue.pid_epa) * getValueBySignal(vue.historyJZ, vue.receivePID)) - vue.bjzSetup.bjzValue).toFixed(1)
+                var PID = Number(num) <= 0 ? 0 : num//去除背景值小于0 显示0 否则显示自己
+                var msg = SingleToHex(54.56).replace(/\s+/g, "")
+                msg='00' + msg + '0D'
+                console.log(msg);
+
+                cxgBluetoothServer.syncServersInfo({},
+                    function (ret, err) {
+                        if (!err) {
+                            // 具体使用方法见demo
+                            // console.log(JSON.stringify(ret.data));
+                            var list = ret.data
+                            api.sendEvent({
+                                name: 'list',
+                                extra: {
+                                    list: list
+                                }
+                            })
+                            for (let i = 0; i < list.length; i++) {
+                                if (list[i].client) {
+                                    cxgBluetoothServer.sendDataServerClient(
+                                        {
+                                            address: list[i].client.address,
+                                            Server_UUID: "00001101-0000-1000-8000-00805F9B34FB",
+                                            data: msg,
+                                            isHex: true
+                                        },
+                                        function (ret, err) {
+                                            if (!err) {
+                                                // console.log("发送成功");
+                                            } else {
+                                                // console.log("code: " + err.code + " msg: " + err.msg);
+                                            }
+                                        }
+                                    );
+                                }
+
+
+                            }
+                        } else {
+                            // console.log("code: " + err.code + " msg: " + err.msg);
+                        }
+                    }
+                );
+
+            }
+        })
+        //刷新校准后监听刷新
+        api.addEventListener('sxHistoryJZ', (ret, err) => {
+            // vue.historyJZ = select2('tr_voc_calibrationInfos', {}, 1, 0, ' standard_value asc')
+            var ret = db.selectSqlSync({
+                name: 'tianrui_offline',
+                sql: 'SELECT * FROM tr_voc_calibrationInfos order by standard_value asc'
+            });
+            ret.data.sort(compare('standard_value'));
+            vue.historyJZ = ret.data
+            console.log('刷新后历史校准' + JSON.stringify(vue.historyJZ))
+        })
+        //更新浓度信息
+        api.addEventListener({
+            name: 'updateNDinf'
+        }, (ret) => {
+            // vue.historyJZ = select2('tr_voc_calibrationInfos', {}, 1, 0, ' standard_value asc')
+            var ret = db.selectSqlSync({
+                name: 'tianrui_offline',
+                sql: 'SELECT * FROM tr_voc_calibrationInfos order by standard_value asc'
+            });
+            ret.data.sort(compare('standard_value'));
+            vue.historyJZ = ret.data
+        })
+        //监听基础数据记录
+        api.addEventListener({
+            name: 'sendBasicReport'
+        }, (ret, err) => {
+            vue.getDetectionInfRealTimeValue()
+        });
+        //监听背景值设置改变
+        api.addEventListener({
+            name: 'bjzSetup'
+        }, (ret) => {
+            console.log('警报设置状态' + JSON.stringify(ret))
+            vue.bjzSetup = ret.value
+        })
+        //监听警报设置值改变
+        api.addEventListener({
+            name: 'jbSetup'
+        }, (ret) => {
+            console.log('警报设置状态' + JSON.stringify(ret))
+            vue.jbSetup = ret.value
+        })
+        //监听单位设置值改变
+        api.addEventListener({
+            name: 'dwSetup'
+        }, (ret) => {
+            console.log('单位设置状态' + JSON.stringify(ret))
+            vue.unitSetup = ret.value
+            vue.detectionValueUnit = vue.unitSetup.unitInf
+        })
+        //监听记录状态改变
+        api.addEventListener({
+            name: 'recordChange'
+        }, (ret) => {
+            console.log('监听记录状态改变' + JSON.stringify(ret.value))
+            vue.jlSetupInf = ret.value
+            if (vue.pumpType) {
+                console.log('开泵状态')
+                if (vue.isJl) {
+                    console.log('记录按钮是开着的')
+                    if (vue.jlSetupInf.isJlSetup == 0) {
+                        console.log('设置为不记录')
+                        vue.stopRecording()
+                    } else if (vue.jlSetupInf.isJlSetup == 1) {
+                        console.log('设置为手动记录')
+                        vue.stopRecording()
+                        // setTimeout(() => {
+                        //     vue.manualRecording()
+                        // }, 500)
+                    } else if (vue.jlSetupInf.isJlSetup == 2) {
+                        console.log('设置为自动记录')
+                        vue.stopRecording()
+                        setTimeout(() => {
+                            vue.automaticRecording()
+                        }, 500)
+                    }
+                } else {
+                    console.log('记录按钮是关着的')
+                    if (vue.jlSetupInf.isJlSetup == 0) {
+                        console.log('设置为不记录')
+                        vue.stopRecording()
+                    } else if (vue.jlSetupInf.isJlSetup == 1) {
+                        console.log('设置为手动记录')
+                        vue.stopRecording()
+                        // setTimeout(() => {
+                        //     vue.manualRecording()
+                        // }, 500)
+                    } else if (vue.jlSetupInf.isJlSetup == 2) {
+                        console.log('设置为自动记录')
+                        vue.stopRecording()
+                        setTimeout(() => {
+                            vue.automaticRecording()
+                        }, 500)
+                    }
+                }
+            } else {
+                console.log('关泵状态不记录数据')
+            }
+        })
+        api.removeEventListener({
+            name: 'refreshPage'
+        });
+        api.addEventListener({
+            name: 'refreshPage'
+        }, (ret, err) => {
+            let res = db.selectSqlSync({
+                name: 'tianrui_offline',
+                sql: "SELECT * FROM tr_voc_tasks WHERE status < 2"
+            });
+            this.monitoringTasks = res.data
+        });
+        var vue = new Vue({
+            el: '#frame1',
+            data: {
+                selectedClass1: '286',//286为异丁烯 默认值
+                selectedValue: '异丁烯',
+                selectedClass2: '请选择',//任务id
+                raskName: '',//任务名称
+                rask_department: '',//任务执行部门
+                taskDuration: 0,//任务执行时间
+                // leftValue: 0,//短时量平均浓度  STEL的值规定由15分钟时间加权，这样在15分钟内取多次求平均值，但是不得小于3次，其得到的值即为所要的stel值。
+                // rightValue: 0,//时量平均浓度  TWA的计算方法： 在8小时内，定时取数，然后求平均值，考虑到结果的有效性和实用性，规定采样间隔的时间不大于15分钟，然后所有的结果相加平均即作为8小时TWA值。
+                receivePID: 0,//PID电压数据 也就是信号值
+                historyJZ: [],//校准历史记录
+                //背景值设置
+                bjzSetup: {
+                    isbjzSetup: false,
+                    bjzValue: '',
+                },
+                pid_epa: 1,//响应系数
+                pidFen: 56.11,//测定的某气体的分子量  C4H8异丁烯 12*4+8 56.11  CH4甲烷 12+4 16.04  C2H6乙烷 12*2+6 30.07 C3H8丙烷 12*3+8 44.10
+                PID: 0,//PID气体浓度值   是根据信号值 历史记录 背景值 响应系数 计算获得
+                PID_max: 0,//pid最大值
+                PID_min: 0,//pid最小值
+                PID_average: 0,//pid平均值
+                AllPid_max: 0,//总最大值
+                AllPid_min: 0,//总最小值
+                AllPid_ave: 0,//总平均值
+                detectionValue: 0,//默认检测值 显示的气体浓度值
+                detectionValueUnit: 'ppm',//默认检测值单位
+                pidUnitList: [
+                    { id: 1, value: 'ppm' },//一百万体积的空气中所含污染物的体积数  大部分传感器输出值单位是PPM
+                    { id: 2, value: 'mg/m³' },//每立方米空气中所含污染物的质量数
+                    { id: 3, value: 'ppb' },//1PPM=1000PPB
+                ],
+                pumpType: false,//泵状态
+                deviceList: [],//串口路径
+                serialPortInfo: {
+                    path: "",
+                    // baudRate: 115200,
+                    baudRate: 9600,
+                },
+                bleDataJS: null,//实时监听串口返回消息定时器  
+                chartData: [],//图表数据
+                echartData: [],//图表数据
+                userinfo: {},
+                curIndex: 0,//tab切换默认值
+                startup_time: 0,//使用记录开始时间
+                shutdown_time: 0,//使用记录结束时间
+                timeTotal: 0,//总时间
+                pideqaList: [],//响应因子数据列表
+                keyWord: '',//样本搜索关键词
+                isSimpleNamePopup: false,
+                monitoringTasks: [],//任务列表
+                standardList: [],//标准列表
+                reportList: [],//检测信息实时值列表
+                //警报值设置
+                jbSetup: {
+                    upLimit: '',
+                    downLimit: '',
+                    stelLimit: '',
+                    twaLimit: ''
+                },
+                //记录设置
+                jlSetupInf: {
+                    isJlSetup: 0,
+                    test_times: '',
+                    test_duration: '',
+                },
+                //基础记录设置
+                basicReportSetup: {
+                    defaultTimeInter: 3
+                },
+                //单位设置
+                unitSetup: {
+                    unitInf: 'ppm'
+                },
+                isReportPopup: false,//记录弹框开关
+                testTimes: 0,//记录次数
+                isJl: false,//是否记录
+                reportNum: 0,//本次开泵时长
+                //任务关联标准项
+                relativeStandardItem: {
+                    id: '',
+                    standard_limit: ''
+                },
+                //定位信息
+                curLon: '',
+                curLat: '',
+                curCity: '',
+                //离线地图相关
+                isOffLineMapPopup: false,
+                offLineCity: '',
+                downRatio: 0,
+                mapReload: 3,
+
+                basicReportTimes: null,//基础记录定时器默认每3秒一次
+                reportTimes: null,//记录操作的定时器按照设置的记录  次数和间隔
+                basicDatasDepositArr: [],//基础记录数据储存数组
+                reportDatasDepositArr: [],//自动或手动记录数据储存数组
+                raskShow: false,//任务提示框开关
+                raskTip: '',//任务提示内容
+                //手指滑动
+                position: { x: 0, y: 0 },
+                nx: '', ny: '', dx: '', dy: '', xPum: '', yPum: '',
+                isDrop: false,//是否滑动
+                endShow: false,
+                isEndTaskShow: false,//结束任务按钮
+                detectionShow: false,//检测值弹框展示
+                reportValueEndShow: false,//记录结束值显示弹框
+                reportValueEndData: [],//记录结束值数据
+                // ceshiReportValue: {},
+                yqinfData: {},//仪器信息
+            },
+            filters: {
+                timeFormate(second_time) {
+                    if (second_time > 0) {
+                        var time = parseInt(second_time);
+                        if (parseInt(second_time) >= 60) {
+                            var second = parseInt(second_time) % 60;
+                            var min = parseInt(second_time / 60);
+                            time = min + "m" + second + "s"
+                            if (parseInt(min) >= 60) {
+                                min = parseInt(second_time / 60) % 60;
+                                var hour = parseInt(parseInt(second_time / 60) / 60);
+                                time = hour + 'h' + min + "m" + second + "s"
+                            }
+                        }
+                        else {
+                            var second = time;
+                            time = second + 's'
+                        }
+                    } else {
+                        time = '0s'
+                    }
+                    return time;
+                },
+                normalTime(value) {
+                    const time = new Date(parseInt(value) * 1000);
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d}
+                    ${h}:${min}:${s}`
+                },
+                stringTofixed(value) {
+                    let newValue = Number(value).toFixed(1)
+                    return newValue
+                }
+            },
+            watch: {
+                //泵状态
+                pumpType() {
+                    if (this.pumpType) {//开泵
+                        // 开泵开始计时
+                        this.startup_time = new Date().getTime()
+                    } else {//关泵
+                        this.shutdown_time = new Date().getTime();
+                        //结束时将本次使用记录存入数据库
+                        let totalTimes = parseInt(this.shutdown_time / 1000) - parseInt(this.startup_time / 1000);
+                        var storageDetection = insert2('tr_voc_detection_slot', {
+                            instrument_code: this.yqinfData.code,
+                            enterprise_name: '天瑞仪器',
+                            address: this.curCity,
+                            lat: this.curLat,
+                            lng: this.curLon,
+                            name: this.selectedClass1,
+                            startup_time: formatDate(this.startup_time),
+                            shutdown_time: formatDate(this.shutdown_time),
+                            times: totalTimes,
+                            add_userid: this.userinfo.id,
+                            Pid_max: this.PID_max,
+                            Pid_min: this.PID_min,
+                            Pid_ave: this.PID_average,
+                            operator: this.userinfo.nickname,
+                            createtime: this.startup_time,
+                            is_upload: 0,
+                            rask_id: this.selectedClass2,
+                            rask_name: this.raskName,
+                            rask_department: this.rask_department,
+                            report_result: '未知判断',
+                            standard_limit: this.relativeStandardItem.standard_limit,
+                            up_limit: this.jbSetup.upLimit,
+                            down_limit: this.jbSetup.downLimit,
+                            stel_limit: this.jbSetup.stelLimit,
+                            twa_limit: this.jbSetup.twaLimit,
+                            relative_stardand_id: this.relativeStandardItem.id,
+                            bjz_value: this.bjzSetup.bjzValue,
+                            // isJlSetup: this.jlSetupInf.isJlSetup,//记录设置
+                            // test_times: this.jlSetupInf.test_times,//记录次数
+                            // test_duration: this.jlSetupInf.test_duration,//记录间隔
+                            // report_status int(2),
+                            // updatetime bigint(11)
+                        });
+                    }
+                },
+                //结束时间
+                shutdown_time() {
+                    // 结束时将使用记录存入数据库
+                    var maxid = insert2('tr_voc_instrument_use', {
+                        // tenant_id: 0,
+                        // enterprise_id: 0,
+                        instrument_code: this.yqinfData.code,
+                        startup_time: this.startup_time,
+                        shutdown_time: this.shutdown_time,
+                        add_userid: this.userinfo.id,
+                        times: this.shutdown_time - this.startup_time,
+                        status: 'normal',
+                        is_upload: 0,
+                        createtime: new Date().getTime(),
+                        operator: this.userinfo.nickname
+                        // updatetime bigint(11)
+                    });
+                    this.timeTotal = maxValue2('tr_voc_instrument_use', 'times');
+                },
+                //检测值单位
+                detectionValueUnit() {
+                    // console.log('检测值单位' + this.detectionValueUnit)
+                    if (this.detectionValueUnit == 'ppm') {
+                        this.detectionValue = Number(this.PID).toFixed(3)
+                    } else if (this.detectionValueUnit == 'ppb') {
+                        this.detectionValue = (this.PID * 1000).toFixed(3)
+                    } else {
+                        this.detectionValue = (this.PID * this.pid_epa * (this.pidFen / 22.4)).toFixed(3)
+                    }
+                },
+                PID() {
+                    if (this.detectionValueUnit == 'ppm') {
+                        this.detectionValue = Number(this.PID).toFixed(3)
+                    } else if (this.detectionValueUnit == 'ppb') {
+                        this.detectionValue = (this.PID * 1000).toFixed(3)
+                    } else {
+                        this.detectionValue = (this.PID * this.pid_epa * (this.pidFen / 22.4)).toFixed(3)
+                    }
+                    // 往校准页面发送实时监听 变化检测值也就是变化的浓度值  和pid区别 是否有小数点后三位
+                    api.sendEvent({
+                        name: 'ndValuesend',
+                        extra: {
+                            ndValue: this.detectionValue
+                        }
+                    })
+                },
+                receivePID() {
+                    // console.log('历史校准值'+JSON.stringify(this.historyJZ))
+                    let num = this.bjzSetup.bjzValue == '' ? (Number(this.pid_epa) * getValueBySignal(this.historyJZ, this.receivePID)).toFixed(1) : ((Number(this.pid_epa) * getValueBySignal(this.historyJZ, this.receivePID)) - this.bjzSetup.bjzValue).toFixed(1)
+                    this.PID = Number(num) <= 0 ? 0 : num//去除背景值小于0 显示0 否则显示自己
+                    // console.log(this.bjzSetup.bjzValue == '' ? '无背景值' + (Number(this.pid_epa) * getValueBySignal(this.historyJZ, this.receivePID)).toFixed(1) + this.PID : '有背景值' + ((Number(this.pid_epa) * getValueBySignal(this.historyJZ, this.receivePID)) - this.bjzSetup.bjzValue).toFixed(1) + this.PID)
+                    //往背景值计算里面发送监听 变化的浓度值
+                    api.sendEvent({
+                        name: 'PIDjcSend',
+                        extra: { PID: this.PID }
+                    })
+                    if (this.PID_min == 0) {
+                        this.PID_min = this.PID
+                    }
+                    if (this.AllPid_min == 0) {
+                        this.AllPid_min = this.PID
+                    }
+                    if (Number(this.PID_max) < this.PID) {
+                        this.PID_max = this.PID
+                    }
+                    if (Number(this.PID_min) > this.PID) {
+                        this.PID_min = this.PID
+                    }
+                    if (Number(this.AllPid_max) < this.PID) {
+                        this.AllPid_max = this.PID
+                    }
+                    if (Number(this.AllPid_min) > this.PID) {
+                        this.AllPid_min = this.PID
+                    }
+                },
+                AllPid_max() {
+                    this.AllPid_ave = ((Number(this.AllPid_max) + Number(this.AllPid_min)) / 2).toFixed(1)
+                },
+                AllPid_min() {
+                    this.AllPid_ave = ((Number(this.AllPid_max) + Number(this.AllPid_min)) / 2).toFixed(1)
+                },
+                PID_max() {
+                    this.PID_average = ((Number(this.PID_max) + Number(this.PID_min)) / 2).toFixed(1)
+                },
+                PID_min() {
+                    this.PID_average = ((Number(this.PID_max) + Number(this.PID_min)) / 2).toFixed(1)
+                },
+                echartData() {
+                    if (this.curIndex == 1 && this.echartData.length > 1) {
+                        this.initEcharts()
+                    }
+                },
+                selectedClass2() {
+                    console.log('任务id名称' + this.raskName)
+                    if (this.selectedClass2 == '请选择') {
+                        this.isEndTaskShow = false
+                        this.raskName = ''
+                        this.rask_department = ''
+                        this.taskDuration = 0
+                    } else {
+                        this.isEndTaskShow = true
+                        this.monitoringTasks.forEach(e => {
+                            if (e.id == this.selectedClass2) {
+                                this.taskDuration = (e.finishtime - e.createtime) / 1000
+                                this.raskName = e.tasks_name
+                                this.rask_department = e.tasks_department
+                            }
+                        })
+                    }
+                    console.log('任务名称：' + this.raskName)
+                }
+            },
+            created() {
+                if (getPrefs('record')) {
+                    this.jlSetupInf = JSON.parse(getPrefs('record'))
+                }
+                if (getPrefs('jbSetupStatus')) {
+                    this.jbSetup = JSON.parse(getPrefs('jbSetupStatus'))
+                }
+                if (getPrefs('bjzSetup')) {
+                    this.bjzSetup = JSON.parse(getPrefs('bjzSetup'))
+                }
+                if (getPrefs('recordTimeInter')) {
+                    this.basicReportSetup = JSON.parse(getPrefs('recordTimeInter'))
+                }
+                if (getPrefs('dwSetup')) {
+                    this.unitSetup = JSON.parse(getPrefs('dwSetup'))
+                    this.detectionValueUnit = this.unitSetup.unitInf
+                }
+                if (getPrefs('userInfo')) {
+                    this.userinfo = getPrefs('userInfo')
+                }
+                // console.log('记录设置' + JSON.stringify(this.jlSetupInf))
+                // console.log('警报设置信息' + JSON.stringify(this.jbSetup))
+                // console.log('背景值设置' + JSON.stringify(this.bjzSetup))
+                // console.log('基础数据存储时间间隔设置' + JSON.stringify(this.basicReportSetup))
+                // console.log('单位设置' + JSON.stringify(this.unitSetup))
+                // console.log('用户信息' + JSON.stringify(this.userinfo))
+                //降低耗能
+                if (this.bleDataJS) {
+                    clearTimeout(this.bleDataJS)
+                }
+                //获取仪器累计使用时长
+                this.timeTotal = maxValue2('tr_voc_instrument_use', 'times');
+                let ret = db.selectSqlSync({
+                    name: 'tianrui_offline',
+                    sql: "SELECT * FROM tr_voc_tasks WHERE status < 2"
+                });
+                this.monitoringTasks = ret.data
+                // console.log('任务列表' + JSON.stringify(this.monitoringTasks))
+                let res = db.selectSqlSync({
+                    name: 'tianrui_offline',
+                    sql: "SELECT * FROM tr_voc_standard"
+                });
+                this.standardList = res.data
+                // console.log('标准列表' + JSON.stringify(this.standardList))
+                if (this.monitoringTasks.length > 0 && this.standardList.length > 0) {
+                    if (getPrefs('raskSelected')) {
+                        console.log('任务选择信息' + JSON.parse(getPrefs('raskSelected')).rask_name)
+                        this.selectedClass2 = JSON.parse(getPrefs('raskSelected')).rask_id;
+                        if (this.selectedClass2 != '请选择') {
+                            this.raskName = JSON.parse(getPrefs('raskSelected')).rask_name;
+                            this.rask_department = JSON.parse(getPrefs('raskSelected')).rask_department;
+                            this.monitoringTasks.forEach(e => {
+                                if (e.id == JSON.parse(getPrefs('raskSelected')).rask_id) {
+                                    this.taskDuration = (e.finishtime - e.createtime) / 1000
+                                    this.standardList.forEach(e1 => {
+                                        if (e1.id == e.relatedStandardsId) {
+                                            this.relativeStandardItem = e1
+                                        }
+                                    })
+                                }
+                            })
+                        } else {
+                            this.raskName = ''
+                            this.rask_department = ''
+                            this.taskDuration = 0
+                        }
+                    }
+                }
+                // console.log('与任务关联的标准项' + JSON.stringify(this.relativeStandardItem))
+
+                //读取仪器信息
+                let yqinf = api.readFile({
+                    sync: true,
+                    path: 'fs://instrumentInformation.txt'
+                });
+                if (yqinf) {
+                    this.yqinfData = JSON.parse(yqinf)
+                } else {
+                    api.alert({
+                        msg: '请前往仪器设置页面进行设置'
+                    });
+                }
+                // console.log('本仪器信息'+JSON.stringify(this.yqinfData))
+
+                //获取检测信息实时值
+                this.getDetectionInfRealTimeValue()
+            },
+            mounted() {
+                //地图初步加载
+                map.getLocationServices((ret, err) => {
+                    if (ret.enable) {
+                        map.initMapSDK((ret1) => {
+                            if (ret1.status) {
+                                // console.log('初始化成功' + JSON.stringify(ret1))
+                                map.getLocation({
+                                    accuracy: '100m',
+                                    autoStop: true,
+                                    filter: 1.0,
+                                    enableLocInForeground: true,
+                                    notification: {
+                                        id: 1,
+                                        contentTitle: 'gps定位',
+                                        contentText: '以方便用户更好的查看位置。'
+                                    }
+                                }, (ret2, err2) => {
+                                    // console.log('获取定位返回' + JSON.stringify(ret2) + JSON.stringify(err2))
+                                    if (ret2.status) {
+                                        this.curLon = ret2.lon;
+                                        this.curLat = ret2.lat;
+                                        map.getNameFromCoords({
+                                            lon: ret2.lon,
+                                            lat: ret2.lat
+                                        }, (ret3, err3) => {
+                                            if (ret3.status) {
+                                                this.curCity = ret3.address + ret3.sematicDescription
+                                            }
+                                        })
+                                    } else {
+                                        console.log('定位失败,离线定位功能需要手动打开GPS，并在无遮挡物的室外')
+                                    }
+                                })
+                            }
+                        })
+                    } else {
+                        alert("未开启定位功能！");
+                    }
+                })
+                //开泵
+                this.switchAirPump()
+                setTimeout(() => {
+                    //获取样品数据时间比较长放这里不干扰其他项 但是任然对应用有影响，打开应用后前几秒时间内，交互不便利
+                    this.pideqaList = select2('tr_basics_pid_coefficient', {});
+                }, 2000)
+            },
+            methods: {
+                //手指离开
+                mousedown(e) {
+                    // console.log('触摸结束' + JSON.stringify(e))
+                    this.flags = false;
+                },
+                //手指滑动
+                mousemove(event) {
+                    if (this.isDrop) {
+                        var touch;
+                        if (event.touches) {
+                            touch = event.touches[0];
+                        } else {
+                            touch = event;
+                        }
+                        this.nx = touch.clientX - this.position.x;
+                        this.ny = touch.clientY - this.position.y;
+                        this.xPum = this.dx + this.nx;
+                        this.yPum = this.dy + this.ny;
+                        moveDiv.style.left = this.xPum + "px";
+                        moveDiv.style.top = this.yPum + "px";
+                        //阻止页面的滑动默认事件
+                        document.addEventListener("touchmove", function () { // 1.2 如果碰到滑动问题，请注意是否获取到 touchmove
+                            // event.preventDefault();//jq 阻止冒泡事件
+                            event.stopPropagation(); // 如果没有引入jq 就用 stopPropagation()
+                        }, false);
+                    }
+                },
+                //手指按下
+                mouseup(event) {
+                    // console.log('触摸开始' + JSON.stringify(event) + '-' + event.touches[0].clientX)
+                    this.isDrop = true;
+                    var touch;
+                    if (event.touches) {
+                        touch = event.touches[0];
+                    } else {
+                        touch = event;
+                    }
+                    this.position.x = touch.clientX;
+                    this.position.y = touch.clientY;
+                    this.dx = moveDiv.offsetLeft;
+                    this.dy = moveDiv.offsetTop;
+                },
+                //确认结束任务
+                endSure() {
+                    this.monitoringTasks.forEach(e => {
+                        if (e.id == this.selectedClass2) {
+                            e.status = 3
+                            update2('tr_voc_tasks', e)
+                        }
+                    })
+                    this.endShow = false
+                    this.isEndTaskShow = false
+                    this.selectedClass2 = '请选择'
+                    this.raskName = ''
+                    this.rask_department = ''
+                    this.taskDuration = 0
+                    this.relativeStandardItem = { "id": "", "standard_limit": "" }
+                    api.sendEvent({
+                        name: 'refreshPage',
+                    })
+                },
+                //获取检测信息实时值
+                getDetectionInfRealTimeValue() {
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_basic_report order by createtime desc limit 1,200"
+                    });
+                    this.reportList = ret.data
+                    // console.log('检测信息实时值'+JSON.stringify(ret.data))
+                },
+                //样品关键词搜索
+                clickSearch() {
+                    if (this.keyWord == '') {
+                        this.pideqaList = select2('tr_basics_pid_coefficient', {});
+                    } else {
+                        let ret = db.selectSqlSync({
+                            name: 'tianrui_offline',
+                            sql: "SELECT * FROM tr_basics_pid_coefficient WHERE name like '%" + this.keyWord + "%' "
+                        });
+                        this.pideqaList = ret.data
+                        if (ret.data.lenght == 0) {
+                            api.toast({
+                                msg: '没有搜索到您想要的数据',
+                                duration: 2000,
+                                location: 'middle'
+                            });
+                        }
+                    }
+                },
+                //选择样品名称
+                selectSimpleName(e) {
+                    // console.log('选择的样品信息' + JSON.stringify(e))
+                    this.selectedClass1 = e.id
+                    this.selectedValue = e.name
+                    this.pid_epa = e.coefficient
+                    this.pidFen = e.molecule
+                    this.isSimpleNamePopup = false
+                    setPrefs('simpleName', this.selectedClass1)
+                },
+                //从开泵开始一直记录数据默认每3秒一条   参考字段this.basicReportSetup
+                basicReportDatas() {
+                    this.basicReportTimes = setTimeout(() => {
+                        if (this.selectedClass2 != '请选择') {
+                            if (this.reportNum >= this.taskDuration) {
+                                this.selectedClass2 = '请选择'
+                                this.raskName = ''
+                                this.rask_department = ''
+                                this.taskDuration = 0
+                                setPrefs('raskSelected', {
+                                    rask_id: this.selectedClass2,
+                                    rask_name: this.raskName,
+                                    rask_department: this.rask_department
+                                })
+                                api.sendEvent({
+                                    name: 'raskSelected',
+                                    extra: {
+                                        rask_id: this.selectedClass2,
+                                        rask_name: this.raskName,
+                                        rask_department: this.rask_department
+                                    }
+                                })
+                            }
+                        }
+                        if (this.basicDatasDepositArr.length == this.basicReportSetup.defaultTimeInter) {
+                            let pidMin = Math.min(...this.basicDatasDepositArr);
+                            let pidMax = Math.max(...this.basicDatasDepositArr);
+                            if (pidMin == 0 && pidMax != 0) {
+                                this.basicDatasDepositArr.forEach((e, i) => {
+                                    // console.log('基础数据'+e)
+                                    if (e == 0) {
+                                        this.basicDatasDepositArr.splice(i, 1)
+                                    }
+                                })
+                                pidMin = Math.min(...this.basicDatasDepositArr);
+                                pidMax = Math.max(...this.basicDatasDepositArr);
+                            }
+                            let pidAve = (this.basicDatasDepositArr.reduce((sum, value) => { return sum + value }, 0) / this.basicDatasDepositArr.length).toFixed(1);
+                            // console.log('数组'+JSON.stringify(this.basicDatasDepositArr)+'--'+pidAve+'--'+pidMin+'--'+pidMax)
+                            let params = {
+                                use_id: this.userinfo.id,
+                                type: 'PID',
+                                operator: this.userinfo.nickname,
+                                instrument_code: this.yqinfData.code,
+                                enterprise_name: '天瑞仪器',
+                                address: this.curCity,
+                                lat: this.curLat,
+                                lng: this.curLon,
+                                name: this.selectedClass1,
+                                isJlSetup: this.jlSetupInf.isJlSetup,//记录设置
+                                test_times: this.jlSetupInf.test_times,//记录次数
+                                test_duration: this.jlSetupInf.test_duration,//记录间隔
+                                averageValue: pidAve,
+                                min_value: pidMin,
+                                max_value: pidMax,
+                                report_value: this.PID,
+                                bjz_value: this.bjzSetup.bjzValue,
+                                createtime: parseInt(new Date().getTime() / 1000),
+                                is_upload: 0,
+                                rask_id: this.selectedClass2,
+                                rask_name: this.raskName,
+                                rask_department: this.rask_department,
+                                report_result: '未知判断',
+                                standard_limit: this.relativeStandardItem.standard_limit,
+                                up_limit: this.jbSetup.upLimit,
+                                down_limit: this.jbSetup.downLimit,
+                                stel_limit: this.jbSetup.stelLimit,
+                                twa_limit: this.jbSetup.twaLimit,
+                                relative_stardand_id: this.relativeStandardItem.id,
+                                // updatetime bigint(11)
+                            };
+                            var res = insert2('tr_voc_basic_report', params);
+                            api.sendEvent({
+                                name: 'sendBasicReport',
+                                extra: { isHasNew: true }
+                            })
+                            this.basicDatasDepositArr = []
+                        } else {
+                            this.basicDatasDepositArr.push(Number(this.PID))
+                        }
+                        if (this.isJl) {
+                            // console.log('记录按钮'+parseInt(new Date().getTime() / 1000))
+                            // console.log('pid数组' + JSON.stringify(this.reportDatasDepositArr)+'--'+JSON.stringify(this.jlSetupInf))
+                            if (this.reportDatasDepositArr.length == this.jlSetupInf.test_duration) {
+                                let pidMin = Math.min(...this.reportDatasDepositArr);
+                                let pidMax = Math.max(...this.reportDatasDepositArr);
+                                if (pidMin == 0 && pidMax != 0) {
+                                    this.reportDatasDepositArr.forEach((e, i) => {
+                                        if (e == 0) {
+                                            this.reportDatasDepositArr.splice(i, 1)
+                                        }
+                                    })
+                                    pidMin = Math.min(...this.reportDatasDepositArr);
+                                    pidMax = Math.max(...this.reportDatasDepositArr);
+                                }
+                                let pidAve = (this.reportDatasDepositArr.reduce((sum, value) => { return sum + value }, 0) / this.reportDatasDepositArr.length).toFixed(1);
+                                // console.log('数组'+JSON.stringify(this.reportDatasDepositArr)+'--'+pidAve)
+                                let params = {
+                                    use_id: this.userinfo.id,
+                                    type: 'PID',
+                                    operator: this.userinfo.nickname,
+                                    instrument_code: this.yqinfData.code,
+                                    enterprise_name: '天瑞仪器',
+                                    address: this.curCity,
+                                    lat: this.curLat,
+                                    lng: this.curLon,
+                                    name: this.selectedClass1,
+                                    isJlSetup: this.jlSetupInf.isJlSetup,//记录设置
+                                    test_times: this.jlSetupInf.test_times,//记录次数
+                                    test_duration: this.jlSetupInf.test_duration,//记录间隔
+                                    averageValue: pidAve,
+                                    min_value: pidMin,
+                                    max_value: pidMax,
+                                    report_value: this.PID,
+                                    bjz_value: this.bjzSetup.bjzValue,
+                                    createtime: parseInt(new Date().getTime() / 1000),
+                                    is_upload: 0,
+                                    rask_id: this.selectedClass2,
+                                    rask_name: this.raskName,
+                                    rask_department: this.rask_department,
+                                    report_result: '未知判断',
+                                    standard_limit: this.relativeStandardItem.standard_limit,
+                                    up_limit: this.jbSetup.upLimit,
+                                    down_limit: this.jbSetup.downLimit,
+                                    stel_limit: this.jbSetup.stelLimit,
+                                    twa_limit: this.jbSetup.twaLimit,
+                                    relative_stardand_id: this.relativeStandardItem.id,
+                                    // updatetime bigint(11)
+                                };
+                                // this.ceshiReportValue = params;//
+                                // console.log('初始数据'+JSON.stringify(this.ceshiReportValue))
+                                var res = insert2('tr_voc_task_report', params);
+                                //往数据页面实时发送任务记录监听
+                                api.sendEvent({
+                                    name: 'sendtaskReport',
+                                    extra: { isHasNew: true }
+                                })
+                                this.reportDatasDepositArr = []
+                            } else {
+                                this.reportDatasDepositArr.push(Number(this.PID))
+                            }
+                        }
+                        // console.log('开始记录基础数据' + (this.reportNum++))//为了让时间、次数增加；不能删除******
+                        var specialParams = {
+                            use_id: this.userinfo.id,
+                            type: 'PID',
+                            operator: this.userinfo.nickname,
+                            instrument_code: this.yqinfData.code,
+                            enterprise_name: '天瑞仪器',
+                            address: this.curCity,
+                            lat: this.curLat,
+                            lng: this.curLon,
+                            name: this.selectedClass1,
+                            isJlSetup: this.jlSetupInf.isJlSetup,//记录设置
+                            test_times: this.jlSetupInf.test_times,//记录次数
+                            test_duration: this.jlSetupInf.test_duration,//记录间隔
+                            report_value: this.PID,
+                            bjz_value: this.bjzSetup.bjzValue,
+                            createtime: parseInt(new Date().getTime() / 1000),
+                            is_upload: 0,
+                            rask_id: this.selectedClass2,
+                            rask_name: this.raskName,
+                            rask_department: this.rask_department,
+                            report_result: '未知判断',
+                            standard_limit: this.relativeStandardItem.standard_limit,
+                            up_limit: this.jbSetup.upLimit,
+                            down_limit: this.jbSetup.downLimit,
+                            stel_limit: this.jbSetup.stelLimit,
+                            twa_limit: this.jbSetup.twaLimit,
+                            relative_stardand_id: this.relativeStandardItem.id,
+                            // updatetime bigint(11)
+                        };
+                        if (this.reportNum % 300 == 0) {//30测试数据间隔  真实数据是stel 以300s一计
+                            var res = insert2('tr_voc_stel_report', specialParams)
+                        }
+                        if (this.reportNum % 900 == 0) {//90测试数据间隔  真实数据是twa 以900s一计
+                            var res = insert2('tr_voc_twa_report', specialParams)
+                        }
+                        if (this.reportNum % 3 == 0) {//这里是为了3秒更新一次最大最小平均值
+                            this.reset()
+                        }
+                        if (this.selectedClass2 != '请选择') {
+                            if (this.reportNum >= this.taskDuration) {
+                                this.monitoringTasks.forEach(e => {
+                                    if (e.id == this.selectedClass2) {
+                                        e.status = 3
+                                        update2('tr_voc_tasks', e)
+                                    }
+                                })
+                                this.selectedClass2 = '请选择'
+                                this.raskName = ''
+                                this.rask_department = ''
+                                this.taskDuration = 0
+                                this.relativeStandardItem = { "id": "", "standard_limit": "" }
+                            }
+                        }
+                        this.basicReportDatas()//循环执行本方法
+                    }, 1000)
+                },
+                //关泵时停止基础记录
+                stopBasicReportDatas() {
+                    console.log('停止记录')
+                    // this.reportNum = 0
+                    clearTimeout(this.basicReportTimes)
+                },
+                //停止记录
+                stopRecording() {
+                    this.isJl = false
+                    this.reportEndTime = new Date().getTime()
+                    clearTimeout(this.reportTimes)
+                    this.storageReportStartEndTime()
+                    api.sendEvent({
+                        name: 'reportFinish',
+                        extra: {
+                            isFinishReport: true
+                        }
+                    })
+                },
+                //自动记录
+                automaticRecording() {
+                    console.log('自动记录' + this.jlSetupInf.isJlSetup)
+                    this.isJl = true;
+                    // this.testTimes = this.jlSetupInf.test_times;
+                    this.reportStartTime = new Date().getTime()
+                    // this.SetupReportTimes()
+                },
+                //手动记录
+                manualRecording() {
+                    // console.log('手动记录' + this.jlSetupInf.isJlSetup)
+                    this.reportValueEndData = [];
+                    this.isReportPopup = true
+                    this.isJl = true;
+                    this.testTimes = this.jlSetupInf.test_times;
+                    this.reportStartTime = new Date().getTime()
+                    this.SetupReportTimes()
+                },
+                //设置记录信息
+                SetupReportTimes() {
+                    this.reportTimes = setTimeout(() => {
+                        if (this.testTimes > 0) {
+                            this.testTimes--
+                            this.SetupReportTimes()
+                        } else {
+                            this.isJl = false;
+                            this.isReportPopup = false;
+                            this.reportEndTime = new Date().getTime()
+                            clearTimeout(this.reportTimes)
+                            //这里担心获取到的记录数据不完整 专门把时间放大两秒
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM tr_voc_task_report WHERE createtime between " + (parseInt(this.reportStartTime / 1000) - 1) + " and " + (parseInt(this.reportEndTime / 1000) + 1) + " " + " order by id desc "
+                            });
+                            // console.log('任务数据'+JSON.stringify(ret)+"时间参数"+parseInt(this.reportStartTime / 1000)+'--'+parseInt(this.reportEndTime / 1000))
+                            this.reportValueEndData = ret.data
+                            this.reportValueEndShow = true
+                            this.storageReportStartEndTime()
+                            api.sendEvent({
+                                name: 'reportFinish',
+                                extra: {
+                                    isFinishReport: true
+                                }
+                            })
+                        }
+                    }, Number(this.jlSetupInf.test_duration) * 1000)
+                },
+                //把记录开始和停止时间存到表中
+                storageReportStartEndTime() {
+                    // 结束时将使用记录存入数据库
+                    // console.log('结束时将使用记录存入数据库')
+                    var maxid = insert2('tr_voc_user_report', {
+                        use_id: this.userinfo.id,
+                        operator: this.userinfo.nickname,
+                        instrument_code: this.yqinfData.code,
+                        enterprise_name: '天瑞仪器',
+                        address: this.curCity,
+                        lat: this.curLat,
+                        lng: this.curLon,
+                        name: this.selectedClass1,
+                        startup_time: this.reportStartTime,
+                        shutdown_time: this.reportEndTime,
+                        times: this.reportEndTime - this.reportStartTime,
+                        report_status: this.jlSetupInf.isJlSetup,
+                        test_times: this.jlSetupInf.test_times,//记录次数
+                        test_duration: this.jlSetupInf.test_duration,//记录间隔
+                        rask_id: this.selectedClass2,
+                        rask_name: this.raskName,
+                        rask_department: this.rask_department,
+                        report_result: '未知判断',
+                        standard_limit: this.relativeStandardItem.standard_limit,
+                        up_limit: this.jbSetup.upLimit,
+                        down_limit: this.jbSetup.downLimit,
+                        stel_limit: this.jbSetup.stelLimit,
+                        twa_limit: this.jbSetup.twaLimit,
+                        relative_stardand_id: this.relativeStandardItem.id,
+                        averageValue: this.PID_average,
+                        max_value: this.PID_max,
+                        min_value: this.PID_min,
+                        bjz_value: this.bjzSetup.bjzValue,
+                        is_upload: 0,
+                        createtime: new Date().getTime(),
+                    });
+                },
+                //响应因子切换
+                selectClass1(e) {
+                    // console.log(111 + this.selectedClass1 + JSON.stringify(this.pideqaList[this.selectedClass1]))
+                    this.pid_epa = this.pideqaList[this.selectedClass1].coefficient
+                    this.pidFen = this.pideqaList[this.selectedClass1].molecule
+                },
+                //展示样品名称选择弹框
+                showSimpleName() {
+                    this.isSimpleNamePopup = true
+                },
+                //任务名称切换
+                selectClass2(option) {
+                    // console.log('选择任务'+JSON.stringify(option))
+                    if (option.isTrusted) {
+                        var rask_names = '';
+                        var rask_department = '';
+                        if (this.selectedClass2 == '请选择') {
+                            // rask_names = ''
+                            this.taskDuration = 0
+                        } else {
+                            this.monitoringTasks.forEach(e => {
+                                if (e.id == this.selectedClass2) {
+                                    this.taskDuration = (e.finishtime - e.createtime) / 1000
+                                    console.log('任务时间' + JSON.stringify(e) + this.taskDuration)
+                                    rask_names = e.tasks_name
+                                    rask_department = e.tasks_department
+                                    this.standardList.forEach(e1 => {
+                                        console.log(222 + JSON.stringify(e1))
+                                        if (e1.id == e.relatedStandardsId) {
+                                            this.relativeStandardItem = e1
+                                            console.log('选择的任务关联标准项' + JSON.stringify(this.relativeStandardItem))
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                        setPrefs('raskSelected', {
+                            rask_id: this.selectedClass2,
+                            rask_name: rask_names,
+                            rask_department: rask_department
+                        })
+                        api.sendEvent({
+                            name: 'raskSelected',
+                            extra: {
+                                rask_id: this.selectedClass2,
+                                rask_name: rask_names,
+                                rask_department: rask_department
+                            }
+                        })
+                    }
+                },
+                //检测值双击事件
+                dblBtnClick(e) {
+                    console.log('检测值双击事件' + JSON.stringify(e))
+                    this.detectionShow = true
+                },
+                //监测值单位切换
+                selectValue(e) {
+                    setPrefs('dwSetup', {
+                        unitInf: this.detectionValueUnit
+                    })
+                    api.sendEvent({
+                        name: 'dwSetup',
+                        extra: {
+                            unitInf: this.detectionValueUnit
+                        }
+                    })
+                },
+                //下方tab切换
+                toggleIndex(num) {
+                    this.curIndex = num
+                    console.log('tab切换' + this.curIndex)
+                    if (this.curIndex == 1) {
+                        map.close();
+                        this.$nextTick(() => {
+                            this.initEcharts()
+                        })
+                    } else if (this.curIndex == 2) {
+                        this.$nextTick(() => {
+                            this.authorityJudgment()
+                        })
+                    } else {
+                        map.close();
+                    }
+                },
+                //重新定位
+                rePosition() {
+                    if (this.mapReload > 0) {
+                        this.mapReload -= 1
+                        this.authorityJudgment()
+                    } else {
+                        this.mapReload = 3
+                    }
+                },
+                //定位授权判断
+                authorityJudgment() {
+                    var permission = 'location';
+                    var resultList = api.hasPermission({
+                        list: [permission]
+                    });
+                    if (resultList[0].granted) {
+                        // 已授权，可以继续下一步操作
+                        this.initBmap()
+                    } else {
+                        api.confirm({
+                            msg: '应用需要您的授权才能访问定位',
+                            buttons: ['取消', '去设置']
+                        }, (ret) => {
+                            if (ret.buttonIndex == 2) {
+                                api.requestPermission({
+                                    list: [permission],
+                                }, (res) => {
+                                    if (res.list[0].granted) {
+                                        // 已授权，可以继续下一步操作
+                                        this.initBmap()
+                                    }
+                                });
+                            }
+                        });
+                    }
+                },
+                //初始化地图
+                initBmap() {
+                    var map_area = document.getElementById('mapArea');
+                    console.log('地图' + JSON.stringify(map_area))
+                    map.getLocationServices((ret, err) => {
+                        if (ret.enable) {
+                            console.log('定位开启' + JSON.stringify(ret))
+                            map.initMapSDK((ret1) => {
+                                if (ret1.status) {
+                                    console.log('初始化地图成功' + JSON.stringify(ret1))
+                                    map.getLocation({
+                                        accuracy: '100m',
+                                        autoStop: true,
+                                        filter: 1,
+                                        enableLocInForeground: true,
+                                        notification: {
+                                            id: 1,
+                                            contentTitle: 'gps定位',
+                                            contentText: '以方便用户更好的查看位置。'
+                                        }
+                                    }, (ret2, err2) => {
+                                        console.log('获取当前定位' + JSON.stringify(ret2))
+                                        if (ret2.status) {
+                                            console.log('定位成功')
+                                            this.curLon = ret2.lon;
+                                            this.curLat = ret2.lat;
+                                            map.getNameFromCoords({
+                                                lon: ret2.lon,
+                                                lat: ret2.lat
+                                            }, (ret4, err4) => {
+                                                // console.log(JSON.stringify(ret4)+JSON.stringify(err4));
+                                                if (ret4.status) {
+                                                    // console.log(JSON.stringify(ret4));
+                                                    this.curCity = ret4.address + ret4.sematicDescription
+                                                    map.searchCityByName({
+                                                        name: ret4.city
+                                                    }, (ret5) => {
+                                                        if (ret5.status) {
+                                                            console.log('当前城市信息' + JSON.stringify(ret5));
+                                                            map.getUpdateInfoByID({
+                                                                cityID: ret5.records[0].cityID
+                                                            }, (ret8) => {
+                                                                if (ret8.status) {
+                                                                    console.log('获取当前城市离线地图更新信息' + JSON.stringify(ret8));
+                                                                    if (ret8.cityInfo.update) {//离线包有更新
+                                                                        map.update({
+                                                                            cityID: ret5.records[0].cityID
+                                                                        }, (ret9) => {
+                                                                            if (ret9.status) {
+                                                                                console.log('更新当前城市离线地图' + JSON.stringify(ret9));
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                    if (ret8.cityInfo.status == 4) {//下载已完成
+
+                                                                    } else {//异常或者未下载
+
+                                                                    }
+                                                                }
+                                                            });
+                                                            // map.remove({
+                                                            //     cityID: ret5.records[0].cityID
+                                                            // }, (ret8,err8)=>{
+                                                            //     console.log('移除离线地图'+JSON.stringify(ret8)+JSON.stringify(err8))
+                                                            //     if (ret8.status) {
+                                                            //         alert(JSON.stringify(ret));
+                                                            //     }
+                                                            // });
+                                                            // 下载离线地图
+                                                            map.start({
+                                                                cityID: ret5.records[0].cityID
+                                                            }, (ret6, err6) => {
+                                                                if (ret6.status) {
+                                                                    console.log(JSON.stringify(ret6) + '----' + JSON.stringify(err6));
+                                                                }
+                                                            });
+                                                            console.log('监听离线地图信息')
+                                                            map.addOfflineListener((ret7) => {
+                                                                console.log('监听离线地图' + JSON.stringify(ret7))
+                                                                // return 
+                                                                switch (ret7.type) {
+                                                                    case 0:
+                                                                        {
+                                                                            map.getUpdateInfoByID({
+                                                                                cityID: ret5.records[0].cityID
+                                                                            }, (ret8) => {
+                                                                                console.log("下载进度：" + ret8.cityInfo.ratio)
+                                                                                this.isOffLineMapPopup = true
+                                                                                this.offLineCity = ret8.cityInfo.name
+                                                                                this.downRatio = ret8.cityInfo.ratio
+                                                                                if (ret8.cityInfo.ratio >= 100) {
+                                                                                    setTimeout(() => {
+                                                                                        this.isOffLineMapPopup = false
+                                                                                        this.offLineCity = ''
+                                                                                        this.downRatio = 0
+                                                                                    }, 500)
+                                                                                }
+                                                                                // api.alert({ msg: ret8.cityInfo.name + "下载进度：" + ret8.cityInfo.ratio });
+                                                                            });
+                                                                        }
+                                                                        break;
+                                                                    case 1:
+                                                                        {
+                                                                            alert('检测到离线包个数是：' + ret7.state);
+                                                                        }
+                                                                        break;
+                                                                    case 2:
+                                                                        {
+                                                                            alert('正在解压第' + ret7.state + '个离线包，导入时会回调此类型');
+                                                                        }
+                                                                        break;
+                                                                    case 3:
+                                                                        {
+                                                                            alert('有' + ret7.state + '个错误包，导入完成后会回调此类型');
+                                                                        }
+                                                                        break;
+                                                                    case 4:
+                                                                        {
+                                                                            alert('id为' + ret7.state + '的' + ret7.state + '城市有新版本,可调用update接口进行更新');
+                                                                        }
+                                                                        break;
+                                                                    case 5:
+                                                                        {
+                                                                            alert('导入成功' + ret7.state + '个离线包，导入成功后会回调此类型');
+                                                                        }
+                                                                        break;
+                                                                    case 6:
+                                                                        {
+                                                                            alert('新增离线包');
+                                                                        }
+                                                                        break;
+                                                                    default:
+                                                                        break;
+                                                                }
+                                                            });
+
+                                                        }
+                                                    });
+                                                }
+                                            });
+
+                                            map.open({
+                                                rect: {
+                                                    x: map_area.offsetLeft,
+                                                    y: map_area.offsetTop,
+                                                    w: map_area.clientWidth,
+                                                    h: map_area.clientHeight
+                                                },
+                                                center: {
+                                                    lon: ret2.lon,
+                                                    lat: ret2.lat,
+                                                },
+                                                zoomLevel: 18,
+                                                showUserLocation: true,
+                                                fixedOn: 'frame0',
+                                                fixed: false
+                                            }, (ret3) => {
+                                                if (ret3.status) {
+                                                    console.log('地图打开成功', ret3.status);
+                                                    this.mapReload = 3
+                                                }
+                                            });
+                                        } else {
+                                            console.log('定位失败,离线定位功能需要手动打开GPS，并在无遮挡物的室外')
+                                            setTimeout(() => {
+                                                this.rePosition()
+                                            }, 1000)
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            alert("未开启定位功能！");
+                        }
+                    });
+                },
+                //重置
+                reset() {
+                    this.AllPid_max = this.PID;
+                    this.AllPid_min = this.PID;
+                    this.AllPid_ave = this.PID;
+                },
+                //刷新PID
+                // refresh() {
+                //     this.PID_max = 0;
+                //     this.PID_min = 0;
+                //     this.PID_average = 0;
+                // },
+                //任务二次确认框
+                nextStep() {
+                    if (this.pumpType) {//准备关泵前 结束任务
+                        console.log('准备关泵前 结束任务')
+                        if (this.selectedClass2 != '请选择') {
+                            if (this.reportNum >= this.taskDuration) {
+                                this.monitoringTasks.forEach(e => {
+                                    if (e.id == this.selectedClass2) {
+                                        e.status = 3
+                                        update2('tr_voc_tasks', e)
+                                    }
+                                })
+                                this.selectedClass2 = '请选择'
+                                this.raskName = ''
+                                this.rask_department = ''
+                                this.taskDuration = 0
+                                this.relativeStandardItem = { "id": "", "standard_limit": "" }
+                                this.endShow = false
+                                this.isEndTaskShow = false
+                                api.sendEvent({
+                                    name: 'refreshPage',
+                                })
+
+                            }
+                        }
+                    }
+                    this.switchFire()
+                },
+                //取消任务提示弹框
+                cancelShow() {
+                    this.raskShow = false
+                    this.raskTip = ''
+                },
+                //开关泵前判断是否有任务
+                switchAirPump() {
+                    // console.log('当前泵的开关状态' + this.pumpType)
+                    if ((this.monitoringTasks.length > 0) && (this.selectedClass2 != '请选择')) {
+                        if (!this.pumpType) {
+                            this.raskShow = true
+                            this.raskTip = '确认执行' + this.raskName + '任务么？'
+                        } else {
+                            this.raskShow = true
+                            this.raskTip = '确认停止' + this.raskName + '任务么？'
+                        }
+                    } else {
+                        this.switchFire()
+                    }
+                },
+                //仪器开关泵具体操作
+                switchFire() {
+                    // console.log('准备泵的开关状态' + this.pumpType)
+                    this.pumpType = !this.pumpType
+                    if (this.pumpType) {//开泵
+                        serialPort.close()//关闭串口
+                        clearTimeout(this.bleDataJS)//清除监听信息的定时器
+                        //同步获取串口路径
+                        this.deviceList = serialPort.getAllDevicePathSync().list;
+                        // console.log('串口路径' + this.deviceList)
+                        this.deviceList.forEach(e => {
+                            if (e == '/dev/ttyS0') {
+                                this.serialPortInfo.path = e
+                            }
+                        })
+                        this.open();//打开串口
+                        this.reportNum = 0
+                        this.basicReportDatas();
+                        if (this.jlSetupInf.isJlSetup == 1) {
+                            //手动记录开始，需要点击记录按钮
+                            // setTimeout(() => {
+                            //     this.manualRecording()
+                            // }, 500)
+                        } else if (this.jlSetupInf.isJlSetup == 2) {
+                            //自动记录开始
+                            setTimeout(() => {
+                                this.automaticRecording()
+                            }, 500)
+                        }
+                        //开泵指令
+                        // switchModule.openPump(function(res,err){
+                        //     console.log('成功'+JSON.stringify(res))
+                        //     console.log('失败'+JSON.stringify(err))
+                        // })
+                        setTimeout(() => {
+                            switchModule.setPump(
+                                {
+                                    dir: 1,
+                                    pin: 172,
+                                    gpioDev: "/sys/devices/platform/1000b000.pinctrl/mt_gpio",
+                                    out: 1 //高电平1 低电平0
+                                }, function (res, err) {
+                                    console.log('开泵成功' + JSON.stringify(res))
+                                }
+                            )
+                        }, 500)
+                        setPrefs('PumpChange', {
+                            pumpType: this.pumpType
+                        })
+                        // api.sendEvent({
+                        //     name:'isPumpType',
+                        //     extra:{
+                        //         pump_type:this.pumpType 
+                        //     }
+                        // })
+                    } else {//关泵
+                        // api.removeEventListener({//移除监听
+                        //     name: 'FvvSerialPort'
+                        // });
+                        //关泵指令
+                        // switchModule.closePump(function(res,err){
+                        //     console.log('成功'+JSON.stringify(res))
+                        //     console.log('失败'+JSON.stringify(err))
+                        // })
+                        // console.log(serialPort.isOpen() ? '串口状态开启' : '串口状态关闭')
+                        this.stopBasicReportDatas()
+                        if (this.isJl) {
+                            this.isJl = false;
+                            this.reportEndTime = new Date().getTime()
+                            clearTimeout(this.reportTimes)
+                            this.storageReportStartEndTime()
+                            api.sendEvent({
+                                name: 'reportFinish',
+                                extra: {
+                                    isFinishReport: true
+                                }
+                            })
+                        }
+                        switchModule.setPump(
+                            {
+                                dir: 1,
+                                pin: 172,
+                                gpioDev: "/sys/devices/platform/1000b000.pinctrl/mt_gpio",
+                                out: 0 //高电平1 低电平0
+                            }, function (res, err) {
+                                console.log('关泵成功' + JSON.stringify(res))
+                            }
+                        )
+                        serialPort.close()//关闭串口
+                        clearTimeout(this.bleDataJS)//清楚监听信息的定时器
+                        setPrefs('PumpChange', {
+                            pumpType: this.pumpType
+                        })
+                        api.sendEvent({
+                            name: 'isPumpType',
+                            extra: {
+                                pump_type: this.pumpType
+                            }
+                        })
+                    }
+                },
+                //打开串口
+                open() {
+                    //以下可选接口可以不设置
+                    //设置串口波特率，可选，默认9600
+                    serialPort.setBaudRate(this.serialPortInfo.baudRate);
+                    //设置数据位，可选，默认8
+                    serialPort.setDataBits(8);
+                    //设置停止位，可选，默认1
+                    serialPort.setStopBits(1);
+                    //设置校验，可选，默认0无校验，1奇校验，2偶校验
+                    serialPort.setParity(0);
+                    //设置流控，可选，默认0不使用流控，1硬件，2软件
+                    serialPort.setFlowCon(0);
+                    //打开串口
+                    var state = serialPort.open(this.serialPortInfo.path)
+                    // console.log('调试串口信息：' + "-- 打开串口 " + this.serialPortInfo.path + (state ? '成功' : '失败') + "\r\n")
+                    // console.log(serialPort.isOpen() ? '串口状态开启' : '串口状态关闭')
+                    switchModule.setPump(
+                        {
+                            dir: 1,
+                            pin: 172,
+                            gpioDev: "/sys/devices/platform/1000b000.pinctrl/mt_gpio",
+                            out: 0 //高电平1 低电平0
+                        }, function (res, err) {
+                            console.log('关泵成功' + JSON.stringify(res))
+                        }
+                    )
+                    this.listenMessage();
+                    //查询历史校准数据
+                    // this.historyJZ = select2('tr_voc_calibrationInfos', {}, 1, 0, ' standard_value asc')
+                    var ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: 'SELECT * FROM tr_voc_calibrationInfos order by standard_value asc'
+                    });
+                    ret.data.sort(compare('standard_value'));
+                    this.historyJZ = ret.data
+                    // console.log('历史校准表数据：' + JSON.stringify(this.historyJZ))
+                },
+                //监听消息
+                listenMessage() {
+                    if (serialPort.isOpen()) {
+                        this.bleDataJS = setTimeout(() => {
+                            serialPort.setReceiveType("ASCII")
+                            serialPort.setSendType("ASCII")
+                            serialPort.send("Read_Data()\r\n");
+                            // console.log(serialPort.isOpen() ? '串口状态开启' : '串口状态关闭')
+                            // console.log('发送读取数据'+serialPort.setReceiveType("ASCII")+'--'+serialPort.setSendType("ASCII")+'--'+serialPort.send("Read_Data()\r\n"))
+                            // 趋势图临时数据
+                            if (this.chartData.length == 300) {
+                                this.chartData.shift()
+                                this.chartData.push(this.PID)
+                            } else {
+                                this.chartData.push(this.PID)
+                            }
+                            this.echartData = [];
+                            // 给趋势数据赋值
+                            for (let i = 0; i < this.chartData.length; i++) {
+                                this.echartData.push([i, Number(this.chartData[i])])
+                            }
+                            // console.log('曲线图'+JSON.stringify(this.echartData))
+                            // console.log('实时发送监听消息'+this.receivePID+this.PID)
+                            this.listenMessage()
+                        }, 1000)
+                    } else { }
+                },
+                //切换记录按钮
+                toggleReport() {
+                    if (this.isJl) {//记录按钮为记录准备不记录
+                        this.stopRecording()
+                        console.log('停止记录')
+                    } else {//记录按钮为不记录准备记录
+                        if (this.jlSetupInf.isJlSetup == 0) {//当前设置为不记录
+                            api.toast({
+                                msg: '请前往管理页面记录设置进行选择',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                        } else {//当前设置为记录
+                            if (!this.pumpType) {
+                                api.toast({
+                                    msg: '请优先进行开泵',
+                                    duration: 2000,
+                                    location: 'bottom'
+                                })
+                            } else {
+                                this.isJl = !this.isJl
+                                console.log('设置记录状态' + JSON.stringify(this.jlSetupInf))
+                                if (this.jlSetupInf.isJlSetup == 1) {
+                                    //手动记录
+                                    this.manualRecording()
+                                } else {
+                                    //自动记录
+                                    this.automaticRecording()
+                                }
+                            }
+
+                        }
+                    }
+                    // api.openWin({
+                    //     name: 'reportListHeader',
+                    //     url: '../dataList/reportListHeader.html',
+                    //     pageParam:{
+                    //         isPumpType:this.pumpType
+                    //     }
+                    // })
+                },
+                //前往校准和回测
+                gotoCalibration() {
+                    // if (!this.pumpType) {
+                    //     api.toast({
+                    //         msg: '请优先进行开泵',
+                    //         duration: 2000,
+                    //         location: 'bottom'
+                    //     })
+                    // } else {
+                    api.openWin({
+                        name: 'calibrationListHeader',
+                        url: '../dataList/calibrationListHeader.html'
+                    })
+                    // }
+                },
+                //前往创建标准和任务
+                gotoCreate() {
+                    api.openWin({
+                        name: 'createListHeader',
+                        url: '../dataList/createListHeader.html'
+                    })
+                },
+                //初始化曲线图
+                initEcharts() {
+                    var myChart = echarts.init(document.getElementById('graphEcharts'));
+                    var option = {
+                        backgroundColor: '#FFF',
+                        color: '#f00',
+                        grid: {
+                            top: 10,
+                            bottom: 20,
+                            left: 38,
+                            right: 10
+                        },
+                        xAxis: {
+                            type: 'value',
+                            boundaryGap: false,
+                            max: 300,
+                            min: 0,
+                            splitNumber: 10,
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#999',
+                                }
+                            },
+                            axisTick: {//刻度
+                                show: false
+                            },
+                            splitLine: {
+                                show: false
+                            },
+                        },
+                        yAxis: {
+                            type: 'value',
+                            axisLine: { show: false },
+                            axisLine: { onZero: true },
+                            axisTick: {//刻度
+                                show: false
+                            },
+                            splitLine: {
+                                show: false
+                            },
+                            axisTick: {//刻度
+                                show: false
+                            },
+                            axisLabel: {//隐藏数字
+                                formatter: (num) => {
+                                    var aa = num == 0 ? 0 : num < 1000 ? num : (num / 1000) % 1 === 0 ? (num / 1000 + "k") : ((num / 1000).toFixed(1) + 'k');
+                                    if (num == this.jbSetup.upLimit) {
+                                        return ''
+                                    } else {
+                                        return aa
+                                    }
+                                }
+                            },
+                            min: 0, //取最小值为最小刻度
+                            max: 'dataMax', //取最大值为最大刻度
+                            max: function (value) {//取最大值向上取整为最大刻度
+                                return Math.ceil(value.max)
+                            },
+                        },
+                        series: [{
+                            data: this.echartData,
+                            type: 'line',
+                            symbolSize: 0,
+                            smooth: true,
+                            itemStyle: {
+                                normal: {
+                                    color: "#1F71FF",//折线点颜色
+                                    symbolSize: '20',
+                                    lineStyle: {
+                                        color: '#1F71FF'//折线颜色
+                                    }
+                                }
+                            },
+                            markLine: {
+                                symbol: ['none', 'none'], //去掉箭头
+                                lineStyle: {
+                                    normal: {
+                                        type: 'dashed',//线条颜色
+                                        width: this.jbSetup.upLimit == '' ? 0 : 1,
+                                        color: this.jbSetup.upLimit == '' ? '#ffffff' : '#ff0000', // 这儿设置安全基线颜色
+                                    },
+                                },
+                                data: [
+                                    {
+                                        label: { formatter: "{b}", position: "start" },
+                                        name: this.jbSetup.upLimit,
+                                        yAxis: this.jbSetup.upLimit,
+                                    },
+                                ],
+                                label: {
+                                    show: this.jbSetup.upLimit == '' ? false : true,
+                                },
+                            },
+                        }]
+                    };
+                    option && myChart.setOption(option);
+                },
+            }
+        })
+    };
+    //需要用到的函数
+    function InsertString(t, c, n) {
+        var r = new Array();
+        for (var i = 0; i * 2 < t.length; i++) {
+            r.push(t.substr(i * 2, n));
+        }
+        return r.join(c);
+    }
+    //需要用到的函数
+    function FillString(t, c, n, b) {
+        if ((t == "") || (c.length != 1) || (n <= t.length)) {
+            return t;
+        }
+        var l = t.length;
+        for (var i = 0; i < n - l; i++) {
+            if (b == true) {
+                t = c + t;
+            }
+            else {
+                t += c;
+            }
+        }
+        return t;
+    }
+    //16进制转浮点数
+    function HexToSingle(t) {
+        t = t.replace(/\s+/g, "");
+        if (t == "") {
+            return "";
+        }
+        if (t == "00000000") {
+            return "0";
+        }
+        if ((t.length > 8) || (isNaN(parseInt(t, 16)))) {
+            return "Error";
+        }
+        if (t.length < 8) {
+            t = FillString(t, "0", 8, true);
+        }
+        t = parseInt(t, 16).toString(2);
+        t = FillString(t, "0", 32, true);
+        var s = t.substring(0, 1);
+        var e = t.substring(1, 9);
+        var m = t.substring(9);
+        e = parseInt(e, 2) - 127;
+        m = "1" + m;
+        if (e >= 0) {
+            m = m.substr(0, e + 1) + "." + m.substring(e + 1)
+        }
+        else {
+            m = "0." + FillString(m, "0", m.length - e - 1, true)
+        }
+        if (m.indexOf(".") == -1) {
+            m = m + ".0";
+        }
+        var a = m.split(".");
+        var mi = parseInt(a[0], 2);
+        var mf = 0;
+        for (var i = 0; i < a[1].length; i++) {
+            mf += parseFloat(a[1].charAt(i)) * Math.pow(2, -(i + 1));
+        }
+        m = parseInt(mi) + parseFloat(mf);
+        if (s == 1) {
+            m = 0 - m;
+        }
+        return m;
+    }
+    //浮点数转16进制
+    function SingleToHex(t) {
+        if (t === "") {
+            return "";
+        }
+        t = parseFloat(t);
+
+        if (isNaN(t) == true) {
+            return "Error";
+        }
+        if (t == 0) {
+            return "00000000";
+        }
+        var s,
+            e,
+            m;
+        if (t > 0) {
+            s = 0;
+        }
+        else {
+            s = 1;
+            t = 0 - t;
+        }
+        m = t.toString(2);
+        if (m >= 1) {
+            if (m.indexOf(".") == -1) {
+                m = m + ".0";
+            }
+            e = m.indexOf(".") - 1;
+        }
+        else {
+            e = 1 - m.indexOf("1");
+        }
+        if (e >= 0) {
+            m = m.replace(".", "");
+        }
+        else {
+            m = m.substring(m.indexOf("1"));
+        }
+        if (m.length > 24) {
+            m = m.substr(0, 24);
+        }
+        else {
+            m = FillString(m, "0", 24, false)
+        }
+        m = m.substring(1);
+        e = (e + 127).toString(2);
+        e = FillString(e, "0", 8, true);
+        var r = parseInt(s + e + m, 2).toString(16);
+        r = FillString(r, "0", 8, true);
+        return InsertString(r, " ", 2).toUpperCase();
+    }
+</script>
+
+</html>

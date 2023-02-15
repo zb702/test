@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+</head>
+<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+<link rel="stylesheet" type="text/css" href="../../css/common.css" />
+<link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+<style>
+    body {
+        background-color: #FFFFFF;
+    }
+
+    .moduleItem {
+        width: 43vw;
+        height: 31vw;
+        background: #F6F6FA;
+        border-radius: 3vw;
+        margin: 2vw;
+    }
+
+    .moduleItem p {
+        font-size: 4vw;
+        font-family: Source Han Sans CN;
+        font-weight: bold;
+        color: #333333;
+    }
+</style>
+
+<body>
+    <div id="frame3" class="pad-3 flex-fs flex-wrap">
+        <div class="moduleItem flex-center" @click="gotoJlSetup">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/jlSetupIcon.png" alt="">
+                <p class="mar-t-5">记录设置</p>
+            </div>
+        </div>
+        <div class="moduleItem flex-center" @click="gotoBjzSetup">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/bjzSetupIcon.png" alt="">
+                <p class="mar-t-5">背景值设置</p>
+            </div>
+        </div>
+        <div class="moduleItem flex-center" @click="gotoDWSetup">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/dwSetupIcon.png" alt="">
+                <p class="mar-t-5">单位设置</p>
+            </div>
+        </div>
+        <div class="moduleItem flex-center" @click="gotoJbSetup">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/jbSetupIcon.png" alt="">
+                <p class="mar-t-5">警报设置</p>
+            </div>
+        </div>
+        <div class="moduleItem flex-center" @click="gotoYqSetup">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/yqSetupIcon.png" alt="">
+                <p class="mar-t-5">仪器信息</p>
+            </div>
+        </div>
+        <div class="moduleItem flex-center" @click="checkSMS">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/smsSetupIcon.png" alt="">
+                <p class="mar-t-5">说明书信息</p>
+            </div>
+        </div>
+        <div class="moduleItem flex-center" @click="dataUpload">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/dataUploadIcon.png" alt="">
+                <p class="mar-t-5">数据上传</p>
+            </div>
+        </div>
+        <div class="moduleItem flex-center" @click="checkVersion">
+            <div class="text-c">
+                <img class="w-h-9" src="../../image/icon/rjbbSetupIcon.png" alt="">
+                <p class="mar-t-5">软件版本</p>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript" src="../../script/md5.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+    var connectionType,db;
+    apiready = function () {
+        connectionType = api.connectionType;
+        db = api.require('db');
+        api.addEventListener({
+            name: 'online'
+        }, (ret, err) => {
+            connectionType = ret.connectionType;
+            console.log('网络连接方式' + connectionType)
+        })
+        api.addEventListener({
+            name: 'offline'
+        }, (ret, err) => {
+            connectionType = '';
+            console.log('当前是无网络连接')
+        })
+        var vue = new Vue({
+            el: '#frame3',
+            data: {
+                token: '',
+                clickCount: 0,
+                clickTime: null,
+                lastTime: 0,
+                uploadDatasForm: {
+                    instrument_code: '',//设备编号
+                    json_data: {},//json格式数据
+                }
+            },
+            created() {
+                this.token = api.getGlobalData({ key: 'token' });
+                console.log('设置页面')
+            },
+            methods: {
+                gotoJlSetup() {
+                    api.openFrame({
+                        name: 'jlPopup',
+                        url: '../bounce/jlPopup.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        reload: true,
+                        animation: {
+                            type: "push",
+                            subType: "from_bottom",
+                        }
+                    });
+                },
+                gotoBjzSetup() {
+                    api.openFrame({
+                        name: 'bjzPopup',
+                        url: '../bounce/bjzPopup.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        reload: true,
+                        animation: {
+                            type: "push",
+                            subType: "from_bottom",
+                        }
+                    });
+                },
+                gotoDWSetup() {
+                    api.openFrame({
+                        name: 'companyPopup',
+                        url: '../bounce/companyPopup.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        reload: true,
+                        animation: {
+                            type: "push",
+                            subType: "from_bottom",
+                        }
+                    });
+                },
+                gotoJbSetup() {
+                    api.openFrame({
+                        name: 'jbPopup',
+                        url: '../bounce/jbPopup.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        reload: true,
+                        animation: {
+                            type: "push",
+                            subType: "from_bottom",
+                        }
+                    });
+                },
+                gotoYqSetup() {
+                    api.openFrame({
+                        name: 'yqPopup',
+                        url: '../bounce/yqPopup.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        reload: true,
+                        animation: {
+                            type: "push",
+                            subType: "from_bottom",
+                        }
+                    });
+                },
+                checkSMS() {
+                    api.openFrame({
+                        name: 'smsPopup',
+                        url: '../bounce/smsPopup.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        reload:true,
+                        animation:{
+                            type:"push",
+                            subType:"from_bottom",
+                        }
+                    });
+                    // var pdfReader = api.require('pdfReader');
+                    // // pdfReader.showView();
+                    // // console.log('查看pdf文件'+JSON.stringify(pdfReader))
+                    // pdfReader.open({
+                    //     path: 'widget://res/voc2000.pdf',
+                    // }, (ret, err) => {
+                    //     console.log('----' + JSON.stringify(ret) + JSON.stringify(err))
+                    // });
+                },
+                checkVersion() {
+                    var currentTime = new Date().getTime();
+                    this.clickCount = (currentTime - this.lastTime) < 1000 ? this.clickCount + 1 : 1;
+                    this.lastTime = new Date().getTime();
+                    if (this.clickCount === 1) {
+                        clearTimeout(this.clickTime)
+                        this.clickTime = setTimeout(() => {
+                            this.clickCount = 0;
+                            api.alert({
+                                msg: '当前版本号是' + api.appVersion
+                            });
+                            this.lastTime = 0;
+                        }, 250)
+                    } else {
+                        clearTimeout(this.clickTime)
+                        if (this.clickCount >= 5) {
+                            this.clickCount = 0;
+                            this.lastTime = 0;
+                            // clearTimeout(this.clickTime)
+                            api.openFrame({
+                                name: 'instrumentInformationGet',
+                                url: '../bounce/instrumentInformationGet.html',
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: 'auto',
+                                    h: 'auto'
+                                },
+                                reload: true,
+                                animation: {
+                                    type: "push",
+                                    subType: "from_bottom",
+                                }
+                            });
+                        }
+                    }
+                },
+                //数据上传到pc端
+                dataUpload() {
+                    
+                    //先判断是否有联网
+                    if (connectionType == '') {
+                        alert('请连接网络')
+                    } else {
+                        if(getPrefs('PumpChange')){
+                            var pumpType = JSON.parse(getPrefs('PumpChange')).pumpType
+                            if(pumpType){
+                                api.confirm({
+                                    title: '提示',
+                                    msg: '确认要关泵，准备上传数据么？',
+                                    buttons: ['确定', '取消']
+                                }, (ret, err)=>{
+                                    var index = ret.buttonIndex;
+                                    console.log('按钮'+index)
+                                    if(index==1){//确认
+                                        api.sendEvent({
+                                            name:'uploadDataPumpChange',
+                                            extra: {
+                                                isClosePump: true,
+                                            }
+                                        })
+                                        setTimeout(()=>{
+                                            this.dataUpload()
+                                        },1000)
+                                    }else{//取消
+
+                                    }
+                                });
+                            }else{
+                                this.uploadDatasApi()
+                            }
+                        }else{
+                            this.uploadDatasApi()
+                        }
+                    }
+                },
+                /**
+                 * 上传最新数据方法
+                 * 执行逻辑 
+                 * 1、获取所有is_upload为0的数据
+                 * 2、整合数据上传
+                 * 3、更新已上传的数据is_upload为1
+                 */
+                uploadDatasApi() {
+                    //1、获取所有is_upload为0的数据 
+                    api.showProgress({
+                        title: '数据上传中...',
+                        text: '请耐心等待...',
+                        modal: true
+                    });
+                    //① 走接口获取所有表名
+                    var instrument_code = get_instrument_code();
+                    let params = {
+                        instrument_code,
+                        type: "tablelist"
+                    };
+                    params = getRequestToken(params);
+                    apiRequest('voc/sync/tables', params, function (result) {
+                        if (result.code == 1) {
+                            tablelist = result.data;
+                            var datalist = {};
+                            var updateList = {};
+                            //过滤掉基础信息表和仪器表
+                            for (i in tablelist) {
+                                //表名称
+                                tablename = tablelist[i];
+                                //根据表名称过滤
+                                if ((['tr_basics_pid_coefficient', 'tr_instrument','tr_voc_version_app']).indexOf(tablename) == -1) {
+                                    //查询需要上传的信息
+                                    var data = select2(tablename, { is_upload: 0 },1,0,'id ASC');
+                                    if (data.length > 0) {
+                                        datalist[tablename] = data;
+                                        var updateIdarr = [];
+                                        for (item in data) {
+                                            updateIdarr.push(data[item].id);
+                                        }
+                                        updateList[tablename] = ['id in (' + (updateIdarr.join(',')) + ')'];
+                                    }
+                                }
+                            }
+                        }
+                        var json_data = JSON.stringify(datalist);
+                        if (json_data == '{}') { return false; }
+                        //2、整合数据上传
+                        let params = {
+                            instrument_code,
+                            json_data
+                        };
+                        params = getRequestToken(params);
+                        apiRequest('voc/sync/upload', params, function (ret) {
+                            if (ret.code == 1) {
+                                //更新已上传的数据is_upload为1
+                                if (JSON.stringify(updateList) != '{}') {
+                                    for (tablename in updateList) {
+                                        let updateLocalDatas = db.executeSqlSync({
+                                            name: 'tianrui_offline',
+                                            sql: 'UPDATE ' + tablename + ' SET is_upload=1 where ' + updateList[tablename]
+                                        });
+                                        if (!updateLocalDatas.status) {
+                                            console.log('本地数据上传状态失败')
+                                        } else {
+                                            console.log('本地数据上传状态成功')
+                                        }
+                                        console.log();
+                                    }
+                                }
+                                api.hideProgress();
+                                //提示上传数据成功
+                                api.toast({
+                                    msg: '数据上传成功',
+                                    location:'middle'
+                                })
+                                // let lists = select2('tr_voc_unit_settings');
+                                // console.log(JSON.stringify(lists));
+                                // return false;
+                            }else{
+                                api.toast({
+                                    msg: '数据上传失败，请联系后台服务人员'
+                                })
+                            }
+                        });
+                    })
+                }
+            }
+        })
+    };
+</script>
+
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>标准项</title>
+  <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+  <style>
+    body,
+    html {
+      background: rgba(255, 255, 255, 0);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="standardPopup">
+    <div class="all-bounce">
+      <div class="all-bounce-mark"></div>
+      <div class="all-bounce-form" style="height: 94vw;margin-top:-45vw">
+        <div class="all-bounce-form-title">
+          <span>标准{{fromType==1?'编辑':'新增'}}</span>
+          <img @click="go_back" src="../../image/icon/closeIcon.png" alt="">
+        </div>
+        <div class="all-bounce-form-content" style="height: 62vw;">
+          <p class="all-bounce-form-line bord-b-f5">
+            <span class="text-3">标准名称</span>
+            <input type="text" placeholder="请填写标准名称" v-model="standardInf.standard_Name">
+          </p>
+          <p class="all-bounce-form-line bord-b-f5">
+            <span class="text-3">标准编号</span>
+            <input type="text" placeholder="请填写标准编号" disabled v-model="standardInf.standard_code">
+          </p>
+          <p class="all-bounce-form-line bord-b-f5">
+            <span class="text-3">组份</span>
+            <input type="text" placeholder="请填写组份" v-model="standardInf.standard_components">
+          </p>
+          <p class="all-bounce-form-line bord-b-f5">
+            <span class="text-3">限值</span>
+            <input type="text" placeholder="请填写限值" v-model="standardInf.standard_limit">
+          </p>
+          <p class="all-bounce-form-line bord-b-f5">
+            <span class="text-3">创建日期</span>
+            <input type="text" placeholder="请填写创建日期" disabled v-model="standardInf.createtime">
+          </p>
+          <p class="all-bounce-form-line"></p>
+        </div>
+        <div class="all-bounce-form-bottom" @click="saveInf">保存</div>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+  var db;
+  apiready = function () {
+    db = api.require('db');
+    var vue = new Vue({
+      el: '#standardPopup',
+      data: {
+        fromType: 0,//0新增1编辑
+        standardInf: {},//标准信息
+        userinfo: {},
+        yqinfData:{},//仪器信息
+      },
+      created() {
+        this.standardInf = api.pageParam.standardParams
+        this.fromType = api.pageParam.type
+        this.userinfo = getPrefs('userInfo')
+      },
+      mounted(){
+        //读取仪器信息
+        let yqinf = api.readFile({
+            sync: true,
+            path: 'fs://instrumentInformation.txt'
+        });
+        if(yqinf){
+            this.yqinfData = JSON.parse(yqinf)
+        }else{
+            api.alert({
+                msg: '请前往仪器设置页面进行设置'
+            });
+        }
+            // console.log('本仪器信息'+JSON.stringify(this.yqinfData))
+      },
+      methods: {
+        //取消返回
+        go_back() {
+          api.closeFrame()
+        },
+        //保存信息
+        saveInf() {
+          if (this.arrEmptyVer(this.standardInf)) {
+            api.toast({
+              msg: '保存成功',
+              duration: 2000,
+              location: 'middle'
+            });
+            if (this.fromType == 1) {//编辑修改
+              update2('tr_voc_standard', {
+                id: this.standardInf.id,
+                tenant_id: 0,
+                enterprise_id: 0,
+                instrument_code: this.yqinfData.code,
+                add_userid: this.userinfo.id,
+                operator: this.userinfo.nickname,
+                createtime: this.standardInf.createtime,
+                standard_Name: this.standardInf.standard_Name,
+                standard_code: this.standardInf.standard_code,
+                standard_components: this.standardInf.standard_components,
+                standard_limit: this.standardInf.standard_limit,
+                is_upload: 0,
+                isEdit: this.standardInf.isEdit ? 1 : 0,
+                updatetime:parseInt(new Date().getTime()/1000),
+              })
+            } else {//新增
+              var standardAddResult = insert2('tr_voc_standard', {
+                tenant_id: 0,
+                enterprise_id: 0,
+                instrument_code: this.yqinfData.code,
+                add_userid: this.userinfo.id,
+                operator: this.userinfo.nickname,
+                createtime: this.standardInf.createtime,
+                standard_Name: this.standardInf.standard_Name,
+                standard_code: this.standardInf.standard_code,
+                standard_components: this.standardInf.standard_components,
+                standard_limit: this.standardInf.standard_limit,
+                is_upload: 0,
+                isEdit: this.standardInf.isEdit ? 1 : 0,
+                // updatetime bigint(11
+              });
+              // console.log('标准新增结果' + JSON.stringify(standardAddResult))
+            }
+            api.sendEvent({
+              name: 'standardInfChange',
+              extra: {
+                isUpdateData: true,
+              }
+            });
+            api.closeFrame()
+          }
+        },
+        arrEmptyVer(obj) {
+          let emptyType = true;
+          Object.keys(obj).forEach(e => {
+            if (obj[e] === '') {
+              api.toast({
+                msg: '请完善所有信息' + e,
+                duration: 2000,
+                location: 'middle'
+              });
+              emptyType = false
+              return emptyType
+            }
+          })
+          return emptyType
+        }
+      }
+    })
+  }
+</script>
+
+</html>

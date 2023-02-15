@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>仪器信息获取</title>
+  <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+  <style>
+    body,
+    html {
+      background: rgba(255, 255, 255, 0);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="instrumentGetPopup">
+    <div class="all-bounce">
+      <div class="all-bounce-mark"></div>
+      <div class="all-bounce-form">
+        <div class="all-bounce-form-title">
+          <span class="text-6 col-dak">仪器设置</span>
+          <!-- <img @click="go_back" src="../../image/icon
+            /closeIcon.png" alt=""> -->
+        </div>
+        <div class="all-bounce-form-content">
+          <div class="all-bounce-form-block">
+            <p class="text-4 col-666">设备标号</p>
+            <input style="outline: none;" type="text" placeholder="请填写设备编号" :disabled="!isChangeYQinfo"
+              v-model="instrumentGetForm.instrument_code">
+          </div>
+        </div>
+        <div class="all-bounce-form-bottom" @click="getYQInfo">获取仪器信息</div>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript" src="../../script/md5.js"></script>
+<script type="text/javascript">
+  var db;
+  apiready = function () {
+    db = api.require('db');
+    var vue = new Vue({
+      el: '#instrumentGetPopup',
+      data: {
+        instrumentGetForm: {
+          type: 'instrument_code',//	验证类型:instrument_code=仪器编号,debug=调试request_token是否正确
+          instrument_code: '100200066-',//仪器编号
+          request_token: '',//加密后的请求token dubeg时必传
+        },//仪器获取表单
+        isChangeYQinfo: true,//是否是第一次安装app
+        newversion:'',//最新版本号
+      },
+      created() {
+        this.isChangeYQinfo = api.pageParam.isChangeYQinfo
+        this.newversion = api.pageParam.newVersion
+        console.log('最新版本号'+this.newversion)
+        let inf = api.readFile({
+          sync: true,
+          path: 'fs://instrumentInformation.txt'
+        });
+        if (inf) {
+          this.instrumentGetForm.instrument_code = get_instrument_code()
+        } else {
+          this.instrumentGetForm.instrument_code = ''
+        }
+      },
+      methods: {
+        //取消返回
+        go_back() {
+          api.closeFrame()
+        },
+        //获取仪器身份信息
+        getRequestToken() {
+          if (this.instrumentGetForm.instrument_code == '') {
+            api.alert({
+              title: '提示',
+              msg: '请优先填写设备编号',
+            }, (ret, err) => { });
+            return
+          }
+          //组装参数
+          let params = {
+            instrument_code: this.instrumentGetForm.instrument_code,
+            type: this.instrumentGetForm.type
+          };
+          //2、参数序列化
+          let jsonstr = JSON.stringify(params);
+          //3、序列化后必须拼上仪器编号 加密
+          let mergeStr = jsonstr + this.instrumentGetForm.instrument_code;
+          this.instrumentGetForm.request_token = md5(mergeStr);
+          apiRequest('voc/sync/verify', this.instrumentGetForm, (result) => {
+            if (result.code == 1) {
+              api.toast({
+                msg: result.msg,
+                duration: 2000,
+                location: 'bottom'
+              });
+              api.writeFile({
+                path: 'fs://instrumentInformation.txt',
+                data: JSON.stringify(result.data)
+              }, (res, ers) => {
+                if (res.status) {
+                  //console.log('仪器信息文件写入成功')
+                  this.tables()
+                } else {
+                  //console.log('仪器信息文件写入失败')
+                }
+              });
+            } else {
+              api.alert({ msg: result.msg })
+            }
+          });
+        },
+        //获取仪器信息
+        getYQInfo() {
+          this.getRequestToken()
+        },
+        //创建仪器信息数据表
+        tables() {
+          let params = {
+            instrument_code: this.instrumentGetForm.instrument_code,
+            type: 'all',//获取类型:createtable=创建表语句，tablelist=数据表名列表,all=以上全部
+            table_name: '',//自定义表名（多个以逗号分隔）不填获取所有
+          };
+          params = getRequestToken(params);
+          // console.log('创建表传递参数' + JSON.stringify(params))
+          apiRequest('voc/sync/tables', params, (result) => {
+            if (result.code == 1) {
+              var createtable = result.data.createtable;
+              createtable.push('CREATE TABLE tr_voc_version_app(id int(10),version varchar(30),createtime bigint(10),is_upload int(1))')
+              console.log('返回表数据' + JSON.stringify(result))
+              //创建数据表
+              createTables2(createtable);
+              //公共表数据是否存在
+              var exits = db.selectSqlSync({
+                name: 'tianrui_offline',
+                sql: 'SELECT count(*) FROM tr_basics_pid_coefficient'
+              });
+              // console.log('当前仪器中校准信息表格' + (exits.status ? '存在' : '不存在'))
+              if (!exits.status) {
+                // 表不存在，创建表
+              } else {
+                //下载公共表数据
+                this.download();
+              }
+              var versionRes = insert2('tr_voc_version_app', {
+                  version: this.newversion,
+                  is_upload: 1
+              })
+              console.log('新增版本号到表中'+JSON.stringify(versionRes))
+            } else {
+              api.alert({ msg: result.msg })
+            }
+          }, 'get');
+        },
+        download() { /**下载公共表数据**/
+          let params = {
+            instrument_code: get_instrument_code()
+          };
+          params = getRequestToken(params);
+          apiRequest('voc/sync/download', params, function (result) {
+            if (result.code == 1) {
+              var ret = db.openDatabase({
+                name: 'tianrui_offline',
+                path: 'fs://tianrui_offline.db'
+              }, function (ret, err) {
+                var data = result.data.inserttable;
+                //循环写入表数据
+                for (key in data) {
+                  var tablename = key;
+                  //处理单个表的数组对象数据
+                  var list = data[key];
+                  if (list.length > 0) {
+                    for (item in list) {
+                      insert2(tablename, list[item]);
+                    }
+                  }
+                }
+                api.sendEvent({
+                  name: 'appInit',
+                  extra: {
+                    isInit: true,
+                  }
+                })
+                api.closeFrame()
+              });
+            }
+          });
+        },
+      }
+    })
+  }
+</script>
+
+</html>

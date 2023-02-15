@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>voc2000</title>
+      <link rel="stylesheet" type="text/css" href="./css/api.css"/>
+      <style>
+          /* body{ } */
+      </style>
+  </head>
+  <body>
+      <div id="app">
+      </div>
+  </body>
+  <script type="text/javascript" src="./script/api.js"></script>
+  <script type="text/javascript" src="./script/vue.min.js"></script>
+  <script type="text/javascript" src="./script/common.js"></script>
+  <script type="text/javascript" src="./script/db2.js"></script>
+  <script type="text/javascript">
+  var db, fs;
+      apiready = function(){
+        db = api.require('db');
+        fs = api.require('fs');
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: 'rgba(255,255,255,0)'
+        });
+        var vue = new Vue({
+            el: '#app',
+            data: {
+                token:'',
+                newversion:'',
+            },
+            created(){
+                api.setKeepScreenOn({
+                    keepOn: true
+                });
+                //查看联网状态
+                var connectionType = api.connectionType;
+                if(connectionType=='none'){
+                    this.gotoIndex()
+                }else{
+                    db.openDatabaseSync({
+                        name: 'tianrui_offline',
+                        path: 'fs://tianrui_offline.db'
+                    });
+                    var versionData = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: 'SELECT * FROM tr_voc_version_app'
+                    });
+                    let version = '';// version 是数据库版本
+                    if (!versionData.status || versionData.data.length == 0) {//第一次安装
+                        version = '0.0.0'
+                    } else {
+                        version = versionData.data[0].version
+                    }
+                    // console.log('版本号'+version)
+                    // console.log('版本号'+version)
+                    this.getVersionUpdateInf(version)
+                }
+                // var appVersion = api.appVersion;
+                // console.log('app版本'+appVersion)  
+            },
+            mounted(){
+                api.addEventListener({
+                    name:'appInit'
+                }, (ret)=>{
+                    if(ret.value.isInit){
+                        this.gotoIndex()
+                    }
+                })
+            },
+            methods:{
+                getVersionUpdateInf(oldversion){
+                    // let newversion = '';//新版本号
+                    apiRequest('common/version', {oldversion:oldversion}, (res) => {
+                        // console.log('版本信息'+JSON.stringify(res));
+                        // return
+                        if (res.code == 1) {//成功
+                            if(res.data){
+                                if (res.data.newversion) {
+                                    this.newversion = res.data.newversion
+                                }
+                                if (res.data.cleardb == 1) {
+                                    // console.log('有更新删除表从新开始')
+                                    var ret1 = fs.removeSync({
+                                        path:'fs://tianrui_offline.db'
+                                    })
+                                    var ret2 = fs.removeSync({
+                                        path:'fs://tianrui_offline.db-shm'
+                                    })
+                                    var ret3 = fs.removeSync({
+                                        path:'fs://tianrui_offline.db-wal'
+                                    }) 
+                                    //仪器信息不能删除
+                                    // var ret4 = fs.removeSync({
+                                    //     path: 'fs://instrumentInformation.txt'
+                                    // })
+                                    api.removePrefs({
+                                        key:'bjzSetup'
+                                    });
+                                    api.removePrefs({
+                                        key:'jbSetupStatus'
+                                    });
+                                    api.removePrefs({
+                                        key:'record'
+                                    });
+                                    api.removePrefs({
+                                        key:'recordTimeInter'
+                                    })
+                                    api.removePrefs({
+                                        key:'raskSelected'
+                                    })
+                                    api.removePrefs({
+                                        key:'PumpChange'
+                                    })
+                                    api.removePrefs({
+                                        key:'userInfo'
+                                    });
+                                    this.gotoIndex()
+                                }else{
+                                    // 不需要删除，更新版本号,下载公共数据
+                                    if (oldversion == '0.0.0') {
+                                        // 说明是新下载，还没有表
+                                        this.gotoIndex()
+                                    } else {
+                                        let aaa = update2('tr_voc_version_app', {
+                                            version: this.newversion,
+                                            is_upload: 1
+                                        }, null, true, true)
+                                        // console.log('更新版本信息返回'+JSON.stringify(aaa))
+                                        this.gotoIndex()
+                                    }
+                                }
+                            }else{
+                                // console.log('返回无数据不更新'+JSON.stringify(res))
+                                this.gotoIndex()
+                            }
+                        } else {//失败
+                            api.alert({ msg: res.msg })
+                            // console.log('网络连接错误'+JSON.stringify(res.msg))
+                            this.gotoIndex()
+                        }
+                    });
+                },
+                gotoIndex(){
+                    // api.removePrefs({ 
+                    //     key: 'userInfo'
+                    // });
+                    var userinfo = api.getPrefs({
+                        sync: true,
+                        key: 'userInfo'
+                    });
+                    this.token = userinfo?JSON.parse(userinfo).token:''
+                    // console.log('token:'+this.token+'-----'+(this.token?1:2)+JSON.stringify(userinfo)+'--'+(userinfo?55:66))
+                    if(this.token&&(this.token != '')){
+                        // console.log('本地有存储token')
+                        api.openFrame({
+                            name: 'index',
+                            url:'./html/mainPage/index.html',
+                            bounces: false,
+                            rect: {
+                                x: 0,
+                                y: 0,
+                                w: 'auto',
+                                h: 'auto'
+                            }
+                        })
+                    }else{
+                        console.log('本地没有存储token')
+                        let inf = api.readFile({
+                            sync: true,
+                            path: 'fs://instrumentInformation.txt'
+                        });
+                        if(inf){
+                            console.log('本地有存储仪器信息')
+                            //查看表数据是否存在
+                            var exits = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: 'SELECT count(*) FROM tr_voc_alarm_settings'
+                            });
+                            console.log('当前仪器中信息表格' + (exits.status ? '存在' : '不存在'))
+                            // console.log('当前仪器中警报表格' + JSON.stringify(exits))
+                            if (!exits.status) { 
+                                console.log('当前仪器中，表不存在，去创建表')
+                                api.openFrame({
+                                    name: 'instrumentInformationGet',
+                                    url: './html/bounce/instrumentInformationGet.html',
+                                    rect: {
+                                        x: 0,
+                                        y: 0,
+                                        w: 'auto',
+                                        h: 'auto'
+                                    },
+                                    pageParam:{
+                                        isChangeYQinfo:false,
+                                        newVersion:this.newversion,
+                                    },
+                                    reload: true,
+                                    animation: {
+                                        type: "push",
+                                        subType: "from_bottom",
+                                    }
+                                });
+                            } else {
+                                console.log("当前仪器中有数据表，去直接登录")
+                                api.openFrame({
+                                    name: 'login',
+                                    url: './html/login/login.html',
+                                    bounces: false,
+                                    rect: {
+                                        x: 0,
+                                        y: 0,
+                                        w: 'auto',
+                                        h: 'auto'
+                                    }
+                                })
+                            }
+                        }else{
+                            console.log('本地没有存储仪器信息第一次安装app')
+                            api.openFrame({
+                                name: 'instrumentInformationGet',
+                                url: './html/bounce/instrumentInformationGet.html',
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: 'auto',
+                                    h: 'auto'
+                                },
+                                pageParam:{
+                                    isChangeYQinfo:true,
+                                    newVersion:this.newversion,
+                                },
+                                reload: true,
+                                animation: {
+                                    type: "push",
+                                    subType: "from_bottom",
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        })
+      };
+  </script>
+  </html>

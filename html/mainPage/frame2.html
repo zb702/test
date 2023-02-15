@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+</head>
+<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+<link rel="stylesheet" type="text/css" href="../../css/common.css" />
+<link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+<style>
+    body {
+        background-color: #F5F6FA;
+    }
+
+    .selectItem {
+        width: 30vw;
+        height: 7vw;
+        border: 1px solid #DADEE6;
+        border-radius: 1vw;
+        background-color: #FFFFFF;
+        padding: 0 3vw;
+    }
+
+    .rightTheme {
+        width: 14vw;
+        height: 10vw;
+        padding: 0 3vw;
+        background: #6C707B;
+        box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+        border-radius: 5vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tabArea {
+        height: 10vw;
+        padding: 3vw 4vw;
+        background-color: #FFFFFF;
+    }
+
+    .tabLine {
+        width: 90vw;
+        height: 8vw;
+        background: #EFF5FF;
+        border-radius: 1vw;
+        padding: 1vw;
+    }
+
+    .tabItem {
+        width: 30vw;
+        height: 8vw;
+        border-radius: 1vw;
+    }
+
+    select {
+        font-size: 3.2vw;
+    }
+
+    .timeTabArea {
+        background-color: #ffffff;
+    }
+    .echartContent{
+        margin:0 4vw;
+        background-color: #ffffff;
+        padding:1vw;
+        border-radius: 2vw;
+        width: 90vw;
+        height: 64vw;
+        overflow-x: auto;
+    }
+    .reportPopup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 900;
+    }
+
+    .reportMask {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        background-color: rgba(0, 0, 0, .3);
+    }
+
+    .reportContent {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 60vw;
+        height: 34vw;
+        z-index: 1100;
+        margin-top: -17vw;
+        margin-left: -30vw;
+        background-color: #ffffff;
+        border-radius: 3vw;
+        text-align: center;
+    }
+
+    .reportContent img {
+        width: 40vw;
+        height: 8.6vw;
+        object-fit: cover;
+        margin: 4vw 0 1vw 0;
+        animation: load 6.2s linear infinite;
+    }
+
+    @keyframes load {
+        0% {
+            width: 0vw;
+            height: 8.6vw;
+        }
+
+        50% {
+            width: 40vw;
+            height: 8.6vw;
+        }
+
+        100% {
+            width: 0vw;
+            height: 8.6vw;
+        }
+    }
+
+    .reportContent p {
+        font-size: 4.4vw;
+        color: #333333;
+        line-height: 6.4vw;
+        margin: 2vw 7vw;
+    }
+
+    [v-cloak] {
+        display: none;
+    }
+</style>
+
+<body>
+    <div id="frame2" v-cloak>
+        <div class="tabArea">
+            <div class="tabLine flex-sb">
+                <div class="tabItem flex-center" :style="{background:tabIndex==0?'#0081FF':'#EFF5FF'}"
+                    @click="toggleTab(0)">
+                    <span class="text-3 text-bold" :class="tabIndex==0?'col-whi':'col-b0b'">超标</span>
+                </div>
+                <div class="tabItem flex-center" :style="{background:tabIndex==1?'#0081FF':'#EFF5FF'}"
+                    @click="toggleTab(1)">
+                    <span class="text-3 text-bold" :class="tabIndex==1?'col-whi':'col-b0b'">警报</span>
+                </div>
+                <div class="tabItem flex-center" :style="{background:tabIndex==2?'#0081FF':'#EFF5FF'}"
+                    @click="toggleTab(2)">
+                    <span class="text-3 text-bold" :class="tabIndex==2?'col-whi':'col-b0b'">时长</span>
+                </div>
+            </div>
+        </div>
+        <div class="timeTabArea">
+            <van-tabs v-model="active" color="#0081FF" @click="toggleTime" line-width="5vw" :title-active-color="'#0081FF'">
+                <van-tab name="d" title="日"></van-tab>
+                <van-tab name="m" title="月"></van-tab>
+                <van-tab name="q" title="季度"></van-tab>
+                <van-tab name="y" title="年"></van-tab>
+            </van-tabs>
+        </div>
+        <div class="echartArea">
+            <div class="echartTheme flex-sb pad-0-4" style="height:16vw;">
+                <div v-if="tabIndex<2" class="leftTheme text-3 col-666 flex-fs">累计{{tabIndex==0?'超标':'警报'}}：<p class="col-blue text-3">{{tabIndex==0?cbNumber:jbNumber}}次</p>
+                </div>
+                <div v-else class="leftTheme"></div>
+                <div class="middleTheme" v-if="tabIndex==0">
+                    <select class="selectItem" v-model="raskSelected" @change="selectRask(event)">
+                        <option :value="item.id" v-for="(item,index) in monitoringTasks">{{item.tasks_name}}</option>
+                    </select>
+                </div>
+                <div class="middleTheme" v-if="tabIndex==1">
+                    <select class="selectItem" v-model="limitSelected" @change="selectLimit(event)">
+                        <option :value="item.limit_value" v-for="(item,index) in limitList">{{item.limit_name}}</option>
+                    </select>
+                </div>
+                <div class="rightTheme" @click="exportEcharts">
+                    <img class="w-h-5 mar-r-2" src="../../image/icon/exportIcon.png" alt="">
+                    <p class="text-2 col-whi">导出</p>
+                </div>
+            </div>
+            <div class="echartContent" v-show="(tabIndex==0)&&(active=='q')">
+                <div id="cbEchartDataq" class="flex-center" style="width: 100%;height: 100%;">暂无数据</div>
+            </div>
+            <div class="echartContent" v-show="(tabIndex==0)&&(active!='q')">
+                <div id="cbEchartData" class="flex-center" style="width: 400%;height: 100%;">暂无数据</div>
+            </div>
+            <div class="echartContent" v-show="(tabIndex==1)&&(active=='q')">
+                <div id="jbEchartDataq" class="flex-center" style="width: 100%;height: 100%;">暂无数据</div>
+            </div>
+            <div class="echartContent" v-show="(tabIndex==1)&&(active!='q')">
+                <div id="jbEchartData" class="flex-center" style="width: 400%;height: 100%;">暂无数据</div>
+            </div>
+            <div class="echartContent" v-show="(tabIndex==2)&&(active=='q')">
+                <div id="scEchartDataq" class="flex-center" style="width: 100%;height: 100%;">暂无数据</div>
+            </div>
+            <div class="echartContent" v-show="(tabIndex==2)&&(active!='q')">
+                <div id="scEchartData" class="flex-center" style="width: 400%;height: 100%;">暂无数据</div>
+            </div>
+        </div>
+        <div class="greyLine" style="height: 4vw;"></div>
+        <!-- 担心运行后期页面数据太多导致echarts绘图太慢 加载弹框 -->
+        <div class="reportPopup" v-show="isLoadingPopup">
+            <div class="reportMask"></div>
+            <div class="reportContent">
+                <img src="../../image/normalLogo.png" alt="">
+                <p>正在努力绘画中，请勿其他操作</p>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript" src="../../script/echarts.min.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+    var db;
+    apiready = function () {
+        db = api.require('db');
+        api.addEventListener({
+            name: 'refreshPage'
+        }, (ret, err) => {
+            let res = db.selectSqlSync({
+                name: 'tianrui_offline',
+                sql: "SELECT * FROM tr_voc_tasks WHERE status == 3"
+            });
+            vue.monitoringTasks = res.data
+        });
+        //监听警报设置值改变
+        api.addEventListener({
+            name: 'jbSetup'
+        }, (ret) => {
+            console.log('警报设置状态' + JSON.stringify(ret))
+            vue.jbSetup = ret.value
+            vue.limitList  = [
+                {id:1,limit_name:'上限值'+vue.jbSetup.upLimit,limit_value:'up_limit'},
+                {id:2,limit_name:'下限值'+vue.jbSetup.downLimit,limit_value:'down_limit'},
+                {id:3,limit_name:'stel限值'+vue.jbSetup.stelLimit,limit_value:'stel_limit'},
+                {id:4,limit_name:'twa限值'+vue.jbSetup.twaLimit,limit_value:'twa_limit'},
+            ];
+            vue.limitSelected = vue.limitList[0].limit_value
+            vue.limitValue = vue.jbSetup.upLimit
+            vue.toggleTime()
+        })
+        api.addEventListener({
+            name:'isPumpType'
+        }, (ret)=>{
+            vue.toggleTime()
+        })
+        var vue = new Vue({
+            el: '#frame2',
+            data: {
+                tabIndex: 0,//顶部 一级tab栏 超标 警报 时长
+                active: 'd',//二级tab栏 日 月 季度 年
+                cbNumber:0,//超标次数
+                jbNumber:0,//警报次数
+                x_axis:[],//x轴数据
+                xd_axis:[],//x轴天数据
+                xm_axis:[],//x轴月数据
+                xq_axis:[],//x轴季数据
+                xy_axis:[],//x轴年数据
+                y_axis:[],//y轴数据
+                reportAllDatas:[],//记录总数据  计算超标用
+                normalAllDatas:[],//预警总数据  计算预警用
+                timeAllDatas:[],//时长总数据   计算时长用
+                cbAllDatas:[],//超标总数据
+                yjAllDatas:[],//预警总数据
+                scAllDatas:[],//时长总数据
+                //警报值设置
+                jbSetup: {
+                    upLimit: '',
+                    downLimit:'',
+                    stelLimit: '',
+                    twaLimit: ''
+                },
+                raskSelected:'请选择',//任务默认值
+                monitoringTasks: [],//任务列表
+                limitSelected:'',
+                limitValue:'',
+                limitList:[],//限值列表
+                formTable:'tr_voc_basic_report',
+                isLoadingPopup:true,
+                reportTimeDatas:[],
+            },
+            created(){
+                console.log('统计页面')
+                // removePrefs('jbSetupStatus')
+                this.reportTimeDatas = select2('tr_voc_user_report', {});
+                //echart x轴数据初始化
+                this.x_axis_init()
+                if (getPrefs('jbSetupStatus')) {
+                    this.jbSetup = JSON.parse(getPrefs('jbSetupStatus'))
+                    this.limitList  = [
+                        {id:1,limit_name:'上限值'+this.jbSetup.upLimit,limit_value:'up_limit'},
+                        {id:2,limit_name:'下限值'+this.jbSetup.downLimit,limit_value:'down_limit'},
+                        {id:3,limit_name:'stel限值'+this.jbSetup.stelLimit,limit_value:'stel_limit'},
+                        {id:4,limit_name:'twa限值'+this.jbSetup.twaLimit,limit_value:'twa_limit'},
+                    ];
+                    this.limitSelected = this.limitList[0].limit_value
+                    this.limitValue = this.jbSetup.upLimit
+                // console.log('警报设置'+JSON.stringify(this.limitList))
+                }
+                // this.monitoringTasks = select2('tr_voc_tasks', {})
+                let res = db.selectSqlSync({
+                    name: 'tianrui_offline',
+                    sql: "SELECT * FROM tr_voc_tasks WHERE status == 3"
+                });
+                this.monitoringTasks = res.data
+                // console.log('任务列表'+JSON.stringify(this.monitoringTasks))
+                if (this.monitoringTasks.length > 0) {
+                    if (getPrefs('raskSelected')) {
+                        if (JSON.parse(getPrefs('raskSelected')).rask_id != '请选择') {
+                            this.raskSelected = JSON.parse(getPrefs('raskSelected')).rask_id;
+                        } else {
+                            this.raskSelected = this.monitoringTasks[0].id;
+                        }
+                    }
+                }
+                
+            },
+            mounted() {
+                //获取超标记录
+
+                // console.log('任务id'+this.raskSelected)
+                // console.log('总超标数据'+JSON.stringify(this.cbAllDatas))
+                this.isLoadingPopup = true
+                this.toggleTime()
+            },
+            methods: {
+                //任务名称切换
+                selectRask(e) {
+                    console.log('选择任务'+JSON.stringify(e))
+                    this.isLoadingPopup = true
+                    this.$nextTick(()=>{
+                        this.toggleTime()
+                    })
+                },
+                //限值名称切换
+                selectLimit(e){
+                    console.log('选择限值'+JSON.stringify(e)+this.limitSelected)
+                    if(this.limitSelected == 'up_limit'){
+                        this.formTable = 'tr_voc_task_report'
+                    }else if(this.limitSelected == 'down_limit'){
+                        this.formTable = 'tr_voc_task_report'
+                    }else if(this.limitSelected == 'stel_limit'){
+                        this.formTable = 'tr_voc_stel_report'
+                    }else if(this.limitSelected == 'twa_limit'){
+                        this.formTable = 'tr_voc_twa_report'
+                    }
+                    this.limitList.forEach(e=>{
+                        if(e.limit_value==this.limitSelected){
+                            // console.log(222+e.limit_name)
+                            this.limitValue = e.limit_name.split('限值')[1]
+                        }
+                    })
+                    // console.log(111111+this.limitValue)
+                    this.isLoadingPopup = true
+                    this.$nextTick(()=>{
+                        this.toggleTime()
+                    })
+                },
+                //切换一级导航栏0超标1警报2时长
+                toggleTab(num) {
+                    this.tabIndex = num
+                    this.isLoadingPopup = true
+                    // console.log('选择限值'+this.limitSelected)
+                    this.limitList.forEach(e=>{
+                        if(e.limit_value==this.limitSelected){
+                            this.limitValue = e.limit_name.split('限值')[1]
+                        }
+                    })
+                    // console.log('选择限值值'+this.limitValue)
+                    this.$nextTick(()=>{
+                        this.toggleTime()
+                    })
+                },
+                //echarts   x轴数据初始化
+                x_axis_init(){
+                    for(var i=1;i<=24;i++){
+                        this.xd_axis.push(i+'时')
+                    }
+                    for(var i=1;i<=12;i++){
+                        this.xm_axis.push(i+'月')
+                    }
+                    for(var i=1;i<=4;i++){
+                        this.xq_axis.push('第'+i+'季')
+                    }
+                    for(var i=(new Date().getFullYear()-9);i<=new Date().getFullYear();i++){
+                        this.xy_axis.push(i+'年')
+                    }
+                    // console.log('时间11'+this.xd_axis)
+                },
+                //数据获取
+                getDatas(){
+                    this.normalAllDatas = []
+                    this.cbAllDatas = []
+                    this.yjAllDatas = []
+                    if(this.tabIndex==0){
+                        if(this.active=='d'){
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM tr_voc_task_report WHERE rask_id ==  '"+this.raskSelected+"' and createtime > "+(new Date(new Date().setHours(0, 0, 0, 0)).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().setHours(23,59,59,999)).getTime()/1000).toFixed(0)+" and report_value >= standard_limit"
+                            });
+                            // console.log('超标数据'+JSON.stringify(ret))
+                            this.normalAllDatas = ret.data
+                            this.normalAllDatas.forEach(e=>{
+                                this.cbAllDatas.push({jlTime:e.createtime})
+                            }) 
+                        }else if(this.active=='m'){
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM tr_voc_task_report WHERE rask_id == '"+this.raskSelected+"' and createtime > "+(new Date(new Date().getFullYear()-1,12,31).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().getFullYear(),12,31).getTime()/1000).toFixed(0)+" and report_value >= standard_limit"
+                            });
+                            this.normalAllDatas = ret.data
+                            this.normalAllDatas.forEach(e=>{
+                                this.cbAllDatas.push({jlTime:e.createtime})
+                            })
+                        }else if(this.active=='q'){
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM tr_voc_task_report WHERE rask_id == '"+this.raskSelected+"' and createtime > "+(new Date(new Date().getFullYear()-1,12,31).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().getFullYear(),12,31).getTime()/1000).toFixed(0)+" and report_value >= standard_limit"
+                            });
+                            this.normalAllDatas = ret.data
+                            this.normalAllDatas.forEach(e=>{
+                                this.cbAllDatas.push({jlTime:e.createtime})
+                            })
+                        }else{
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM tr_voc_task_report WHERE rask_id == '"+this.raskSelected+"' and createtime > "+(new Date(new Date().getFullYear()-10,12,31).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().getFullYear(),12,31).getTime()/1000).toFixed(0)+" and report_value >= standard_limit"
+                            });
+                            this.normalAllDatas = ret.data
+                            this.normalAllDatas.forEach(e=>{
+                                this.cbAllDatas.push({jlTime:e.createtime})
+                            })
+                        }
+                    }else if(this.tabIndex==1){
+                        if(this.limitSelected==''){
+                            this.isLoadingPopup = false
+                            return
+                        }
+                        if(this.active=='d'){
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM "+this.formTable+" WHERE createtime > "+(new Date(new Date().setHours(0, 0, 0, 0)).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().setHours(23,59,59,999)).getTime()/1000).toFixed(0)+" and report_value "+(this.limitSelected=="down_limit"?"<= ":">= ")+this.limitSelected+" and "+this.limitSelected+" != ''"
+                            });
+                            // console.log('stel天数据'+JSON.stringify(ret))
+                            this.normalAllDatas = ret.data
+                            this.normalAllDatas.forEach(e=>{
+                                this.yjAllDatas.push({jlTime:e.createtime})
+                            })
+                            // return
+                            // var arr1 = [];
+                            // this.reportTimeDatas.forEach(e=>{
+                            //     let arr2 = [];
+                            //     ret.data.forEach(e1=>{
+                            //         if(((Number(e1.createtime)*1000) >= Number(e.startup_time)) && ((Number(e1.createtime)*1000) <= Number(e.shutdown_time))){
+                            //             arr2.push(e1)
+                            //         }
+                            //     })
+                            //     // console.log('新数组2'+JSON.stringify(arr2))
+                            //     if(arr2.length>=1){
+                            //         arr1.push(arr2)
+                            //     }
+                            // })
+                            // // console.log('新数组1'+JSON.stringify(arr1))
+                            // var arr4 = [];
+                            // arr1.forEach(e2=>{
+                            //     var arr3 = [];
+                            //     for(var i=0;i<e2.length;i+=3){
+                            //         arr3.push(e2.slice(i,i+3));
+                            //     }
+                            //     // console.log('新数组3'+JSON.stringify(arr3))
+                            //     arr4.push(arr3)
+                            // })
+                            // // console.log('新数组4'+JSON.stringify(arr4))
+                            // var arr5 = [];
+                            // arr4.forEach(e3=>{
+                            //     e3.forEach(e4=>{
+                            //         let obj2 = {};
+                            //         let totalValue = 0;
+                            //         let max_value = 0;
+                            //         let min_value = 0;
+                            //         e4.forEach(e5=>{
+                            //             totalValue+=Number(e5.report_value)
+                            //             max_value = max_value>=e5.report_value?max_value:e5.report_value
+                            //             min_value = min_value<=e5.report_value?min_value:e5.report_value
+                            //             obj2 = e5
+                            //         })
+                            //         obj2.max_value = max_value;
+                            //         obj2.min_value = min_value;
+                            //         obj2.averageValue = (totalValue/e4.length).toFixed(2)
+                            //         arr5.push(obj2)
+                            //     })
+                            // })
+                        }else if(this.active=='m'){
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM "+this.formTable+" WHERE createtime > "+(new Date(new Date().getFullYear()-1,12,31).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().getFullYear(),12,31).getTime()/1000).toFixed(0)+" and report_value "+(this.limitSelected=='down_limit'?'<= ':'>= ')+this.limitSelected+" and "+this.limitSelected+" != ''"
+                            });
+                            this.normalAllDatas = ret.data
+                            // console.log(2222+JSON.stringify(ret))
+                            this.normalAllDatas.forEach(e=>{
+                                this.yjAllDatas.push({jlTime:e.createtime})
+                            })
+                        }else if(this.active=='q'){
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM "+this.formTable+" WHERE createtime > "+(new Date(new Date().getFullYear()-1,12,31).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().getFullYear(),12,31).getTime()/1000).toFixed(0)+" and report_value "+(this.limitSelected=='down_limit'?'<= ':'>= ')+this.limitSelected+" and "+this.limitSelected+" != ''"
+                            });
+                            this.normalAllDatas = ret.data
+                            this.normalAllDatas.forEach(e=>{
+                                this.yjAllDatas.push({jlTime:e.createtime})
+                            })
+                        }else{
+                            let ret = db.selectSqlSync({
+                                name: 'tianrui_offline',
+                                sql: "SELECT * FROM "+this.formTable+" WHERE createtime > "+(new Date(new Date().getFullYear()-10,12,31).getTime()/1000).toFixed(0)+" and createtime < "+(new Date(new Date().getFullYear(),12,31).getTime()/1000).toFixed(0)+" and report_value "+(this.limitSelected=='down_limit'?'<= ':'>= ')+this.limitSelected+" and "+this.limitSelected+" != ''"
+                            });
+                            this.normalAllDatas = ret.data
+                            this.normalAllDatas.forEach(e=>{
+                                this.yjAllDatas.push({jlTime:e.createtime})
+                            })
+                        }
+                    }else{
+                        this.timeAllDatas = select2('tr_voc_detection_slot', {})
+                        this.scAllDatas= this.timeAllDatas
+                    }
+                    this.dataProcessing(this.x_axis)
+                },
+                //切换时间
+                toggleTime(){
+                    this.isLoadingPopup = true
+                    if(this.active=='d'){
+                        this.x_axis = this.xd_axis
+                        this.getDatas()
+                    }else if(this.active=='m'){
+                        this.x_axis = this.xm_axis
+                        this.getDatas()
+                    }else if(this.active=='q'){
+                        this.x_axis = this.xq_axis
+                        this.getDatas()
+                    }else{
+                        this.x_axis = this.xy_axis
+                        this.getDatas()
+                    }
+                    // console.log('时间'+this.x_axis)
+                },
+                //数据处理
+                dataProcessing(xData){
+                    // console.log('x轴数据'+JSON.stringify(xData))
+                    // console.log('y轴数据'+JSON.stringify(this.cbAllDatas))
+                    // console.log('y轴数据'+JSON.stringify(this.yjAllDatas))
+                    if(this.tabIndex==0){
+                        if(this.active=='d'){
+                            this.cbNumber = 0;
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.cbAllDatas.forEach(e=>{
+                                if(new Date(Number(e.jlTime)*1000).toDateString() === new Date().toDateString()){
+                                    this.cbNumber+=1
+                                    xData.forEach((e1,i1)=>{
+                                        if((new Date(Number(e.jlTime)*1000).getHours()+'时')==e1){
+                                            newArr[i1]+=1
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='m'){
+                            this.cbNumber = 0;
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.cbAllDatas.forEach(e=>{
+                                let aaa = new Date().getFullYear() == new Date(Number(e.jlTime)*1000).getFullYear(); 
+                                if(aaa){
+                                    this.cbNumber+=1
+                                    xData.forEach((e1,i1)=>{
+                                        if(((new Date(Number(e.jlTime)*1000).getMonth()+1)+'月')==e1){
+                                            newArr[i1]+=1
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='q'){
+                            this.cbNumber = 0;
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.cbAllDatas.forEach(e=>{
+                                let aaa = new Date().getFullYear() == new Date(Number(e.jlTime)*1000).getFullYear(); 
+                                let currMonth= new Date(Number(e.jlTime)*1000).getMonth()+1;
+                                let currQuarter = Math.floor( ( currMonth % 3 == 0 ? ( currMonth / 3 ) : ( currMonth / 3 + 1 ) ) );
+                                if(aaa){
+                                    this.cbNumber+=1
+                                    xData.forEach((e1,i1)=>{
+                                        if(('第'+(currQuarter)+'季')==e1){
+                                            newArr[i1]+=1
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='y'){
+                            this.cbNumber = 0;
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.cbAllDatas.forEach(e=>{
+                                this.cbNumber+=1
+                                xData.forEach((e1,i1)=>{
+                                    if(((new Date(Number(e.jlTime)*1000).getFullYear())+'年')==e1){
+                                        newArr[i1]+=1
+                                    }
+                                })
+                            })
+                            this.y_axis = newArr
+                        }
+                    }else if(this.tabIndex==1){
+                        if(this.active=='d'){
+                        this.jbNumber = 0
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.yjAllDatas.forEach(e=>{
+                                if(new Date(Number(e.jlTime)*1000).toDateString() === new Date().toDateString()){
+                                    this.jbNumber += 1
+                                    xData.forEach((e1,i1)=>{
+                                        if((new Date(Number(e.jlTime)*1000).getHours()+'时')==e1){
+                                            newArr[i1]+=1
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='m'){
+                        this.jbNumber = 0
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.yjAllDatas.forEach(e=>{
+                                let aaa = new Date().getFullYear() == new Date(Number(e.jlTime)*1000).getFullYear(); 
+                                if(aaa){
+                                    this.jbNumber += 1
+                                    xData.forEach((e1,i1)=>{
+                                        if(((new Date(Number(e.jlTime)*1000).getMonth()+1)+'月')==e1){
+                                            newArr[i1]+=1
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='q'){
+                        this.jbNumber = 0
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.yjAllDatas.forEach(e=>{
+                                let aaa = new Date().getFullYear() == new Date(Number(e.jlTime)*1000).getFullYear(); 
+                                let currMonth= new Date(Number(e.jlTime)*1000).getMonth()+1;
+                                let currQuarter = Math.floor( ( currMonth % 3 == 0 ? ( currMonth / 3 ) : ( currMonth / 3 + 1 ) ) );
+                                if(aaa){
+                                    this.jbNumber += 1
+                                    xData.forEach((e1,i1)=>{
+                                        if(('第'+(currQuarter)+'季')==e1){
+                                            newArr[i1]+=1
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='y'){
+                        this.jbNumber = 0
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.yjAllDatas.forEach(e=>{
+                                    this.jbNumber += 1
+                                xData.forEach((e1,i1)=>{
+                                    if(((new Date(Number(e.jlTime)*1000).getFullYear())+'年')==e1){
+                                        newArr[i1]+=1
+                                    }
+                                })
+                            })
+                            this.y_axis = newArr
+                        }
+                    }else if(this.tabIndex==2){
+                        if(this.active=='d'){
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.scAllDatas.forEach(e=>{
+                                if(new Date(Number(e.createtime)).toDateString() === new Date().toDateString()){
+                                    xData.forEach((e1,i1)=>{
+                                        if((new Date(Number(e.createtime)).getHours()+'时')==e1){
+                                            newArr[i1]+=(e.shutdown_time-e.startup_time)
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='m'){
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.scAllDatas.forEach(e=>{
+                                let aaa = new Date().getFullYear() == new Date(Number(e.createtime)).getFullYear(); 
+                                if(aaa){
+                                    xData.forEach((e1,i1)=>{
+                                        if(((new Date(Number(e.createtime)).getMonth()+1)+'月')==e1){
+                                            newArr[i1]+=(e.shutdown_time-e.startup_time)
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='q'){
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.scAllDatas.forEach(e=>{
+                                let aaa = new Date().getFullYear() == new Date(Number(e.createtime)).getFullYear(); 
+                                let currMonth= new Date(Number(e.createtime)).getMonth()+1;
+                                let currQuarter = Math.floor( ( currMonth % 3 == 0 ? ( currMonth / 3 ) : ( currMonth / 3 + 1 ) ) );
+                                if(aaa){
+                                    xData.forEach((e1,i1)=>{
+                                        if(('第'+(currQuarter)+'季')==e1){
+                                            newArr[i1]+=(e.shutdown_time-e.startup_time)
+                                        }
+                                    })
+                                }
+                            })
+                            this.y_axis = newArr
+                        }else if(this.active=='y'){
+                            let newArr = [];
+                            xData.forEach(e1=>{
+                                newArr.push(0)
+                            })
+                            this.scAllDatas.forEach(e=>{
+                                xData.forEach((e1,i1)=>{
+                                    if(((new Date(Number(e.createtime)).getFullYear())+'年')==e1){
+                                        newArr[i1]+=(e.shutdown_time-e.startup_time)
+                                    }
+                                })
+                            })
+                            this.y_axis = newArr
+                        }
+                    }
+                    // if(this.tabIndex==2){
+                    //     this.y_axis.forEach(e=>{
+                    //         e = this.normalTime(e)
+                    //     })
+                    // }
+                    // console.log('y轴新数据'+JSON.stringify(this.y_axis))
+                    this.$nextTick(()=>{
+                        this.initEcharts()
+                    })
+                },
+                //时间格式化
+                normalTime(value) {
+                    let val = parseInt(Number(value)/1000)
+                    if (val > 0) {
+                        var time = parseInt(val);
+                        if (parseInt(val) >= 60) {
+                            var second = parseInt(val) % 60;
+                            var min = parseInt(val / 60);
+                            time = min + "m" + second + "s"
+                            if (parseInt(min) >= 60) {
+                                min = parseInt(val / 60) % 60;
+                                var hour = parseInt(parseInt(val / 60) / 60);
+                                time = hour + 'h' + min + "m" + second + "s"
+                                if(parseInt(hour) >= 24){
+                                    hour = parseInt(parseInt(val / 60) % 60) & 24 ;
+                                    var day = parseInt(parseInt(parseInt(val / 60) / 60) / 24);
+                                    time = day + 'd' + hour + 'h' + min + "m" + second + "s"
+                                }
+                            }
+                        }else {
+                            var second = time;
+                            time = second + 's'
+                        }
+
+                    } else {
+                        time = '0s'
+                    }
+                    return time
+                },
+                //初始化曲线图
+                initEcharts() {
+                    if(this.tabIndex==0){
+                        if(this.active=='q'){
+                            var myChart = echarts.init(document.getElementById('cbEchartDataq'));
+                        }else{
+                            var myChart = echarts.init(document.getElementById('cbEchartData'));
+                        }
+                    }else if(this.tabIndex==1){
+                        if(this.active=='q'){
+                            var myChart = echarts.init(document.getElementById('jbEchartDataq'));
+                        }else{
+                            var myChart = echarts.init(document.getElementById('jbEchartData'));
+                        }
+                    }else{
+                        if(this.active=='q'){
+                            var myChart = echarts.init(document.getElementById('scEchartDataq'));
+                        }else{
+                            var myChart = echarts.init(document.getElementById('scEchartData'));
+                        }
+                    }
+                    var option = {
+                        backgroundColor: '#ffffff',
+                        color: '#f00',
+                        grid: {
+                            top: 20,
+                            bottom: 20,
+                            left: 10,
+                            right: 10
+                        },
+                        xAxis: {
+                            // data: category,
+                            data: this.x_axis,
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#666666'
+                                }
+                            }
+                        },
+                        yAxis: {
+                            show: false,
+                            // splitLine: { show: false },
+                            // axisLine: {
+                            //     lineStyle: {
+                            //         color: '#aaadba'
+                            //     }
+                            // }
+                        },
+                        series: [
+                            {
+                                name: 'bar',
+                                type: 'bar',
+                                barWidth: 14,
+                                itemStyle: {
+                                    barBorderRadius: 20,
+                                    color: (params)=> {//自定义设定柱状颜色
+                                        var colorList = [
+                                            ['#16D2E0','#3AF1FF'],
+                                            ['#369AFB','#36D4FB'],
+                                            ['#14D6A8','#2FEFC1'],
+                                            ['#F7AC2C','#FCCC39'],
+                                            ['#FA7246','#FFA975'],
+                                        ]; 
+                                        var index = params.dataIndex % colorList.length;
+                                        return new echarts.graphic.LinearGradient(0, 1, 0, 0, [
+                                            { offset: 0, color: colorList[index][0] },
+                                            { offset: 1, color: colorList[index][1] }
+                                        ]);
+                                    }
+                                },
+                                label:{
+                                    // normal: {
+                                        show: true,
+                                        position:'top',
+                                        fontSize:12,
+                                        color:'#14c8d4',
+                                        fontstyle:'normal',
+                                        align:'center',
+                                    // },
+                                    formatter:(value)=>{
+                                        if(this.tabIndex==2){
+                                            // console.log(2222222222+JSON.stringify(value))
+                                            var val = value.data
+                                            return this.normalTime(val)
+                                        }else{
+                                            return value.data
+                                        }
+                                        
+                                    }
+                                },
+                                // data: barData
+                                data: this.y_axis
+                            },
+                        ]
+                    };
+                    this.isLoadingPopup = false
+                    option && myChart.setOption(option);
+                },
+                //导出echarts
+                exportEcharts(fileName = '导出', imageType = 'png'){
+                    // exportChart(canvas, fileName = '导出', imageType = 'png') {
+                        // if(this.tabIndex==0){
+                        //     var myChart = echarts.init(document.getElementById('cbEchartData'));
+                        // }else if(this.tabIndex==1){
+                        //     var myChart = echarts.init(document.getElementById('jbEchartData'));
+                        // }else{
+                        //     var myChart = echarts.init(document.getElementById('scEchartData'));
+                        // }
+                        if(this.tabIndex==0){
+                            if(this.active=='q'){
+                                var myChart = echarts.init(document.getElementById('cbEchartDataq'));
+                            }else{
+                                var myChart = echarts.init(document.getElementById('cbEchartData'));
+                            }
+                        }else if(this.tabIndex==1){
+                            if(this.active=='q'){
+                                var myChart = echarts.init(document.getElementById('jbEchartDataq'));
+                            }else{
+                                var myChart = echarts.init(document.getElementById('jbEchartData'));
+                            }
+                        }else{
+                            if(this.active=='q'){
+                                var myChart = echarts.init(document.getElementById('scEchartDataq'));
+                            }else{
+                                var myChart = echarts.init(document.getElementById('scEchartData'));
+                            }
+                        }
+                        let img = new Image();
+                        img.src = myChart.getDataURL({
+                            type: "png",
+                            pixelRatio: 1, //放大2倍
+                            backgroundColor: '#fff'
+                        });
+
+                        img.onload = () => {
+                            let canvas = document.createElement("canvas");
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            let ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            let dataURL = canvas.toDataURL('image/png');
+                            // console.log('图片'+dataURL)
+                            // console.log('asdasdas-----'+dataURL.slice(22))
+                            var timestamp = new Date().getTime()
+                            var trans = api.require('trans');
+                            trans.saveImage({
+                                base64Str: dataURL.slice(22),
+                                album:true,
+                                imgPath:"fs://img/",
+                                imgName:"ss.png"
+                            }, (ret, err)=>{
+                                if (ret.status) {
+                                    alert('已为您下载到相册可连接数据线导出查看');
+                                } else {
+                                    // alert(JSON.stringify(err));
+                                }
+                            });
+                            // // api.download({
+                            // //     url: dataURL,
+                            // //     savePath: 'fs://test'+timestamp+'.jpeg',
+                            // //     report: true,
+                            // //     cache: true,
+                            // //     allowResume: true
+                            // // }, (ret1, err1)=>{
+                            // //     console.log('图片存成功'+JSON.stringify(ret1))
+                            // //     console.log('图片存失败'+JSON.stringify(err1))
+                            //     // if(ret1){
+                            //     //     api.toast({
+                            //     //         msg:'图片已保存到本地'
+                            //     //     })
+                            //     // }
+                            //     api.saveMediaToAlbum({
+                            //         path: dataURL
+                            //     }, (ret, err)=>{
+                            //         console.log('图片存相册成功'+JSON.stringify(ret))
+                            //         console.log('图片存相册失败'+JSON.stringify(err))
+                            //     });
+                            // })
+                            // let a = document.createElement('a');
+                            // // 创建一个单击事件
+                            // let event = new MouseEvent('click');
+                            // // 将a的download属性设置为我们想要下载的图片名称，若name不存在则使用‘下载图片名称’作为默认名称
+                            // a.download = '图片.png' || '下载图片名称';
+                            // // 将生成的URL设置为a.href属性
+                            // a.href = dataURL;
+                            // // 触发a的单击事件
+                            // a.dispatchEvent(event);
+                        }
+                        // if (myChart) {
+                        //     fileName = `${fileName}.${imageType}`;
+                        //     myChart.toBlob((blob) => {
+                        //         const rUrl = window.URL.createObjectURL(blob);
+                        //         const link = document.createElement('a'); // 创建a标签
+                        //         link.href = rUrl;
+                        //         link.download = fileName; // 重命名文件
+                        //         link.click();
+                        //         URL.revokeObjectURL(rUrl); // 释放内存
+                
+                        //         this.$notification.success({ message: `导出“${fileName}”`, description: '' });
+                        //     });
+                        // // }
+                    }
+            }
+        })
+    };
+</script>
+
+</html>

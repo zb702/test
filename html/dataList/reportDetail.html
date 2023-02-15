@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <style>
+        body{
+            background-color: #FFFFFF;
+        }
+        
+        .baseInfArea{
+            background-color: #FFFFFF;
+            padding:3.5vw 0;
+        }
+        .baseInfLine{
+            width: 1px;
+            height: 10vw;
+            background: #F2F2F2;
+        }
+        .baseInfItem{
+            padding:0 7vw;
+            line-height: 6vw;
+            text-align: left;
+            width: 35vw;
+        }
+        .reportArea{
+            width: 100vw;
+            overflow-x: auto;
+        }
+        .reportTitle{
+            background: #FAFAFA;
+            width: 161vw;
+        }
+        .floatPopup{
+            position: fixed;
+            z-index: 99;
+            right:6vw;
+            bottom: 8vw;
+            width: 20vw;
+            height: 12vw;
+            padding:0 6vw;
+            background: #6C707B;
+            box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+            border-radius: 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .floatBtn{
+            text-align: center;
+        }
+        .floatBtn img{
+            width: 5vw;
+            height: 5vw;
+        }
+        .floatBtn p{
+            font-size: 2vw;
+            font-family: PingFang SC;
+            font-weight: 500;
+            color: #FFFFFF;
+        }
+        .floatLine{
+            width: 1px;
+            height: 5vw;
+            background: #8A8E99;
+        }
+        [v-cloak]{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="reportDetail" v-cloak>
+        <div class="baseInfArea mar-2-0 flex-sb">
+            <div class="baseInfItem">
+                <p class="text-3 col-333">任务名称：<span class="text-3 text-bold">{{reportInf.rask_name==''?'暂无关联任务':reportInf.rask_name}}</span></p>
+                <p class="text-3 col-333">标准编号：<span class="text-3 text-bold">{{relativeStandardItem.standard_code==''?'暂无标准编号':relativeStandardItem.standard_code}}</span></p>
+                <p class="text-3 col-333">开始日期：<span class="text-3 text-bold">{{reportInf.startup_time | normalTime}}</span></p>
+            </div>
+            <div class="baseInfLine"></div>
+            <div class="baseInfItem">
+                <p class="text-3 col-333">执行单位：<span class="text-3 text-bold">{{reportInf.rask_department==''?'天瑞仪器':reportInf.rask_department}}</span></p>
+                <p class="text-3 col-333">标准限值：<span class="text-3 text-bold col-blue">{{reportInf.standard_limit==''?'暂无关联标准':reportInf.standard_limit}}</span></p>
+                <p class="text-3 col-333">结束日期：<span class="text-3 text-bold">{{reportInf.shutdown_time | normalTime}}</span></p>
+            </div>
+        </div>
+        <div class="reportArea mar-2-0">
+            <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;">
+                <p class="text-c text-3 text-bold col-333" style="width: 23vw;">序号</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 23vw;">时间</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 23vw;">地点</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 23vw;">最大值</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 23vw;">最小值</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 23vw;">平均值</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 23vw;">结果</p>
+            </div>
+            <div class="reportBody pad-0-5">
+                <ul>
+                    <li class="bord-b-f5 flex-sb text-3" style="height: 12vw;width:161vw;" v-for="(item,index) in reportDatas" :key="index">
+                        <p class="text-c text-3 col-666" style="width: 23vw;">
+                            {{index+1}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 23vw;">
+                            {{Number(item.createtime)*1000 | normalTime}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 23vw;overflow-x: auto;white-space: nowrap;">
+                            {{item.address}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 23vw;">
+                            {{item.max_value}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 23vw;">
+                            {{item.min_value}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 23vw;">
+                            {{item.averageValue}}
+                        </p>
+                        <p class="text-c text-3 col-666" :class="item.standard_limit==''?'col-red':Number(item.averageValue)>=Number(item.standard_limit)?'col-red':'col-green'" style="width: 23vw;">
+                            {{item.standard_limit==''?'无法判断':Number(item.averageValue)>=Number(item.standard_limit)?'超标':'合格'}} 
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="floatPopup">
+            <div class="floatBtn" @click="exportExcel('#print-content')">
+                <img src="../../image/icon/exportIcon.png" alt="">
+                <p>导出</p>
+            </div>
+            <div class="floatLine"></div>
+            <div class="floatBtn" @click="printExcel">
+                <img src="../../image/icon/printIcon.png" alt="">
+                <p>打印</p>
+            </div>
+        </div>
+        <!-- 导出excel内容，不可删除 -->
+        <div id="divcate" style="display: none;">
+            <table id="print-content" border="1">
+                <tr>
+                    <th style="background-color:#808080;color:#ffffff">序号</th>
+                    <th style="background-color:#808080;color:#ffffff">时间</th>
+                    <th style="background-color:#808080;color:#ffffff">地点</th>
+                    <th style="background-color:#808080;color:#ffffff">最大值</th>
+                    <th style="background-color:#808080;color:#ffffff">最小值</th>
+                    <th style="background-color:#808080;color:#ffffff">平均值</th>
+                    <th style="background-color:#808080;color:#ffffff">结果</th>
+                </tr>
+                <tr v-for="(item,index) in reportDatas" :key="index">
+                    <td>{{index+1}}</td>
+                    <td>{{Number(item.createtime)*1000 | normalTime}}</td>
+                    <td>{{item.address}}</td>
+                    <td>{{item.max_value}}</td>
+                    <td>{{item.min_value}}</td>
+                    <td>{{item.averageValue}}</td>
+                    <td>{{item.standard_limit==''?'无法判断':Number(item.averageValue)>=Number(item.standard_limit)?'超标':'合格'}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript" src="../../script/db2.js"></script>
+  <script type="text/javascript">
+    var db,BluetoothPrinter;
+      apiready = function(){
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: 'rgba(255,255,255,0)'
+        });
+        BluetoothPrinter = api.require('djyPrinter');
+        BluetoothPrinter.disconnectBT();
+        db = api.require('db')
+        var fs = api.require('fs');
+        var vue = new Vue({
+            el: '#reportDetail',
+            data: {
+                // reportLists:[],
+                reportInf:{},
+                relativeStandardItem:{
+                    standard_code:''
+                },
+                reportDatas:[],
+                pageNum:1,
+                isHasMore:true,
+                isContentBluetooth:false,
+            },
+            created(){
+                // console.log('传递参数'+JSON.stringify(api.pageParam.reportDetail))
+                this.reportInf = api.pageParam.reportDetail
+                this.getReportDatas()
+                var standardList = select2('tr_voc_standard', {});
+                var monitoringTasks = select2('tr_voc_tasks', {})
+                // console.log('标准列表'+JSON.stringify(standardList))
+                // console.log('数据'+JSON.stringify(this.reportInf))
+                if (monitoringTasks.length > 0) {
+                    if (this.reportInf.rask_id != '请选择') {
+                        monitoringTasks.forEach(e=>{
+                            if(e.id==this.reportInf.rask_id){
+                                standardList.forEach(e1 => {
+                                    if (e1.id == e.relatedStandardsId) {
+                                        this.relativeStandardItem = e1
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }      
+            },
+            mounted(){
+                if(this.isHasMore){
+                    api.addEventListener({
+                    　　name:'scrolltobottom',
+                        extra:{threshold:50}
+                    }, (ret, err)=>{
+                        console.log('上拉加载历史数据'+JSON.stringify(ret))
+            　　　　　　 this.pageNum +=1
+                        this.getReportDatas()
+                    });
+                }
+            },
+            filters: {
+                normalTime(value) {
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d}
+                    ${h}:${min}:${s}`
+                }
+            },
+            methods:{
+                //获取该任务记录下所有数据
+                getReportDatas(){
+                    var arr = [];
+                    let page = (this.pageNum -1)*30;
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_basic_report WHERE createtime > "+(this.reportInf.startup_time/1000).toFixed(0)+" and createtime <"+(this.reportInf.shutdown_time/1000).toFixed(0)+" limit "+page+","+30
+                    });
+                    if(ret.data.length==0){
+                        api.toast({
+                            msg: '暂无更多数据了',
+                            duration: 2000,
+                            location: 'bottom'
+                        })
+                        this.isHasMore = false
+                    }else{
+                        // console.log('任务数据'+JSON.stringify(ret.data))
+                        // var arr1 = [];
+                        // this.reportTimeDatas.forEach(e=>{
+                        //     let arr2 = [];
+                        //     ret.data.forEach(e1=>{
+                        //         if(((Number(e1.createtime)*1000) >= Number(e.startup_time)) && ((Number(e1.createtime)*1000) <= Number(e.shutdown_time))){
+                        //             arr2.push(e1)
+                        //         }
+                        //     })
+                        //     // console.log('新数组2'+JSON.stringify(arr2))
+                        //     if(arr2.length>=1){
+                        //         arr1.push(arr2)
+                        //     }
+                        // })
+                        // console.log('新数组1'+JSON.stringify(arr1))
+                        var arr4 = [];
+                        // ret.data.forEach(e2=>{
+                            var arr3 = [];
+                            for(var i=0;i<ret.data.length;i+=3){
+                                arr3.push(ret.data.slice(i,i+3));
+                            }
+                            // console.log('新数组3'+JSON.stringify(arr3))
+                            arr4.push(arr3)
+                        // })
+                        // console.log('新数组4'+JSON.stringify(arr4))
+                        var arr5 = [];
+                        arr4.forEach(e3=>{
+                            e3.forEach(e4=>{
+                                let obj2 = {};
+                                let totalValue = 0;
+                                let max_value = 0;
+                                let min_value = 0;
+                                e4.forEach(e5=>{
+                                    totalValue+=Number(e5.report_value)
+                                    max_value = max_value>=e5.report_value?max_value:e5.report_value
+                                    min_value = min_value<=e5.report_value?min_value:e5.report_value
+                                    obj2 = e5
+                                })
+                                obj2.max_value = max_value;
+                                obj2.min_value = min_value;
+                                obj2.averageValue = (totalValue/e4.length).toFixed(2)
+                                arr5.push(obj2)
+                            })
+                        })
+                        // console.log('新数组5'+JSON.stringify(arr5))
+                        // return 
+                        this.reportDatas = this.pageNum==1?arr5:this.reportDatas.concat(arr5)
+                        // let num = 0;
+                        // setInterval(()=>{
+                        //     num+=5;
+                        //     this.blankLength(num)
+                        // },1000)
+                        
+                    }
+                    // console.log('该任务下所有数据'+JSON.stringify(ret.data))
+                },
+                formalTime(value){
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${h}:${min}:${s}`
+                },
+                formalTimes(value){
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d} ${h}:${min}:${s}`
+                },
+                blankLength(val){
+                    let vals = Number(val).toFixed(1)
+                    let str = ' ';
+                    if(vals.length>=6){
+                        str = ' '
+                    }else if(vals.length==1){
+                        str = '     '
+                    }else if(vals.length==2){
+                        str = '    '
+                    }else if(vals.length==3){
+                        str = '   '
+                    }else if(vals.length==4){
+                        str = '  '
+                    }else if(vals.length==5){
+                        str = ' '
+                    }
+                    return str
+                },
+                //连接蓝牙打印设备
+                contentBluetooth(){
+                    BluetoothPrinter.scan({}, (ret1, err1) => {
+                        console.log('初始化蓝牙' + JSON.stringify(ret1) + JSON.stringify(err1))
+                        if (ret1.status) {
+                            BluetoothPrinter.listBT({}, (ret2, err2) => {
+                                // console.log('搜索蓝牙列表' + JSON.stringify(ret2) + JSON.stringify(err2))
+                                let isHasCC2 = false;
+                                let BTAddress = '';
+                                let BTName = '';
+                                api.showProgress({
+                                    title: '搜索蓝牙中',
+                                    text: '请稍后...',
+                                    modal: true
+                                })
+                                if (JSON.stringify(ret2) == '{}') {
+                                    api.toast({
+                                        msg: '暂时没有搜索到你想要连接的设备，请前往蓝牙设置连接匹配。'
+                                    })
+                                    api.hideProgress()
+                                } else {
+                                    if (ret2.msg == 'No Bluetooth Device Found') {
+                                        api.toast({
+                                            msg: '暂时没有搜索到你想要连接的设备，请前往蓝牙设置连接匹配。'
+                                        })
+                                        api.hideProgress()
+                                    } else {
+                                        (ret2.length > 0) && ret2.forEach(e => {
+                                            if (e.name && (e.name.indexOf("CC2") != -1)) {
+                                                isHasCC2 = true
+                                                BTAddress = e.address
+                                                BTName = e.name
+                                            }
+                                        })
+                                        if (isHasCC2) {
+                                            BluetoothPrinter.connect({
+                                                name: BTName
+                                            }, (ret3, err3) => {
+                                                // console.log('连接蓝牙设备' + JSON.stringify(ret3) + JSON.stringify(err3))
+                                                this.isContentBluetooth = true
+                                                this.startPrintExcel()
+                                            });
+                                        }
+                                    }
+
+                                }
+                            })
+                        }
+                    })
+                },
+                //打印
+                printExcel(){
+                    if(!this.isContentBluetooth){
+                        this.contentBluetooth()
+                    }else{
+                        this.startPrintExcel()
+                    }
+                },
+                //开始打印数据
+                startPrintExcel(){
+                    let tableInf = '';
+                    this.reportDatas.forEach(e=>{
+                        tableInf += String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                        String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                        this.formalTime(Number(e.createtime)*1000)+' '+
+                        Number(e.max_value).toFixed(1)+this.blankLength(e.max_value)+
+                        Number(e.min_value).toFixed(1)+this.blankLength(e.averageValue)+
+                        Number(e.averageValue).toFixed(1)+this.blankLength(e.averageValue)+
+                        (e.standard_limit==''?'无法判断':Number(e.averageValue)>=Number(e.standard_limit)?'超标':'合格')+ "\n"
+                    })
+                    BluetoothPrinter.printPOSCommand({
+                        msg:
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(17) + //字体放大
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(1) + //居中
+                            "报告单\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                            "任务名称:" +(this.reportInf.rask_name==''?'暂无关联任务':this.reportInf.rask_name)+ "\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                            "执行单位:" +(this.reportInf.rask_department==''?'天瑞仪器':this.reportInf.rask_department)+ "\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                            "标准编号:" +(this.relativeStandardItem.standard_code==''?'暂无标准编号':this.relativeStandardItem.standard_code)+ "\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                            "标准限值:" +(this.reportInf.standard_limit==''?'暂无关联标准':this.reportInf.standard_limit)+ "\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                            "开始日期:" +this.formalTimes(this.reportInf.startup_time)+ "\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                            "结束日期:" +this.formalTimes(this.reportInf.shutdown_time)+ "\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                            "监测地点:" +this.reportDatas[0].address+ "\n" + "\n" +
+                            String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) + 
+                            String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) + 
+                            "时间   最大值 最小值 平均值 结果"+ "\n" +
+                            "--------------------------------"+ "\n" +
+                            tableInf+
+                            "--------------------------------"+ "\n"+ "\n"
+                    },  (ret4, err4)=> {
+                        console.log('提交打印'+JSON.stringify(ret4)+JSON.stringify(err4))
+                        api.hideProgress()
+                        if(ret4.msg=='no connectBT'){
+                            api.toast({
+                                msg:'设备蓝牙连接异常，请重试'
+                            })
+                        }else if(ret4.status){
+
+                        }
+                    });
+                },
+                //导出
+                exportExcel() {
+                    api.confirm({
+                        title: '提示',
+                        msg: '确定要导出报告数据?',
+                        buttons: ['确定', '取消']
+                    }, (ret, err)=>{
+                        if(ret.buttonIndex==1){
+                            api.showProgress({
+                                text: '努力导出数据中...',
+                                modal: true
+                            })
+                            this.createTableExcelElement(this.reportDatas,'报告数据')
+                        }
+                    });
+                },
+                createTableExcelElement(data, filename) {
+                    // 填充数据
+                    let excelFile = `
+                    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${filename}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>
+                    <style>.table{border: 2px solid #000;}thead th{height:40px;font-size: 24px;}th,td{text-align: center;height: 30px;font-size:16px;}td{padding:10px}td img{margin:0 auto;}</style><![endif]--></head>
+                <body>
+                    <table class="table" id="print-content" border='1' cellpadding="0" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th colspan="${8}">${'报告数据单'}</th>
+                            </tr>
+                        </thead>`
+                        // 生成Element
+                            excelFile+=`<tr height="30" style="text-align: center;font-size:12px">
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 100px;height: 30px;">序号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">仪器编号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">时间</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">最大值</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">最小值</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">平均值</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">结果</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 500px;height: 30px;">地址</td>
+                                </tr>
+                                `;
+                            data.forEach((val, index)=>{
+                                excelFile += `
+                                <tr height="24" style="text-align: center;font-size:12px">
+                                    <td style="width: 100px;height: 24px;">${index+1}</td>
+                                    <td style="width: 200px;height: 24px;">${val.instrument_code}</td>
+                                    <td style="width: 200px;height: 24px;">${this.tableTimes(val.createtime*1000)}</td>
+                                    <td style="width: 125px;height: 24px;">${val.max_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.min_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.averageValue}</td>
+                                    <td style="width: 125px;height: 24px;">${val.standard_limit==''?'无法判断':Number(val.averageValue)>=Number(val.standard_limit)?'超标':'合格'}</td>
+                                    <td style="width: 500px;height: 24px;overflow-x:scroll;">${val.address}</td>
+                                </tr>`
+                            });
+                    excelFile += `   
+                            </table>
+                        </body>
+                    </html>`
+                    this.exportTable(excelFile,filename)
+                },
+                //时间格式化
+                tableTimes(value) {
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d} ${h}:${min}:${s}`
+                },
+                //导出表
+                exportTable(excelEle,filename){
+                    var time = formatDate(parseInt(new Date().getTime() / 1000))
+                    fs.createFile({
+                        path: 'fs://record' +filename+time + '.xlsx'
+                    }, (ret, err)=>{
+                        if (ret.status) {
+                            fs.open({
+                                path: 'fs://record' +filename+ time + '.xlsx',
+                                flags: 'read_write'
+                            }, (ret1, err1)=>{
+                                if (ret1.status) {
+                                    var fd = ret1.fd;
+                                    api.hideProgress()
+                                    fs.write({
+                                        fd: fd,
+                                        data: excelEle,
+                                        offset: 0,
+                                        overwrite: true
+                                    }, (ret2, err2)=>{
+                                        if (ret2.status) {
+                                            alert('表格导出成功，请前往文件管理/UZMap/A6101279501112查看！')
+                                        } else {
+                                            console.log(JSON.stringify(err2));
+                                        }
+                                    });
+                                } else {
+                                    console.log(JSON.stringify(err1));
+                                }
+                            });
+                        } else {
+                            console.log(JSON.stringify(err));
+                        }
+                    });
+                },
+            }
+        })
+      };
+  </script>
+</html>

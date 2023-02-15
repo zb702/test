@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>LDAR云</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common3.css" />
+    <style>
+        body,
+        html {
+            background: rgba(0, 0, 0, 0.3);
+            height: 100%;
+        }
+
+        .con {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            right: 0.75rem;
+            transform: translateY(-50%);
+            background: #fff;
+            border-radius: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 1.88rem;
+            line-height: 1.88rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="" id="app" v-cloak>
+        <div class="con aui-padded-15 aui-padded-t-10 aui-padded-b-0 radius10 white-bg" @click.stop>
+            <div v-if="blueon">
+                <div class="text-black aui-font-size-18 aui-padded-b-10 aui-padded-t-10 text-center font-weight">蓝牙已开启
+                </div>
+                <div class="aui-padded-t-10">
+                    <div class="theme-color">已连接设备</div>
+                </div>
+                <div style="max-height:50vh;overflow-y: scroll;" v-if="list.length && list[0].client">
+                    <div class="borderB aui-padded-t-10 aui-padded-b-10" v-for="item in list">
+                        <div>{{item.client.name}}</div>
+                        <div>{{item.client.address}}</div>
+                    </div>
+                </div>
+                <div class="borderB aui-padded-t-15 aui-padded-b-15" v-else>
+                    暂无
+                </div>
+                <footer class="aui-padded-b-15 aui-margin-t-15 flex justify-between" >
+                    <div class="aui-btn-n aui-gray-btn aui-margin-r-15" @click="close">取消</div>
+                    <div class="aui-btn-n aui-theme-btn" @click="closeBlue">关闭蓝牙</div>
+                </footer>
+            </div>
+            <div v-else>
+                <div class="text-black aui-font-size-18 aui-padded-b-10 aui-padded-t-10 text-center font-weight">蓝牙已关闭
+                </div>
+                <div class="aui-padded-t-10">
+                    <div class="aui-text-center">立即开启蓝牙</div>
+                </div>
+                <div class="borderB aui-padded-t-15 aui-padded-b-15" v-else>
+                    暂无
+                </div>
+                <footer class="aui-padded-b-15 aui-margin-t-15 flex justify-between" >
+                    <div class="aui-btn-n aui-gray-btn aui-margin-r-15" @click="close">取消</div>
+                    <div class="aui-btn-n aui-theme-btn" @click="openBlue">确定</div>
+                </footer>
+            </div>
+
+            <!-- <footer class="flex-between aui-padded-b-15 aui-padded-t-15 aui-margin-t-10" v-if="show">
+                <div class="btn aui-btn-n aui-theme-btn" @click="search()">搜索</div>
+            </footer>
+            <div v-else>
+                <div class="aui-padded-t-15 aui-padded-b-5">
+                    <div class="text-theme4">其他可见设备</div>
+                </div>
+                <div style="max-height:30vh;overflow-y: scroll;">
+                    <div class="borderB aui-padded-t-10 aui-padded-b-10" v-for="item in list2"
+                        @click="choose(item.address,item.name)">
+                        <div>{{item.name}}</div>
+                        <div>{{item.address}}</div>
+                    </div>
+                </div>
+            </div> -->
+
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/zepto.min.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript">
+    var vm, token, tenant_id, db, ble
+    apiready = function () {
+        // cxgBluetoothBase = api.require('cxgBluetoothBase')
+        initVue()
+        // scanBle()
+        // vm.init()
+        $('body').click(function () {
+            vm.close()
+        })
+        api.addEventListener({
+            name:'blueon'
+        }, function(ret){
+            vm.blueon = ret.value.blueon
+        })
+        api.addEventListener({
+            name:'list'
+        }, function(ret){
+            vm.list = ret.value.list
+        })
+    };
+    function initVue() {
+        vm = new Vue({
+            el: '#app',
+            data: {
+                show: true,
+                blueon: api.pageParam.blueon,
+                list: api.pageParam.list,//历史连接
+                list2: [],//其他可见
+            },
+            methods: {
+                close() {
+                    api.sendEvent({
+                        name:'closeframe'
+                    })
+                    api.closeFrame({ name: 'connect_ble' })
+                },
+                closeBlue(){
+                    api.sendEvent({
+                        name:'closeBlue'
+                    })
+                    this.close()
+                },
+                openBlue(){
+                    api.sendEvent({
+                        name:'openBlue'
+                    })
+                    this.close()
+                },
+                choose(address, name) {
+                    api.sendEvent({
+                        name: 'chooseBle',
+                        extra: {
+                            name: name,
+                            address: address
+                        }
+                    })
+                    // stopScan()
+                    api.sendEvent({
+                        name: 'closeframe'
+                    })
+                    api.closeFrame({ name: 'connect_ble' })
+                },
+                search() {
+                    api.require("cxgBluetoothBase").scan({}, function (ret, err) {
+                        if (!err) {
+                            if (ret.data == "ACTION_DISCOVERY_FINISHED") {
+                                cxgBluetoothBase.stopScan();
+                            } else {
+                                // console.log(JSON.stringify(ret.data));
+                                if (ret.data.name) {
+                                    var arr = vm.list2
+                                    var address = ret.data.address
+                                    var res = arr.find(function (value) {
+                                        if (value.address == address) {
+                                            //则包含该元素 
+                                            return value.address
+                                        }
+                                    })
+                                    // 没找到就添加
+                                    if (!res) {
+                                        vm.list2.push(ret.data)
+
+                                    }
+                                }
+
+                            }
+                        } else {
+                            alert("code: " + err.code + " msg: " + err.msg);
+                        }
+                    });
+                    this.show = false
+                }
+            }
+        })
+    }
+    function scanBle() {
+        // 获取已配对蓝牙
+        api.require("cxgBluetoothBase").bondedDevices({}, function (ret, err) {
+            if (!err) {
+                // alert(JSON.stringify(ret.data));
+                vm.list = ret.data
+            } else {
+                alert("code: " + err.code + " msg: " + err.msg);
+            }
+        });
+    }
+</script>
+
+</html>

@@ -1,0 +1,1605 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>仪器校准</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common2.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/project.css" />
+    <style>
+        html,
+        body {
+            /* width: 100%;
+            height: 100%; */
+            background-color: #F5F6FA;
+        }
+
+        .floatPopup {
+            position: fixed;
+            z-index: 99;
+            right: 6vw;
+            bottom: 8vw;
+            width: 32vw;
+            height: 12vw;
+            padding: 0 6vw;
+            background: #6C707B;
+            box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+            border-radius: 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .floatBtn {
+            text-align: center;
+        }
+
+        .floatBtn img {
+            width: 5vw;
+            height: 5vw;
+        }
+
+        .floatBtn p {
+            font-size: 2vw;
+            font-family: PingFang SC;
+            font-weight: 500;
+            color: #FFFFFF;
+        }
+
+        .floatLine {
+            width: 1px;
+            height: 5vw;
+            background: #8A8E99;
+        }
+
+        .header {
+            width: 100%;
+            padding: 10px 20px;
+            line-height: 1.5rem;
+        }
+
+        .calibrationArea {
+            width: 100vw;
+            padding: 3vw 4vw;
+            background-color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btnimg {
+            width: 16.5vw;
+            height: 16.5vw;
+            border: 1px #0081FF solid;
+            color: #0081FF;
+            border-radius: 2vw;
+        }
+
+        .active {
+            color: white;
+            background-color: #0081FF;
+        }
+
+        .btn-jz {
+            width: 2.5rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.45rem;
+            /* background-color: #0081FF; */
+            border: 1px #0081FF solid;
+            border-radius: 5px;
+            color: #0081FF;
+            margin-top: -0.2rem;
+        }
+
+        .text-height-xxs {
+            line-height: 0.9rem;
+        }
+
+        input[type="text"] {
+            font-size: 0.5rem;
+            margin-top: -0.06rem;
+            line-height: 0.9rem;
+            height: auto;
+            text-align: center;
+        }
+        input[type="number"] {
+            font-size: 0.5rem;
+            margin-top: -0.06rem;
+            line-height: 0.9rem;
+            height: auto;
+            text-align: center;
+        }
+
+        #types {
+            font-size: 0.5rem;
+            margin-top: -0.06rem;
+            line-height: 0.9rem;
+            height: auto;
+            margin-left: 30%
+        }
+
+        .menu {
+            /* height: 1.5rem; */
+            font-size: 0.6rem;
+            color: #333;
+            text-align: center;
+            /* line-height: 1.5rem; */
+        }
+
+        .actives {
+            font-weight: bold;
+            border-bottom: 2px #0081FF solid;
+        }
+
+        .calibrationBtnArea {
+            background: #FFFFFF;
+        }
+
+        .calibrationBtnItem {
+            width: 21vw;
+            height: 15vw;
+            box-shadow: 0px 0px 3vw 0px rgba(218, 222, 230, 0.8600);
+            border-radius: 1vw;
+            padding-top: 3vw;
+        }
+
+        .blueLine {
+            width: 5vw;
+            height: 1vw;
+            background: #0081FF;
+            border-radius: 0.5vw;
+        }
+
+        .whiteLine {
+            width: 5vw;
+            height: 1vw;
+            background: #FFFFFF;
+            border-radius: 0.5vw;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="rootWarp" v-cloak>
+        <!-- 头部 -->
+        <div class="header flex text-black">
+            <div class="flex-sub flex">
+                <!-- <div class="flex" @click="selectenterprise()">
+                    <div class="text-sot text-black2 text-bold">{{list_name}}</div>
+                    <img class="com-img-s" src="../image/jt.png" alt="">
+                </div> -->
+                <!-- <div class="flex margin-left">
+                    <div class="text-sot text-black2 text-bold">标准曲线</div>
+                    <img class="com-img-s" src="../image/jt.png" alt="">
+                </div> -->
+            </div>
+            <div class="flex">
+                <p class="text-sot">当前浓度:<span class="text-blue">{{ndValue}}</span></p>
+                <p class="margin-left-sm text-sot">当前信号值：<span class="text-blue">{{PicoAmpsPID}}</span></p>
+            </div>
+        </div>
+        <div class="calibrationBtnArea pad-0-4 flex-sb" style="height: 27vw;">
+            <div class="calibrationBtnItem text-c" @click="add">
+                <img class="w-h-5 mar-c" src="../../image/icon/addcalibrationIcon.png" alt="">
+                <p class="text-3 col-7a7 mar-t-1">新增</p>
+            </div>
+            <div class="calibrationBtnItem text-c" :style="{background:curFrameIndex==0?'#0081FF':'#FFFFFF'}"
+                @click="setFrameGroupIndex(0)">
+                <img class="w-h-5 mar-c"
+                    :src="curFrameIndex==0?'../../image/icon/normalcalibrationactiveIcon.png':'../../image/icon/normalcalibrationIcon.png'"
+                    alt="">
+                <p class="text-3 mar-t-1" :class="curFrameIndex==0?'col-whi':'col-7a7'">日常校准</p>
+            </div>
+            <div class="calibrationBtnItem text-c" :style="{background:curFrameIndex==1?'#0081FF':'#FFFFFF'}"
+                @click="setFrameGroupIndex(1)">
+                <img class="w-h-5 mar-c"
+                    :src="curFrameIndex==1?'../../image/icon/nextcalibrationactiveIcon.png':'../../image/icon/nextcalibrationIcon.png'"
+                    alt="">
+                <p class="text-3 mar-t-1" :class="curFrameIndex==1?'col-whi':'col-7a7'">回测</p>
+            </div>
+            <div class="calibrationBtnItem text-c" :style="{background:curFrameIndex==3?'#0081FF':'#FFFFFF'}"
+                @click="setFrameGroupIndex(3)">
+                <img class="w-h-5 mar-c"
+                    :src="curFrameIndex==3?'../../image/icon/reportcalibrationactiveIcon.png':'../../image/icon/reportcalibrationIcon.png'"
+                    alt="">
+                <p class="text-3 mar-t-1" :class="curFrameIndex==3?'col-whi':'col-7a7'">记录</p>
+            </div>
+        </div>
+        <!-- <div class="calibrationArea">
+            <div class="flex btnimg justify-center align-center text-sot" @click="add">
+                新增
+            </div>
+            <div class="flex btnimg justify-center align-center text-sot" :class="{'active':curFrameIndex==0}"
+                @click="setFrameGroupIndex(0)">日常校准
+            </div>
+            <div class="flex btnimg justify-center align-center text-sot" :class="{'active':curFrameIndex==1}"
+                @click="setFrameGroupIndex(1)">回测校准
+            </div>
+            <div class="flex btnimg justify-center align-center text-sot" :class="{'active':curFrameIndex==2}"
+                    @click="setFrameGroupIndex(2)">漂移校准
+                </div>
+            <div class="flex btnimg justify-center align-center text-sot" :class="{'active':curFrameIndex==3}"
+                @click="setFrameGroupIndex(3)">校准记录
+            </div>
+            <div class="flex justify-center" style="margin-right: 15px;">
+                    <p style="line-height: 1.5rem; color: #8A939E; font-size: 0.5rem;">PID校准</p>
+                    <input type="checkbox" class="aui-switch aui-pull-right margin-left" v-model="checks"
+                        @click="toggle()" disabled v-if="start">
+                    <input type="checkbox" class="aui-switch aui-pull-right margin-left" v-model="checks"
+                        @click="toggle()" v-else>
+                </div>
+            <div class="flex btnimg justify-center margin-left-sm" v-if="curFrameIndex == 1">
+                    <div class="com-img-xs" style="margin-top: 0.25rem;">
+                        <img class="resoponse" src="../image/dc.png" alt="">
+                    </div>
+                    <div class="flex align-center text-sot" style="line-height: 1.5rem;">导出</div>
+                </div>
+                <div class="flex btnimg justify-center margin-left-sm" v-if="curFrameIndex == 1">
+                    <div class="com-img-xs" style="margin-top: 0.25rem;">
+                        <img class="resoponse" src="../image/dy.png" alt="">
+                    </div>
+                    <div class="flex align-center text-sot" style="line-height: 1.5rem;">打印</div>
+                </div>
+        </div> -->
+        <!-- 表格 -->
+        <div class="">
+            <!-- 日常校准 -->
+            <div class="bg-white" v-if="curFrameIndex == 0">
+                <div class="flex bg-gray ">
+                    <!-- <div class="padding-tb-sm text-center flex-sub">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">序号</div>
+                    </div> -->
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">类型</div>
+                    </div> -->
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">标气浓度</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">信号值</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">开始校准</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">操作</div>
+                    </div>
+                </div>
+                <div class="flex bg-white" style="border-bottom: 1px solid #f0f0f0;" v-for="(item,index) in jzList">
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{index+1}}</div>
+                    </div> -->
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.FID_type}}</div>
+                        <input type="" placeholder="请选择">
+                        <select v-model="ProductActive" name="types" id="types" @change="changeProduct($event)">
+                            <option v-for="(item,index) in typeList" :key="index" :value="item.id">{{item.type}}</option>
+                        </select>
+                    </div> -->
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <input type="number" value="0" v-if="item.id" readonly placeholder="请输入"
+                            v-model="item.standard_value">
+                        <input type="number" value="0" v-else placeholder="请输入" v-model="item.standard_value">
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.signal_value | floatFormat}}</div>
+                    </div>
+                    <div class="flex-sub flex align-center justify-center" @click="jzStart(index)">
+                        <div class="btn-jz" v-if="start && idx == index && time > 0">{{time}}</div>
+                        <div class="btn-jz" v-else-if="idx != index">校准</div>
+                    </div>
+                    <div class="flex-sub flex align-center justify-center">
+                        <div class="btn-jz" @click="jzDel(index,item.id)" v-if="index != 0"
+                            style="background-color: #F5F6FA; color: #0081FF; border: 1px #F5F6FA solid;">删除</div>
+                        <div class="btn-jz" v-else
+                            style="background-color: #F5F6FA; color: #8A939E; border: 1px #F5F6FA solid;">删除</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 回测校准 -->
+            <div class="bg-white" v-if="curFrameIndex == 1">
+                <div class="flex bg-gray">
+                    <!-- <div class="flex padding-tb-sm padding-left-sm flex-sub">
+                        <input class="aui-checkbox" type="checkbox">
+                        <div class="text-xxs margin-left text-bold text-margin text-height-xxs">序号</div>
+                    </div> -->
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">类型</div>
+                    </div> -->
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">标气浓度</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">平均回测值</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">允许误差</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">回测误差</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">开始回测</div>
+                    </div>
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">校准结果</div>
+                    </div> -->
+                </div>
+                <div class="flex bg-white" style="border-bottom: 1px solid #f0f0f0;" v-for="(item,index) in hcList"
+                    v-show="item.standard_value != 0">
+                    <!-- <div class="flex padding-tb-sm padding-left-sm flex-sub">
+                        <input class="aui-checkbox" type="checkbox">
+                        <div class="text-xxs text-xs margin-left text-margin text-height-xxs"
+                            style="margin-left: 0.45rem;">{{index + 1}}</div>
+                    </div> -->
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.FID_type}}</div>
+                        <input type="" placeholder="请选择">
+                        <select name="types" id="types">
+                            <option value="0">FID</option>
+                            <option value="1">PID</option>
+                        </select>
+                    </div> -->
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <!-- <input type="text" value="0" placeholder="请输入"> -->
+                        <div class="text-xxs text-margin text-height-xxs">{{item.standard_value}}</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.average_value}}</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center flex">
+                        <input type="text" v-model="item.deviation_value" placeholder="请输入">
+                        <div class="text-xxs text-height-xxs" style="margin-left: -8vw;">%</div>
+                    </div>
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">50</div>
+                    </div> -->
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.fact_deviation}}%</div>
+                    </div>
+                    <div class="flex-sub flex align-center justify-center" @click="hcStart(index)">
+                        <div class="btn-jz" v-if="start && idxHC == index && timeHc > 0 && item.result == '30'">
+                            {{timeHc}}</div>
+                        <div class="btn-jz" v-else-if="idxHC != index  && item.result == '30'">回测</div>
+                        <div class="btn-jz" v-else-if="item.result == '10'">通过</div>
+                        <div class="btn-jz" v-else-if="item.result == '20'">不通过</div>
+                    </div>
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">通过</div>
+                    </div> -->
+                </div>
+            </div>
+            <!-- 漂移校准 -->
+            <div class="bg-white padding-l border-radius" v-if="curFrameIndex == 2">
+                <div class="flex margin-bottom-sm bg-gray border-radius">
+                    <div class="flex padding-tb-sm padding-left-sm flex-sub">
+                        <!-- <input class="aui-checkbox" type="checkbox"> -->
+                        <div class="text-xxs margin-left text-bold text-margin text-height-xxs">序号</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">类型</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">标气浓度</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">平均回测值</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">允许误差</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">回测误差</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">开始漂移</div>
+                    </div>
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-bold text-margin text-height-xxs">校准结果</div>
+                    </div> -->
+                </div>
+                <div class="flex margin-top-sm bg-white border-radius" style="box-shadow: 10px 10px 10px #F5F6FA;"
+                    v-for="(item,index) in pyList" v-show="item.standard_value != 0">
+                    <div class="flex padding-tb-sm padding-left-sm flex-sub">
+                        <!-- <input class="aui-checkbox" type="checkbox"> -->
+                        <div class="text-xxs text-xs margin-left text-margin text-height-xxs"
+                            style="margin-left: 0.45rem;">{{index + 1}}</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.FID_type}}</div>
+                        <!-- <input type="" placeholder="请选择"> -->
+                        <!-- <select name="types" id="types">
+                            <option value="0">FID</option>
+                            <option value="1">PID</option>
+                        </select> -->
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <!-- <input type="text" value="0" placeholder="请输入"> -->
+                        <div class="text-xxs text-margin text-height-xxs">{{item.standard_value}}</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.average_value}}</div>
+                    </div>
+                    <div class="padding-tb-sm flex-sub text-center flex">
+                        <input type="text" v-model="item.deviation_value" placeholder="请输入">
+                        <div class="text-xxs text-height-xxs" style="margin-left: -40px;">%</div>
+                    </div>
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">50</div>
+                    </div> -->
+                    <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">{{item.fact_deviation}}%</div>
+                    </div>
+                    <div class="flex-sub flex align-center justify-center" @click="pyStart(index)">
+                        <div class="btn-jz" v-if="start && idxHC == index && timeHc > 0 && item.result == '30'">
+                            {{timeHc}}</div>
+                        <div class="btn-jz" v-else-if="idxHC != index  && item.result == '30'">校准</div>
+                        <div class="btn-jz" v-else-if="item.result == '10'">通过</div>
+                        <div class="btn-jz" v-else-if="item.result == '20'">不通过</div>
+                    </div>
+                    <!-- <div class="padding-tb-sm flex-sub text-center">
+                        <div class="text-xxs text-margin text-height-xxs">通过</div>
+                    </div> -->
+                </div>
+            </div>
+            <!-- 记录 -->
+            <div class="bg-white" v-if="curFrameIndex == 3">
+                <!-- <div class="bg-white border-radius flex-sub">
+                    <div class="flex">
+                        <div class="menu flex-sub" :class="{'actives':jlindex==0}" @click="recordQH(0)">校准记录</div>
+                        <div class="menu flex-sub" :class="{'actives':jlindex==1}" @click="recordQH(1)">回测记录</div>
+                        <div class="menu flex-sub" :class="{'actives':jlindex==2}" @click="recordQH(2)">漂移记录</div>
+                    </div>
+                </div> -->
+                <div class=" flex-sa" style="height: 12vw;">
+                    <div class="text-c" @click="recordQH(0)">
+                        <p class="text-4 text-bold" :class="jlindex==0?'col-blue':'col-aaa'">校准记录</p>
+                        <p :class="jlindex==0?'blueLine':'whiteLine'" class="mar-c"></p>
+                    </div>
+                    <div class="text-c" @click="recordQH(1)">
+                        <P class="text-4 text-bold" :class="jlindex==1?'col-blue':'col-aaa'">回测记录</P>
+                        <p :class="jlindex==1?'blueLine':'whiteLine'" class="mar-c"></p>
+                    </div>
+                </div>
+                <div style="overflow-x:scroll;width: 100vw;">
+                    <div style="white-space: nowrap;font-size: 0;">
+                        <div class="padding-tb-sm text-center bg-gray" style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">序号</div>
+                        </div>
+                        <!-- <div class="padding-tb-sm flex-sub text-center">
+                            <div class="text-mini text-bold text-margin text-height-xxs">类型</div>
+                        </div> -->
+                        <div class="padding-tb-sm text-center bg-gray" style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">标气浓度</div>
+                        </div>
+                        <div class="padding-tb-sm text-center bg-gray" v-show="jlindex == 0"
+                            style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">信号值</div>
+                        </div>
+                        <div class="padding-tb-sm text-center bg-gray" v-show="jlindex != 0"
+                            style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">允许误差</div>
+                        </div>
+                        <div class="padding-tb-sm text-center bg-gray" v-show="jlindex != 0"
+                            style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">回测值</div>
+                        </div>
+                        <!-- <div class="padding-tb-sm flex-sub text-center">
+                            <div class="text-mini text-bold text-margin text-height-xxs">回测误差</div>
+                        </div> -->
+                        <div class="padding-tb-sm text-center bg-gray" v-show="jlindex != 0"
+                            style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">校准结果</div>
+                        </div>
+                        <div class="padding-tb-sm text-center bg-gray" style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">校准时间</div>
+                        </div>
+                        <!-- <div class="padding-tb-sm flex-sub text-center">
+                            <div class="text-mini text-bold text-margin text-height-xxs">仪器编号</div>
+                        </div> -->
+                        <div class="padding-tb-sm text-center bg-gray" style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">校准人</div>
+                        </div>
+                        <div class="padding-tb-sm text-center bg-gray" style="width: 25vw;display: inline-block;">
+                            <div class="text-mini text-bold text-height-xxs">操作</div>
+                        </div>
+                    </div>
+                    <div style="width: auto;white-space: nowrap;font-size: 0;" v-for="(info,index) in jzjlist">
+                        <div class=" padding-tb-sm text-center"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini text-height-xxs">{{index+1}}</div>
+                        </div>
+                        <!-- <div class="padding-tb-sm flex-sub text-center">
+                            <div class="text-mini text-margin text-height-xxs">{{info.id_type}}</div>
+                        </div> -->
+                        <div class="padding-tb-sm text-center"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini text-height-xxs">{{info.standard_value}}</div>
+                        </div>
+                        <div class="padding-tb-sm text-center" v-show="jlindex == 0"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini text-height-xxs">{{info.signal_value}}</div>
+                        </div>
+                        <div class="padding-tb-sm text-center" v-show="jlindex != 0"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini  text-height-xxs">{{info.deviation_value}}%</div>
+                        </div>
+                        <div class="padding-tb-sm text-center" v-show="jlindex != 0"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini text-height-xxs">{{info.average_value}}</div>
+                        </div>
+                        <!-- <div class="padding-tb-sm flex-sub text-center">
+                            <div class="text-mini text-margin text-height-xxs">2.8%</div>
+                        </div> -->
+                        <div class="padding-tb-sm text-center" v-show="jlindex != 0"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini text-height-xxs">{{info.result == '10'?'通过':'不通过'}}</div>
+                        </div>
+                        <div class="padding-tb-sm text-center"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini text-height-xxs">{{info.create_date}}</div>
+                        </div>
+                        <!-- <div class="padding-tb-sm flex-sub text-center">
+                            <div class="text-mini text-margin text-height-xxs">{{info.instrument_code}}</div>
+                        </div> -->
+                        <div class="padding-tb-sm text-center"
+                            style="width: 25vw;display: inline-block;border-bottom: 1px solid #f0f0f0;">
+                            <div class="text-mini text-height-xxs">{{info.operator}}</div>
+                        </div>
+                        <div class="text-center" style="width: 25vw;display: inline-block;">
+                            <div class="btn-jz" @click="deleteJL(index,info.id)"
+                                style="background-color: #F5F6FA; color: #0081FF; border: 1px #F5F6FA solid;margin:auto;">
+                                删除</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="margin-top-xl padding-bottom-sm">
+                    <div class="flex justify-end">
+                        <button class="btn">上一页</button>
+                        <div class="text-black text-sm padding-lr-sm flex flex-vertical">1/22</div>
+                        <button class="btn">下一页</button>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+        <div class="floatPopup" v-if="curFrameIndex==3">
+            <div class="floatBtn" @click="exportExcel">
+                <img src="../../image/icon/exportIcon.png" alt="">
+                <p>导出</p>
+            </div>
+            <div class="floatLine"></div>
+            <div class="floatBtn" @click="printExcel">
+                <img src="../../image/icon/printIcon.png" alt="">
+                <p>打印</p>
+            </div>
+        </div>
+        <!-- 导出excel校准记录内容，不可删除 -->
+        <div id="divcate" style="display: none;">
+            <table id="print-content1" border="1">
+                <tr>
+                    <th style="background-color:#808080;color:#ffffff">序号</th>
+                    <th style="background-color:#808080;color:#ffffff">标气浓度</th>
+                    <th style="background-color:#808080;color:#ffffff">信号值</th>
+                    <th style="background-color:#808080;color:#ffffff">校准时间</th>
+                    <th style="background-color:#808080;color:#ffffff">校准人</th>
+                </tr>
+                <tr v-for="(item,index) in jzjlist" :key="index">
+                    <td>{{index+1}}</td>
+                    <td>{{item.standard_value}}</td>
+                    <td>{{item.signal_value}}</td>
+                    <td>{{item.create_date}}</td>
+                    <td>{{item.operator}}</td>
+                </tr>
+            </table>
+        </div>
+        <!-- 导出excel回测记录内容，不可删除 -->
+        <div id="divcate" style="display: none;">
+            <table id="print-content2" border="1">
+                <tr>
+                    <th style="background-color:#808080;color:#ffffff">序号</th>
+                    <th style="background-color:#808080;color:#ffffff">标气浓度</th>
+                    <th style="background-color:#808080;color:#ffffff">允许误差</th>
+                    <th style="background-color:#808080;color:#ffffff">回测值</th>
+                    <th style="background-color:#808080;color:#ffffff">校准结果</th>
+                    <th style="background-color:#808080;color:#ffffff">校准时间</th>
+                    <th style="background-color:#808080;color:#ffffff">校准人</th>
+                </tr>
+                <tr v-for="(item,index) in jzjlist" :key="index">
+                    <td>{{index+1}}</td>
+                    <td>{{item.standard_value}}</td>
+                    <td>{{item.deviation_value}}%</td>
+                    <td>{{item.average_value}}</td>
+                    <td>{{item.result == '10'?'通过':'不通过'}}</td>
+                    <td>{{item.create_date}}</td>
+                    <td>{{item.operator}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/serialPort.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript">
+    var fs, db, map, BluetoothPrinter ;
+    apiready = function () {
+        BluetoothPrinter = api.require('djyPrinter');
+        BluetoothPrinter.disconnectBT();
+        fs = api.require('fs');
+        db = api.require('db');
+        map = api.require('bMap');
+        // $app.addEventListener('PicoAmpsPID', function (ret) {
+        //     console.log('信号值444444'+JSON.stringify(ret))
+        //     vm.PicoAmpsPID = ret.value.PicoAmpsPID
+        //     vm.PID = ret.value.PID
+        // })
+        // $app.addEventListener('updata', function (ret) {
+        //     vm.init();
+        //     jzInit();
+        // })
+        // api.addEventListener({
+        //     name:'signalValuesend'
+        // }, (ret)=>{
+        //     // console.log('实时监听信号返回值'+JSON.stringify(ret))
+        //     vm.PicoAmpsPID = ret.value.signalValue
+        // })
+        // api.addEventListener({
+        //     name:'ndValuesend'
+        // }, (ret)=>{
+        //     // console.log('实时监听浓度返回值'+JSON.stringify(ret)+(typeof ret.value.ndValue))
+        //     vm.ndValue = Number(ret.value.ndValue).toFixed(1)
+        //     // vm.PID = vm.ndValue
+        // })
+        $app.addEventListener('signalValuesend', (ret)=>{
+            // console.log('实时监听信号返回值'+JSON.stringify(ret))
+            vm.PicoAmpsPID = ret.value.signalValue
+        })
+        $app.addEventListener('ndValuesend', (ret)=>{
+            // console.log('实时监听浓度返回值'+JSON.stringify(ret)+(typeof ret.value.ndValue))
+            vm.ndValue = Number(ret.value.ndValue).toFixed(1)
+            // vm.PID = vm.ndValue
+        })
+
+        var vm = new Vue({
+            el: '#rootWarp',
+            data: {
+                curFrameIndex: 0,//按钮类型  0 校准  1  回测  3  记录
+                jzInterval:null,//校准定时器
+                hcInterval:null,//回测定时器
+                pyInterval:null,//漂移定时器
+                // list: [],
+                // list_name: '测试企业',//企业名称
+                // index: '',//选择企业索引
+                jzList: [],// 校准列表
+                hcList: [],// 回测列表
+                hcSignalData: [],// 回测校准数据临时存储
+                hcSignalJsonData:[],//回测数据信号值临时存储
+                pyList: [],// 漂移列表
+                pySignalData: [],// 回测校准数据临时存储
+                jzjlist: [],//校准与回测记录
+                jlindex: 0,//校准记录/回测记录/漂移记录
+                // checks: false,//PID隐藏按钮
+                time: 5,
+                timeHc: 9,
+                // timePy: 9,
+                // FID: '0.0',//当前浓度
+                // PicoAmps: '0.0',//当前信号值，微电流值
+                PID: 0,//当前浓度
+                PicoAmpsPID: '0.0',//当前信号值，微电流值
+                start: false,
+                idx: -1,
+                idxHC: -1,
+                idxPY: -1,
+                // device_name: '本机',
+                // curve_name: '标准曲线',
+                FID_type: 'PID',
+                // typeList: [{
+                //     id: 0,
+                //     type: 'FID'
+                // }, {
+                //     id: 1,
+                //     type: 'PID'
+                // }],
+                // ProductActive: '0',
+                ndValue: '0.0',
+                userinfo:{},//用户信息
+                yqinfData: {},//仪器信息
+                curCity:'',//当前地址
+                isContentBluetooth:false,//是否连接了蓝牙
+            },
+            filters: {
+                floatFormat(str) {
+                    return Number(str).toFixed(1)
+                }
+            },
+            created(){
+                this.userinfo = getPrefs('userInfo')
+                //校准数据初始化
+                this.jzInit();
+                this.getCurLocation()
+            },
+            mounted() {
+                //读取仪器信息
+                let yqinf = api.readFile({
+                    sync: true,
+                    path: 'fs://instrumentInformation.txt'
+                });
+                if (yqinf) {
+                    this.yqinfData = JSON.parse(yqinf)
+                } else {
+                    api.alert({
+                        msg: '请前往仪器设置页面进行设置'
+                    });
+                }
+                // console.log('本仪器信息'+JSON.stringify(this.yqinfData))
+            },
+            methods: {
+                //获取当前定位
+                getCurLocation(){
+                    map.getLocation({
+                        accuracy: '100m',
+                        autoStop: true,
+                        filter: 1
+                        }, (ret1, err1) => {
+                        // console.log(22222 + JSON.stringify(ret1) + JSON.stringify(err1))
+                        if (ret1.status) {
+                            // this.curLon = ret1.lon;
+                            // this.curLat = ret1.lat;
+                            map.getNameFromCoords({
+                            lon: ret1.lon,
+                            lat: ret1.lat
+                            }, (ret4, err4) => {
+                            if (ret4.status) {
+                                // console.log(JSON.stringify(ret4));
+                                this.curCity = ret4.address + ret4.sematicDescription
+                            }
+                            // console.log(2111111+ JSON.stringify(ret4) + JSON.stringify(err4))
+                            })
+                        } else {
+                            console.log('定位失败,离线定位功能需要手动打开GPS，并在无遮挡物的室外')
+                        }
+                    })
+                },
+                //校准数据初始化
+                jzInit() {
+                    // let historyJZ = select2('tr_voc_calibrationInfos', {
+                    //     instrument_code: this.yqinfData.code,
+                    //     FID_type: this.FID_type,
+                    //     curve_name: '标准曲线',
+                    // }, 1, 0, ' standard_value asc')
+                    // let historyJZ = select2('tr_voc_calibrationInfos', {},1,0,' standard_value asc')
+                        var ret = db.selectSqlSync({
+                            name: 'tianrui_offline',
+                            sql: 'SELECT * FROM tr_voc_calibrationInfos order by standard_value asc'
+                        });
+                        ret.data.sort(compare('standard_value'));
+                        var historyJZ = ret.data
+                    // console.log(JSON.stringify(historyJZ))
+                    if (historyJZ.length == 0) {//无数据时新增一条
+                        this.jzList = [{
+                            instrument_code: this.yqinfData.code,//仪器编号
+                            operator: this.userinfo.nickname,
+                            device_name: '天瑞仪器voc-2000',//设备名称
+                            curve_name: '标准曲线',//曲线名字
+                            FID_type: this.FID_type,
+                            standard_value: 0,
+                            signal_value: 0,
+                            k_value: '',
+                            b_value: '',
+                            is_upload: 0,
+                            createtime:parseInt(new Date().getTime() / 1000),
+                        }]
+                        // console.log(JSON.stringify(this.jzList))
+                    } else {
+                        this.jzList = historyJZ
+                    }
+                },
+
+                // 隐藏/打开PID数据
+                // toggle: function (e) {
+                //     console.log(1111+this.checks)
+                //     if (this.start) {
+                //         $app.toast('正在检测中...!');
+                //         return;
+                //     }
+                //     if (this.checks) {
+                //         this.FID_type = "FID"
+                //     } else {
+                //         this.FID_type = "PID"
+                //     }
+                //     if (this.curFrameIndex == 0) {
+                //         jzInit()
+                //     } else {
+                //         this.setFrameGroupIndex(this.curFrameIndex)
+                //     }
+                // },
+
+                //校准页面大按钮切换 0=校准  1=回测  3=记录
+                setFrameGroupIndex(index) {
+                    if (index == 1) {//回测
+                        if (this.jzList.length < 2) {
+                            $app.toast('请先进行校准操作')
+                            return
+                        }
+                        this.hcList = [];
+                        // var hcList = select2('tr_voc_calibrationInfos', {
+                        //     device_name: this.yqinfData.code,
+                        //     curve_name: '标准曲线',
+                        //     FID_type: this.FID_type,
+                        // }, 1, 0, ' standard_value asc')
+                        // var hcData = select2('tr_voc_calibrationInfos', {},1,0,' standard_value asc')
+                        
+                        var ret = db.selectSqlSync({
+                            name: 'tianrui_offline',
+                            sql: 'SELECT * FROM tr_voc_calibrationInfos order by standard_value asc'
+                        });
+                        ret.data.sort(compare('standard_value'));
+                        var hcData = ret.data
+                        // console.log('index===111:'+JSON.stringify(hcList))
+                        for (let i = 0; i < hcData.length; i++) {
+                            this.hcList.push({
+                                standard_value: hcData[i].standard_value,
+                                deviation_value: 5,
+                                fact_deviation: 0,
+                                result: '30',
+                                average_value: 0,
+                                FID_type: hcData[i].FID_type,
+                            })
+                        }
+                    } else if (index == 2) {//漂移
+                        if (this.jzList.length < 2) {
+                            $app.toast('请先进行校准操作')
+                            return
+                        }
+                        this.pyList = [];
+                        // var pyList = select2('tr_voc_calibrationInfos', {
+                        //     device_name: this.yqinfData.code,
+                        //     curve_name: '标准曲线',
+                        //     FID_type: this.FID_type,
+                        // }, 1, 0, ' standard_value asc')
+                        // var pyList = select2('tr_voc_calibrationInfos', {},1,0,' standard_value asc')
+                        var ret = db.selectSqlSync({
+                            name: 'tianrui_offline',
+                            sql: 'SELECT * FROM tr_voc_calibrationInfos order by standard_value asc'
+                        });
+                        ret.data.sort(compare('standard_value'));
+                        var pyList = ret.data
+                        // console.log(JSON.stringify(hcList))
+                        for (let i = 0; i < pyList.length; i++) {
+                            this.pyList.push({
+                                standard_value: pyList[i].standard_value,
+                                deviation_value: 5,
+                                fact_deviation: 0,
+                                result: '30',
+                                average_value: 0,
+                                FID_type: pyList[i].FID_type,
+                            })
+                        }
+                    } else if (index == 3) {
+                        this.jzjlInit('10')
+                        this.recordQH(this.jlindex)
+                    }
+                    this.curFrameIndex = index;
+                },
+                // selectenterprise: function () {
+                //     var that = this;
+                //     var list_select = [{
+                //         text: ''
+                //     }];
+                //     for (var i = 0; i < that.list.length; i++) {
+                //         list_select[i].text = that.list[i].enterprise_name
+                //     }
+                //     dialogBoxFn(list_select, function (ret, err) {
+                //         if (ret) {
+                //             if (ret.eventType == 'cell') {
+                //                 that.index = ret.index;
+                //             }
+                //             if (ret.eventType == 'ok') {
+                //                 // that.list_name = list_select[that.index].text;
+                //                 // console.log(that.list_name)
+                //                 var dialogBox = api.require('dialogBox');
+                //                 dialogBox.close();
+                //             }
+                //         } else {
+                //             console.log(JSON.stringify(err));
+                //         }
+                //     })
+                // },
+                // 添加校准
+                add() {
+                    if(this.jzList.some((e,i)=> e.standard_value=='')){
+                        api.toast({
+                            msg:'请逐条完善校准信息'
+                        })
+                    }else{
+                        this.jzList.splice(1,0,{
+                            instrument_code: this.yqinfData.code,//仪器编号
+                            operator: this.userinfo.nickname,
+                            device_name: '天瑞仪器voc-2000',//设备名称
+                            curve_name: '标准曲线',//曲线名字
+                            FID_type: this.FID_type,
+                            standard_value: '',
+                            signal_value: 0,
+                            k_value: '',
+                            b_value: '',
+                            is_upload: 0,
+                            createtime:parseInt(new Date().getTime() / 1000),
+                        });
+                    }
+                    console.log('所有校准列表数据'+JSON.stringify(this.jzList))
+                },
+                // 删除校准信息
+                jzDel(i, id) {
+                    console.log(id)
+                    this.jzList.splice(i, 1)
+                    dbdelete2('tr_voc_calibrationInfos', id)
+                    // 删除数据库后，计算kb更新数据库和当前校准数据
+                    this.updateJZdata()
+                },
+                // 删除校准、回测记录信息
+                deleteJL(i, id) {
+                    this.jzjlist.splice(i, 1);
+                    dbdelete2('tr_voc_instrument_calibration', id);
+                    this.updateJZdata();
+                },
+                // 开始校准  5秒时间内最后一次值为校准值
+                jzStart(i) {
+                    if (!this.start) {
+                        // console.log(JSON.stringify(this.jzList));
+                        if (this.jzList[i].standard_value === '') {
+                            $app.toast('请输入当前校准信息的标气浓度')
+                            return
+                        }
+                        this.idx = i;
+                        this.start = true;
+                        this.time = 5
+                        var begin_time = parseInt(new Date().getTime() / 1000)
+                        clearInterval(this.jzInterval)
+                        this.jzInterval = setInterval(() => {
+                            if (this.time > 0) {
+                                this.time--
+                            }
+                            if (this.time == 0) {
+                                var end_time = parseInt(new Date().getTime() / 1000)
+                                var signal_value = this.PicoAmpsPID
+                                // 更新数据库，增加校准记录
+                                var res = insert2('tr_voc_instrument_calibration', {
+                                    curve_name: '标准曲线',
+                                    id_type: this.FID_type,
+                                    signal_value: signal_value,
+                                    standard_value: this.jzList[i].standard_value,
+                                    tenant_id: this.userinfo.id,
+                                    begin_time: begin_time,
+                                    end_time: end_time,
+                                    create_date: formatDate(begin_time, 'Y-m-d'),
+                                    address: this.curCity,
+                                    type: '10',
+                                    add_userid: this.userinfo.id,
+                                    operator: this.userinfo.nickname,
+                                    instrument_code: this.yqinfData.code,
+                                    is_upload:0,
+                                    createtime:parseInt(new Date().getTime() / 1000),
+                                    result:'30',//2023 1/10 zg 让添加默认值 30
+                                    // model varchar(50),
+                                    // average_value varchar(50),
+                                    // average_value_json varchar(255),
+                                    // deviation_value varchar(50),
+                                    // k_value varchar(50),
+                                    // b_value varchar(50),
+                                    // fact_deviation varchar(10),
+                                    // result varchar(0),
+                                })
+                                // 校准结束     
+                                clearInterval(this.jzInterval)
+                                this.jzList[i].signal_value = signal_value;
+                                // 更新当前本条校准信息
+                                // 去除列表里浓度为空的数据
+                                this.updateJZdata();//更新校准数据
+                                this.start = false
+                                this.idx = -1
+                            }
+                        }, 1000)
+                    }
+                },
+                // 开始回测  9秒时间内 以3s一段时间内信号平均值 总计三个平均值 求取最终平均值作为回测值
+                hcStart(i) {
+                    if (!this.start) {
+                        if (this.hcList[i].deviation_value === '') {
+                            $app.toast('请输入标气' + this.hcList[i].standard_value + '的允许误差')
+                            return
+                        }
+                        this.idxHC = i;
+                        this.start = true;
+                        this.timeHc = 9
+                        clearInterval(this.hcInterval)
+                        // var signal_value = this.FID_type == 'FID' ? this.PicoAmps : this.PicoAmpsPID
+                        // var signal_value = this.FID_type == 'FID' ? this.ndValue : this.ndValue
+                        var signal_value = this.PicoAmpsPID;
+                        console.log('信号值--'+signal_value)
+                        console.log('浓度值--'+this.ndValue)
+                        var firstAverage = 0, secondAverage = 0, thirdAverage = 0;
+                        var fSigAveValue = 0, sSigAveValue = 0, tSigAveValue = 0;
+                        var begin_time = parseInt(new Date().getTime() / 1000)
+                        this.hcInterval = setInterval(() => {
+                            if (this.timeHc > 0) {
+                                this.timeHc--
+                                this.hcSignalData.push(this.ndValue)
+                                this.hcSignalJsonData.push(this.PicoAmpsPID)
+                            }
+                            var sum = 0;
+                            var sigNum = 0;
+                            // 第一个平均值
+                            if (this.timeHc == 6) {
+                                var signalData = this.hcSignalData
+                                for (let i = 0; i < signalData.length; i++) {
+                                    sum += Number(signalData[i]);
+                                }
+                                firstAverage = (sum / signalData.length).toFixed(2)
+                                console.log('第一次平均值' + firstAverage)
+                                this.hcSignalData = []
+                                sum = 0
+
+                                this.hcSignalJsonData.forEach(e=>{
+                                    sigNum += Number(e)
+                                })
+                                fSigAveValue = (sigNum / this.hcSignalJsonData.length).toFixed(2)
+                                console.log('第一次信号平均值'+fSigAveValue)
+                                this.hcSignalJsonData = []
+                                sigNum = 0
+                            }
+                            //第二个平均值
+                            if (this.timeHc == 3) {
+                                var signalData = this.hcSignalData
+                                for (let i = 0; i < signalData.length; i++) {
+                                    sum += Number(signalData[i]);
+                                }
+                                secondAverage = (sum / signalData.length).toFixed(2)
+                                console.log('第二次平均值' + secondAverage)
+                                this.hcSignalData = []
+                                sum = 0
+
+                                this.hcSignalJsonData.forEach(e=>{
+                                    sigNum += Number(e)
+                                })
+                                sSigAveValue = (sigNum / this.hcSignalJsonData.length).toFixed(2)
+                                console.log('第二次信号平均值'+sSigAveValue)
+                                this.hcSignalJsonData = []
+                                sigNum = 0
+                            }
+                            if (this.timeHc == 0) {
+                                // 第三个平均值
+                                var signalData = this.hcSignalData
+                                for (let i = 0; i < signalData.length; i++) {
+                                    sum += Number(signalData[i]);
+                                }
+                                thirdAverage = (sum / signalData.length).toFixed(2)
+                                console.log('第三次平均值' + thirdAverage)
+                                this.hcSignalData = []
+                                sum = 0
+
+                                this.hcSignalJsonData.forEach(e=>{
+                                    sigNum += Number(e)
+                                })
+                                tSigAveValue = (sigNum / this.hcSignalJsonData.length).toFixed(2)
+                                console.log('第三次信号平均值'+fSigAveValue)
+                                this.hcSignalJsonData = []
+                                sigNum = 0
+
+                                // 三个平均值求一个最终平均值
+                                var average_value = ((Number(firstAverage) + Number(secondAverage) + Number(thirdAverage)) / 3).toFixed(2)
+                                var signalAveValue = ((Number(fSigAveValue) + Number(sSigAveValue) + Number(tSigAveValue)) / 3).toFixed(2)
+                                console.log('最终平均值'+average_value+'最终信号平均值'+signalAveValue)
+                                this.hcList[i].average_value = average_value
+                                this.hcList[i].signal_value = signalAveValue
+                                // 回测结束     
+                                clearInterval(this.hcInterval)
+                                // 计算结果是否通过
+                                var cc = (100 * (Math.abs((Number(this.hcList[i].average_value) - Number(this.hcList[i].standard_value)))) / Number(this.hcList[i].standard_value)).toFixed(2)
+                                this.hcList[i].fact_deviation = cc
+                                if (cc > Number(this.hcList[i].deviation_value)) {
+                                    //大于误差值说明不合格
+                                    this.hcList[i].result = '20'
+                                    $app.toast('标气' + this.hcList[i].standard_value + '回测结果不合格，请重新校准')
+                                } else {
+                                    this.hcList[i].result = '10'
+                                }
+                                var end_time = parseInt(new Date().getTime() / 1000)
+                                // 更新云端数据库,增加回测校准
+                                var res = insert2('tr_voc_instrument_calibration', {
+                                    curve_name: '标准曲线',
+                                    id_type: this.FID_type,
+                                    signal_value:signalAveValue,
+                                    standard_value: this.hcList[i].standard_value,
+                                    average_value: average_value,
+                                    average_value_json: firstAverage + ',' + secondAverage + ',' + thirdAverage,
+                                    tenant_id: this.userinfo.id,
+                                    begin_time: begin_time,
+                                    end_time: end_time,
+                                    create_date: formatDate(begin_time, 'Y-m-d'),
+                                    address: this.curCity,
+                                    type: '20',
+                                    add_userid: this.userinfo.id,
+                                    operator: this.userinfo.nickname,
+                                    instrument_code: this.yqinfData.code,
+                                    deviation_value: this.hcList[i].deviation_value,
+                                    fact_deviation: this.hcList[i].fact_deviation,
+                                    k_value: this.jzList[i].k_value,
+                                    b_value: this.jzList[i].b_value,
+                                    result: this.hcList[i].result,
+                                    is_upload:0,
+                                    createtime:parseInt(new Date().getTime() / 1000),
+                                    // model varchar(50),
+                                })
+                                // this.updateJZdata()
+                                this.start = false
+                                this.idxHC = -1
+                            }
+                        }, 1000)
+                    }
+                },
+                // 开始漂移
+                pyStart(i) {
+                    if (!this.start) {
+                        if (this.pyList[i].deviation_value === '') {
+                            $app.toast('请输入标气' + this.pyList[i].standard_value + '的允许误差')
+                            return
+                        }
+                        this.idxHC = i;
+                        this.start = true;
+                        this.timeHc = 9
+                        clearInterval(this.pyInterval)
+                        // var signal_value = this.FID_type == 'FID' ? this.PicoAmps : this.PicoAmpsPID
+                        var signal_value = this.FID_type == 'FID' ? this.ndValue : this.ndValue
+                        console.log(signal_value)
+                        var firstAverage = 0, secondAverage = 0, thirdAverage = 0;
+                        var begin_time = parseInt(new Date().getTime() / 1000)
+                        this.pyInterval = setInterval(() => {
+                            if (this.timeHc > 0) {
+                                this.timeHc--
+                                this.pySignalData.push(signal_value)
+                            }
+                            var sum = 0
+                            // 第一个平均值
+                            if (this.timeHc == 6) {
+                                var signalData = this.pySignalData
+                                for (let i = 0; i < signalData.length; i++) {
+                                    sum += Number(signalData[i]);
+                                }
+                                firstAverage = (sum / signalData.length).toFixed(2)
+                                console.log(firstAverage)
+                                this.pySignalData = []
+                                sum = 0
+                            }
+                            //第二个平均值
+                            if (this.timeHc == 3) {
+                                var signalData = this.pySignalData
+                                for (let i = 0; i < signalData.length; i++) {
+                                    sum += Number(signalData[i]);
+                                }
+
+                                secondAverage = (sum / signalData.length).toFixed(2)
+                                console.log(secondAverage)
+                                this.pySignalData = []
+                                sum = 0
+                            }
+                            if (this.timeHc == 0) {
+                                // 第三个平均值
+                                var signalData = this.pySignalData
+                                for (let i = 0; i < signalData.length; i++) {
+                                    sum += Number(signalData[i]);
+                                }
+                                thirdAverage = (sum / signalData.length).toFixed(2)
+                                console.log(thirdAverage)
+                                this.pySignalData = []
+                                sum = 0
+                                // 三个平均值求一个最终平均值
+                                var average_value = ((Number(firstAverage) + Number(secondAverage) + Number(thirdAverage)) / 3).toFixed(2)
+                                console.log(average_value)
+                                this.pyList[i].average_value = average_value
+
+                                // 回测结束     
+                                clearInterval(this.pyInterval)
+                                // 计算结果是否通过
+                                var cc = (100 * (Math.abs((Number(this.pyList[i].average_value) - Number(this.pyList[i].standard_value)))) / Number(this.pyList[i].standard_value)).toFixed(2)
+                                this.pyList[i].fact_deviation = cc
+                                if (cc > Number(this.pyList[i].deviation_value)) {
+                                    //大于误差值说明不合格
+                                    this.pyList[i].result = '20'
+                                    $app.toast('标气' + this.pyList[i].standard_value + '漂移结果不合格，请重新校准')
+                                } else {
+                                    this.pyList[i].result = '10'
+                                }
+                                var end_time = parseInt(new Date().getTime() / 1000)
+                                // 更新云端数据库,增加漂移校准
+                                var res = insert2('tr_voc_instrument_calibration', {
+                                    curve_name: '标准曲线',
+                                    id_type: this.FID_type,
+                                    standard_value: this.pyList[i].standard_value,
+                                    average_value: average_value,
+                                    average_value_json: firstAverage + ',' + secondAverage + ',' + thirdAverage,
+                                    tenant_id: this.userinfo.id,
+                                    begin_time: begin_time,
+                                    end_time: end_time,
+                                    create_date: formatDate(begin_time, 'Y-m-d'),
+                                    address: this.curCity,
+                                    type: '30',
+                                    add_userid: this.userinfo.id,
+                                    operator: this.userinfo.nickname,
+                                    instrument_code: this.yqinfData.code,
+                                    deviation_value: this.pyList[i].deviation_value,
+                                    fact_deviation: this.pyList[i].fact_deviation,
+                                    k_value: this.jzList[i].k_value,
+                                    b_value: this.jzList[i].b_value,
+                                    result: this.pyList[i].result
+                                })
+                                // this.updateJZdata()
+                                this.start = false
+                                this.idxHC = -1
+                            }
+                        }, 1000)
+                    }
+                },
+                /**
+                 * 更新校准数据
+                 * params object params 要更新的数据对象
+                 */
+                updateJZdata(params) {
+                    // console.log(JSON.stringify(params));
+                    var copyData = JSON.parse(JSON.stringify(this.jzList))
+                    copyData.sort(compare('standard_value'));
+                    console.log('新数据'+JSON.stringify(copyData))
+                    var realData = []
+                    for (let i = 0; i < copyData.length; i++) {
+                        if (copyData[i].standard_value !== '' && copyData[i].signal_value !== '0.00') {
+                            realData.push(copyData[i])
+                        }
+                    }
+                    if (realData.length > 1) {
+                        calculateKB(realData)//计算kb值
+                    }
+                    // 更新到数据库
+                    for (let i = 0; i < realData.length; i++) {
+                        var result = select2('tr_voc_calibrationInfos', {
+                            standard_value: realData[i].standard_value
+                        }, 1, 0, ' standard_value asc')
+                        // console.log(JSON.stringify(result))
+                        if (result.length != 0) {// 数据库已有此浓度数据，做更新
+                            realData[i].updatetime = parseInt(new Date().getTime() / 1000)
+                            realData[i].id = result[0].id
+                            update2('tr_voc_calibrationInfos', realData[i])
+                        } else {// 数据库无此浓度信息，作添加
+                            insert2('tr_voc_calibrationInfos', realData[i])
+                        }
+                        api.sendEvent({
+                            name: 'updateNDinf',
+                        })
+                    }
+                    // this.jzList = select2('tr_voc_calibrationInfos', {},1,0,' standard_value asc')
+                    var ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: 'SELECT * FROM tr_voc_calibrationInfos order by standard_value asc'
+                    });
+                    ret.data.sort(compare('standard_value'));
+                    this.jzList = ret.data
+                    console.log('更新后的校准列表'+JSON.stringify(this.jzList))
+                    $app.sendEvent('sxHistoryJZ')
+                },
+                /**
+                 * 记录类型切换
+                * params int index 下标类型:0=校准记录,1=回测记录,
+                */
+                recordQH(index) {
+                    this.jlindex = index;
+                    if (index == 0) {
+                        this.jzjlInit('10')
+                    } else if (index == 1) {
+                        this.jzjlInit('20')
+                    } else {
+                        this.jzjlInit('30')
+                    }
+                },
+                //校准记录初始化   type:10=校准记录,20=回测记录
+                jzjlInit(type) {
+                    var where = {
+                        type: type,
+                    };
+                    var res = select2('tr_voc_instrument_calibration', where)
+                    this.jzjlist = res;
+                    // console.log('tr_voc_instrument_calibration:-------'+JSON.stringify(res));
+                },
+                //导出
+                exportExcel() {
+                    api.confirm({
+                        title: '提示',
+                        msg: '确定要导出'+(this.jlindex==0?'校准记录':'回测记录')+'?',
+                        buttons: ['确定', '取消']
+                    }, (ret, err)=>{
+                        if(ret.buttonIndex==1){
+                            api.showProgress({
+                                text: '努力导出数据中...',
+                                modal: true
+                            })
+                            this.createTableExcelElement(this.jzjlist,this.jlindex==0?'校准记录':'回测记录')
+                        }
+                    });
+                },
+                createTableExcelElement(data, filename) {
+                    // 填充数据
+                    let excelFile = `
+                    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${filename}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>
+                    <style>.table{border: 2px solid #000;}thead th{height:40px;font-size: 24px;}th,td{text-align: center;height: 30px;font-size:16px;}td{padding:10px}td img{margin:0 auto;}</style><![endif]--></head>
+                <body>
+                    <table class="table" id="print-content" border='1' cellpadding="0" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th colspan="${this.jlindex == 0 ? 6 : 8}">${this.jlindex==0?'校准记录单':'回测记录单'}</th>
+                            </tr>
+                        </thead>`
+                        // 生成Element
+                        if(this.jlindex==0){
+                            excelFile+=`<tr height="30" style="text-align: center;font-size:12px">
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 100px;height: 30px;">序号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">仪器编号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">标气浓度</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">信号值</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">校准时间</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 150px;height: 30px;">校准人</td>
+                                </tr>
+                                `;
+                            data.forEach((val, index)=>{
+                                excelFile += `
+                                <tr height="24" style="text-align: center;font-size:12px">
+                                    <td style="width: 100px;height: 24px;">${index+1}</td>
+                                    <td style="width: 200px;height: 24px;">${val.instrument_code}</td>
+                                    <td style="width: 125px;height: 24px;">${val.standard_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.signal_value}</td>
+                                    <td style="width: 200px;height: 24px;">${val.create_date}</td>
+                                    <td style="width: 150px;height: 24px;overflow-x:scroll;">${val.operator}</td>
+                                </tr>`
+                            });
+                        }else{
+                            excelFile+=`<tr height="30" style="text-align: center;font-size:12px">
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 100px;height: 30px;">序号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">仪器编号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">标气浓度</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">允许误差</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">回测值</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">校准结果</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">校准时间</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 150px;height: 30px;">校准人</td>
+                                </tr>`;
+                            data.forEach((val, index)=>{
+                                excelFile += `
+                                <tr height="24" style="text-align: center;font-size:12px">
+                                    <td style="width: 100px;height: 24px;">${index+1}</td>
+                                    <td style="width: 200px;height: 24px;">${val.instrument_code}</td>
+                                    <td style="width: 125px;height: 24px;">${val.standard_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.deviation_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.average_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.result == '10'?'通过':'不通过'}</td>
+                                    <td style="width: 200px;height: 24px;">${val.create_date}</td>
+                                    <td style="width: 150px;height: 24px;overflow-x:scroll;">${val.operator}</td>
+                                </tr>`
+                            });
+                        }
+                    excelFile += `   
+                            </table>
+                        </body>
+                    </html>`
+                    this.exportTable(excelFile,filename)
+                },
+                //导出表
+                exportTable(excelEle,filename){
+                    var time = formatDate(parseInt(new Date().getTime() / 1000))
+                    fs.createFile({
+                        path: 'fs://record' +filename+time + '.xlsx'
+                    }, (ret, err)=>{
+                        if (ret.status) {
+                            fs.open({
+                                path: 'fs://record' +filename+ time + '.xlsx',
+                                flags: 'read_write'
+                            }, (ret1, err1)=>{
+                                if (ret1.status) {
+                                    var fd = ret1.fd;
+                                    api.hideProgress()
+                                    fs.write({
+                                        fd: fd,
+                                        data: excelEle,
+                                        offset: 0,
+                                        overwrite: true
+                                    }, (ret2, err2)=>{
+                                        if (ret2.status) {
+                                            alert('表格导出成功，请前往文件管理/UZMap/A6101279501112查看！')
+                                        } else {
+                                            console.log(JSON.stringify(err2));
+                                        }
+                                    });
+                                } else {
+                                    console.log(JSON.stringify(err1));
+                                }
+                            });
+                        } else {
+                            console.log(JSON.stringify(err));
+                        }
+                    });
+                },
+                //连接蓝牙打印设备
+                contentBluetooth(){
+                    BluetoothPrinter.scan({}, (ret1, err1) => {
+                        console.log('初始化蓝牙' + JSON.stringify(ret1) + JSON.stringify(err1))
+                        if (ret1.status) {
+                            BluetoothPrinter.listBT({}, (ret2, err2) => {
+                                // console.log('搜索蓝牙列表' + JSON.stringify(ret2) + JSON.stringify(err2))
+                                let isHasCC2 = false;
+                                let BTAddress = '';
+                                let BTName = '';
+                                api.showProgress({
+                                    title: '搜索蓝牙中',
+                                    text: '请稍后...',
+                                    modal: true
+                                })
+                                if (JSON.stringify(ret2) == '{}') {
+                                    api.toast({
+                                        msg: '暂时没有搜索到你想要连接的设备，请前往蓝牙设置连接匹配。'
+                                    })
+                                    api.hideProgress()
+                                } else {
+                                    if (ret2.msg == 'No Bluetooth Device Found') {
+                                        api.toast({
+                                            msg: '暂时没有搜索到你想要连接的设备，请前往蓝牙设置连接匹配。'
+                                        })
+                                        api.hideProgress()
+                                    } else {
+                                        (ret2.length > 0) && ret2.forEach(e => {
+                                            if (e.name && (e.name.indexOf("CC2") != -1)) {
+                                                isHasCC2 = true
+                                                BTAddress = e.address
+                                                BTName = e.name
+                                            }
+                                        })
+                                        if (isHasCC2) {
+                                            BluetoothPrinter.connect({
+                                                name: BTName
+                                            }, (ret3, err3) => {
+                                                // console.log('连接蓝牙设备' + JSON.stringify(ret3) + JSON.stringify(err3))
+                                                this.isContentBluetooth = true
+                                                this.startPrintExcel()
+                                            });
+                                        }
+                                    }
+
+                                }
+                            })
+                        }
+                    })
+                },
+                //打印
+                printExcel() {
+                    if(!this.isContentBluetooth){
+                        this.contentBluetooth()
+                    }else{
+                        this.startPrintExcel()
+                    }
+                },
+                //开始打印数据
+                startPrintExcel(){
+                    api.showProgress({
+                        title: '打印中',
+                        text: '请稍后...',
+                        modal: true
+                    })
+                    let tableInf = '';
+                    if (this.jlindex == 0) {
+                        this.jzjlist.forEach(e => {
+                            tableInf += String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                e.create_date + '  ' +
+                                e.standard_value + this.blankLength(e.standard_value) +
+                                e.signal_value + "\n"
+                        })
+                        BluetoothPrinter.printPOSCommand({
+                            msg:
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(17) + //字体放大
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(1) + //居中
+                                "校准记录单\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "执行单位:" + '天瑞仪器' + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "校准人:" + this.jzjlist[0].operator + "\n" + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "校准时间     标气浓度     信号值" + "\n" +
+                                "--------------------------------" + "\n" +
+                                tableInf +
+                                "--------------------------------" + "\n" + "\n"
+                        }, (ret4, err4) => {
+                            console.log('提交打印' + JSON.stringify(ret4) + JSON.stringify(err4))
+                            api.hideProgress()
+                            if (ret4.msg == 'no connectBT') {
+                                api.toast({
+                                    msg: '设备蓝牙连接异常，请重试'
+                                })
+                            } else if (ret4.status) {
+
+                            }
+                        });
+                    } else {
+                        this.jzjlist.forEach(e => {
+                            tableInf += String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                e.create_date + '  ' +
+                                e.standard_value + this.blankLength(e.standard_value) +
+                                e.deviation_value + '% ' +
+                                e.average_value + this.blankLength(e.average_value) +
+                                (e.result == '10' ? '通过' : '不通过') + "\n"
+                        })
+                        BluetoothPrinter.printPOSCommand({
+                            msg:
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(17) + //字体放大
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(1) + //居中
+                                "回测记录单\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "执行单位:" + '天瑞仪器' + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "校准人:" + this.jzjlist[0].operator + "\n" + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "时间   标气浓度 误差 回测值 结果" + "\n" +
+                                "--------------------------------" + "\n" +
+                                tableInf +
+                                "--------------------------------" + "\n" + "\n"
+                        }, (ret4, err4) => {
+                            console.log('提交打印' + JSON.stringify(ret4) + JSON.stringify(err4))
+                            api.hideProgress()
+                            if (ret4.msg == 'no connectBT') {
+                                api.toast({
+                                    msg: '设备蓝牙连接异常，请重试'
+                                })
+                            } else if (ret4.status) {
+
+                            }
+                        });
+                    }
+                },
+                //空格
+                blankLength(val) {
+                    let vals = Number(val).toFixed(1)
+                    let str = ' ';
+                    if (vals.length >= 6) {
+                        str = ' '
+                    } else if (vals.length == 1) {
+                        str = '     '
+                    } else if (vals.length == 2) {
+                        str = '    '
+                    } else if (vals.length == 3) {
+                        str = '   '
+                    } else if (vals.length == 4) {
+                        str = '  '
+                    } else if (vals.length == 5) {
+                        str = ' '
+                    }
+                    return str
+                },
+            }
+        })
+    };
+</script>
+
+</html>

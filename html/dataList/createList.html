@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+    <style>
+        body {
+            background-color: #FFFFFF;
+        }
+
+        .reportTitle {
+            background: #FAFAFA;
+        }
+
+        .titleItem {
+            width: 23vw;
+            display: inline-block;
+            /* margin: 0; */
+            line-height: 11vw;
+        }
+
+        .bodyItem {
+            width: 23vw;
+            display: inline-block;
+            line-height: 12vw;
+        }
+
+        .smallCalibrationBtn {
+            width: 13vw;
+            height: 7vw;
+            border: 1px solid #0081FF;
+            border-radius: 1vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3vw;
+            font-family: PingFang SC;
+            font-weight: 500;
+            color: #0081FF;
+            margin: auto;
+        }
+
+        .floatPopup {
+            position: fixed;
+            z-index: 99;
+            right: 6vw;
+            bottom: 8vw;
+            width: 20vw;
+            height: 12vw;
+            padding: 0 6vw;
+            background: #6C707B;
+            box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+            border-radius: 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .floatBtn {
+            text-align: center;
+        }
+
+        .floatBtn img {
+            width: 5vw;
+            height: 5vw;
+        }
+
+        .floatBtn p {
+            font-size: 2vw;
+            font-family: PingFang SC;
+            font-weight: 500;
+            color: #FFFFFF;
+        }
+
+        .floatLine {
+            width: 1px;
+            height: 5vw;
+            background: #8A8E99;
+        }
+
+        .reportAreas {
+            width: 100vw;
+            overflow-x: scroll;
+        }
+
+        .reportTitles {
+            width: 138vw;
+            white-space: nowrap;
+            background: #FAFAFA;
+        }
+
+        .reportTitless {
+            width: 161vw;
+            white-space: nowrap;
+            background: #FAFAFA;
+        }
+
+        .reportBodys {
+            width: 138vw;
+            white-space: nowrap;
+        }
+
+        .reportBodyss {
+            width: 161vw;
+            white-space: nowrap;
+        }
+
+        .blueLine {
+            width: 5vw;
+            height: 1vw;
+            background: #0081FF;
+            border-radius: 0.5vw;
+        }
+
+        .whiteLine {
+            width: 5vw;
+            height: 1vw;
+            background: #FFFFFF;
+            border-radius: 0.5vw;
+        }
+
+        .selectedClass {
+            border: 1px solid #0081FF;
+        }
+
+        .selectedClass p input {
+            color: #ffffff;
+            background-color: #0081FF;
+        }
+
+        .selectedClass p span {
+            color: #ffffff;
+            width: 100%;
+            background-color: #0081FF;
+        }
+
+        .selectedClass p input::-webkit-input-placeholder {
+            color: #ffffff;
+        }
+
+        input {
+            text-align: center;
+            width: 23vw;
+            line-height: 12vw;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="createList" v-cloak>
+        <van-dialog v-model="deleteConfirm" title="提示" show-cancel-button @confirm="nextStep" @cancel="cancelShow">
+            <p style="text-align: center;line-height: 20vw;">确认删除该条{{tabIndex==0?'标准':'任务'}}么?</p>
+        </van-dialog>
+        <div class=" flex-sa" style="height: 12vw;">
+            <div class="text-c" @click="toggleTab(0)">
+                <p class="text-4 text-bold" :class="tabIndex==0?'col-blue':'col-aaa'">创建标准</p>
+                <p :class="tabIndex==0?'blueLine':'whiteLine'" class="mar-c"></p>
+            </div>
+            <div class="text-c" @click="toggleTab(1)">
+                <P class="text-4 text-bold" :class="tabIndex==1?'col-blue':'col-aaa'">创建任务</P>
+                <p :class="tabIndex==1?'blueLine':'whiteLine'" class="mar-c"></p>
+            </div>
+        </div>
+        <div class=" pad-0-4 flex-sa" style="height: 13vw;">
+            <div class="createBtnItem text-c" @click="addData">
+                <img class="w-h-4" src="../../image/icon/addcalibrationIcon.png" alt="">
+                <p class="text-2 col-7a7">新增</p>
+            </div>
+            <div class="createBtnItem text-c" @click="editData">
+                <img class="w-h-4" src="../../image/icon/editIcon.png" alt="">
+                <p class="text-2 col-7a7">修改</p>
+            </div>
+            <div class="createBtnItem text-c" @click="deleteData">
+                <img class="w-h-4" src="../../image/icon/deleteIcon.png" alt="">
+                <p class="text-2 col-7a7">删除</p>
+            </div>
+        </div>
+        <div class="reportAreas" v-if="tabIndex==0">
+            <div class="reportTitles flex-fs pad-0-5">
+                <p class="titleItem text-c text-3 text-bold col-333">序号</p>
+                <p class="titleItem text-c text-3 text-bold col-333">标准名称</p>
+                <p class="titleItem text-c text-3 text-bold col-333">标准编号</p>
+                <p class="titleItem text-c text-3 text-bold col-333">组份</p>
+                <p class="titleItem text-c text-3 text-bold col-333">限值</p>
+                <p class="titleItem text-c text-3 text-bold col-333">创建日期</p>
+            </div>
+            <div class="reportBodys pad-0-5">
+                <ul>
+                    <li v-for="(item,index) in standard_list" :key="index" @click="goSelectedItem(item,index)"
+                        :class="selectedIndex==index?'selectedClass':''" class="bord-b-f5 flex-sb text-3"
+                        style="height: 12vw;">
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{index+1}}
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.standard_Name}}
+                            <!-- <input type="text" @blur="contentSave" placeholder="请输入" v-model="item.standard_Name"
+                                :disabled="item.isEdit"> -->
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.standard_code}}
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.standard_components}}
+                            <!-- <input type="text" @blur="contentSave" placeholder="请输入" v-model="item.standard_components"
+                                :disabled="item.isEdit"> -->
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.standard_limit}}
+                            <!-- <input type="number" @blur="contentSave" placeholder="请输入" v-model="item.standard_limit"
+                                :disabled="item.isEdit"> -->
+                        </p>
+                        <p class="text-3 text-c col-666"
+                            style="width: 23vw; display: inline-block;word-wrap: break-word;white-space:normal;">
+                            {{item.createtime | timeFormat}}
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="reportAreas" v-if="tabIndex==1">
+            <div class="reportTitless flex-fs pad-0-5">
+                <p class="titleItem text-c text-3 text-bold col-333">序号</p>
+                <p class="titleItem text-c text-3 text-bold col-333">任务名称</p>
+                <p class="titleItem text-c text-3 text-bold col-333">关联标准</p>
+                <p class="titleItem text-c text-3 text-bold col-333">执行单位</p>
+                <p class="titleItem text-c text-3 text-bold col-333">执行编号</p>
+                <p class="titleItem text-c text-3 text-bold col-333">开始时间</p>
+                <p class="titleItem text-c text-3 text-bold col-333">结束时间</p>
+                <p class="titleItem text-c text-3 text-bold col-333">任务状态</p>
+            </div>
+            <div class="reportBodyss pad-0-5">
+                <ul>
+                    <li v-for="(item,index) in tasks_list" :key="index" @click="goSelectedItem(item,index)"
+                        :class="selectedIndex==index?'selectedClass':''" class="bord-b-f5 flex-sb text-3"
+                        style="height: 12vw;">
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{index+1}}
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.tasks_name}}
+                            <!-- <input type="text" @blur="contentSave" placeholder="请输入" v-model="item.tasks_name"
+                                :disabled="item.isEdit"> -->
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.relatedStandardsName}}
+                            <!-- <span class="text-3"
+                                @click="selectedIndex==index && !item.isEdit && selecteStandard()">{{item.relatedStandardsName==''?'请选择':item.relatedStandardsName}}</span> -->
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.tasks_department}}
+                            <!-- <input type="text" @blur="contentSave" placeholder="请输入" v-model="item.tasks_department"
+                                :disabled="item.isEdit"> -->
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.tasks_code}}
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.createtime | timeForm}}
+                            <!-- <span class="text-3"
+                                @click="selectedIndex==index && !item.isEdit && selecteDate(1)">{{item.createtime==''?'请选择':item.createtime}}</span> -->
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.finishtime | timeForm}}
+                            <!-- <span class="text-3"
+                                @click="selectedIndex==index && !item.isEdit && selecteDate(2)">{{item.finishtime==''?'请选择':item.finishtime}}</span> -->
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            {{item.status==0?'未开始':item.status==1?'进行中':item.status==2?'已取消':'已完成'}}
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+    var db;
+    apiready = function () {
+        db = api.require('db');
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: 'rgba(255,255,255,0)'
+        });
+
+        api.addEventListener({
+            name: 'standardInfChange'
+        }, (ret) => {
+            console.log('标准记录刷新' + JSON.stringify(ret))
+            vue.initData()
+        })
+        api.addEventListener({
+            name: 'taskInfChange'
+        }, (ret) => {
+            console.log('任务记录刷新' + JSON.stringify(ret))
+            vue.initData()
+        })
+        var vue = new Vue({
+            el: '#createList',
+            data: {
+                tabIndex: 0,
+                standard_list: [],
+                tasks_list: [],
+                selectedItem: {},
+                selectedIndex: 'abc',
+                // showStandard: false,
+                deleteConfirm: false,
+            },
+            filters: {
+                timeFormat(value) {
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d}
+                    ${h}:${min}:${s}`
+                },
+                timeForm(val){
+                    var date = new Date(parseInt(val))
+                    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:00`;
+                }
+            },
+            created() {
+                // dropTables2('tr_voc_tasks')
+                // createTables2(['CREATE TABLE tr_voc_tasks(id int(10),tenant_id int(10),enterprise_id int(10),instrument_code int(30),createtime varchar(100),add_userid  int(10),is_upload int(1),operator varchar(30),tasks_name varchar(50),tasks_code varchar(20),tasks_department varchar(50),finishtime varchar(100),isEdit int(1),relatedStandardsName varchar(50),relatedStandardsId int(10));'])
+                // dropTables2('tr_voc_standard')
+                // createTables2(['CREATE TABLE tr_voc_standard(id int(10),tenant_id int(10),enterprise_id int(10),instrument_code int(30),createtime varchar(100),add_userid  int(10),is_upload int(1),operator varchar(30),standard_Name varchar(50),standard_code varchar(20),standard_components varchar(50),standard_limit varchar(30),isEdit int(1));'])
+                this.initData()
+            },
+            methods: {
+                initData() {
+                    this.tasks_list = select2('tr_voc_tasks', {})
+                    console.log('任务列表' + JSON.stringify(this.tasks_list))
+                    this.standard_list = select2('tr_voc_standard', {})
+                    console.log('标准列表' + JSON.stringify(this.standard_list))
+                },
+                toggleIndex(num) {
+                    this.tabIndex = num
+                },
+                codeFormat() {
+                    var date = new Date();
+                    var year = date.getFullYear();
+                    var month = ('0' + (date.getMonth() + 1)).slice(-2);
+                    var day = ('0' + date.getDate()).slice(-2);
+                    var hour = ('0' + date.getHours()).slice(-2);
+                    var minute = ('0' + date.getMinutes()).slice(-2);
+                    var second = ('0' + date.getSeconds()).slice(-2);
+                    // console.log('时间:'+new Date().getMonth()+1+'月'+new Date().getDate()+'日'+new Date().getHours()+'时'+new Date().getMinutes()+'分')
+                    return String(year).substr(2, 2) + month + day + hour + minute + second
+                },
+                //新增
+                addData() {
+                    var params = {};
+                    console.log('biaozhun'+JSON.stringify(this.standard_list))
+                    if((this.tabIndex==1)&&(this.standard_list.length==0)){
+                        api.toast({
+                            msg: '请先创建标准',
+                            duration: 2000,
+                            location: 'middle'
+                        });
+                        return
+                    }
+                    if (this.tabIndex == 0) {
+                        params = {
+                            standard_Name: '',
+                            standard_code: this.codeFormat(),
+                            standard_components: '',
+                            standard_limit: '',
+                            isEdit: false,
+                            createtime: parseInt(new Date().getTime()),
+                        }
+                    } else {
+                        params = {
+                            tasks_name: '',
+                            relatedStandardsName: '',
+                            relatedStandardsId: '',
+                            tasks_department: '',
+                            tasks_code: this.codeFormat(),
+                            isEdit: false,
+                            createtime: '',
+                            finishtime: ''
+                        }
+                    }
+                    let paramsInf = {};
+                    if (this.tabIndex == 0) {
+                        paramsInf = {
+                            type: 0,//0新增1编辑
+                            standardParams: params
+                        }
+                    } else {
+                        paramsInf = {
+                            type: 0,//0新增1编辑
+                            taskParams: params
+                        }
+                    }
+                    api.openFrame({
+                        name: this.tabIndex == 0 ? 'standardPopup' : 'taskPopup',
+                        url: this.tabIndex == 0 ? '../bounce/standardPopup.html' : '../bounce/taskPopup.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        pageParam: paramsInf,
+                        reload: true,
+                        animation: {
+                            type: "push",
+                            subType: "from_bottom",
+                        }
+                    });
+                },
+                //选择项
+                goSelectedItem(e, i) {
+                    this.selectedItem = e
+                    this.selectedIndex = i
+                },
+                //编辑修改
+                editData() {
+                    if (JSON.stringify(this.selectedItem) == '{}') {
+                        api.toast({
+                            msg: '请优先选择一条数据',
+                            location: 'middle',
+                        })
+                        return
+                    } else {
+                        console.log('查看选择项'+JSON.stringify(this.selectedItem))
+                        var params = this.selectedItem;
+                        params.updatetime=parseInt(new Date().getTime()/1000);
+                        let paramsInf = {};
+                        if(this.tabIndex == 0){//标准
+                            paramsInf = {
+                                type: 1,//0新增1编辑
+                                standardParams: params
+                            }
+                            api.openFrame({
+                                name:'standardPopup',
+                                url: '../bounce/standardPopup.html',
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: 'auto',
+                                    h: 'auto'
+                                },
+                                pageParam: paramsInf,
+                                reload: true,
+                                animation: {
+                                    type: "push",
+                                    subType: "from_bottom",
+                                }
+                            });
+                        }else{//任务
+                            if (this.selectedItem.status == 0) {
+                                paramsInf = {
+                                    type: 1,//0新增1编辑
+                                    taskParams: params
+                                }
+                                api.openFrame({
+                                    name: 'taskPopup',
+                                    url: '../bounce/taskPopup.html',
+                                    rect: {
+                                        x: 0,
+                                        y: 0,
+                                        w: 'auto',
+                                        h: 'auto'
+                                    },
+                                    pageParam: paramsInf,
+                                    reload: true,
+                                    animation: {
+                                        type: "push",
+                                        subType: "from_bottom",
+                                    }
+                                });
+                            } else {
+                                api.toast({
+                                    msg: '当前任务是' + (this.selectedItem.status == 1 ? '进行中' : this.selectedItem.status == 2 ? '已取消' : '已完成') + '无法编辑',
+                                    location: 'middle',
+                                })
+                                return
+                            }
+                        }
+                        
+                    }
+                },
+                //删除
+                deleteData() {
+                    if (JSON.stringify(this.selectedItem) == '{}') {
+                        api.toast({
+                            msg: '请优先选择一条数据',
+                            location: 'middle',
+                        })
+                        return
+                    }
+                    this.deleteConfirm = true
+                },
+                //确认
+                nextStep() {
+                    if (this.tabIndex == 0) {
+                        this.standard_list.splice(this.selectedIndex, 1)
+                        dbdelete2('tr_voc_standard', this.selectedItem.id);
+                        // this.selectedCode1 = ''
+                    } else {
+                        this.tasks_list.splice(this.selectedIndex, 1)
+                        dbdelete2('tr_voc_tasks', this.selectedItem.id);
+                        // this.selectedCode2 = ''
+                    }
+                    this.selectedItem = {}
+                    this.selectedIndex = 'abc'
+                },
+                //取消
+                cancelShow() {
+                    this.deleteConfirm = false
+                },
+                toggleTab(num) {
+                    if (this.tabIndex == 0 && num == 1 && this.standard_list.length == 0) {
+                        api.toast({
+                            msg: '请优先创建标准',
+                            duration: 2000,
+                            location: 'middle'
+                        });
+                        return
+                    }
+                    this.tabIndex = num
+                    this.selectedItem = {}
+                    this.selectedIndex = 'abc'
+                },
+                
+            }
+        })
+    };
+</script>
+
+</html>

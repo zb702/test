@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>警报设置</title>
+  <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+  <style>
+    body,
+    html {
+      background: rgba(255, 255, 255, 0);
+    }
+
+    .content {
+      padding: 2vw 3vw;
+    }
+
+    .inputLine {
+      padding: 2vw 0;
+    }
+
+    input {
+      border: none;
+      outline: none;
+      margin-left: 13vw;
+    }
+
+    .tabArea {
+      height: 10vw;
+      margin-bottom: 4vw;
+      border-radius: 3vw;
+    }
+
+    .tabLine {
+      width: 92vw;
+      height: 8vw;
+      background: #EFF5FF;
+      border-radius: 1vw;
+      padding: 1vw;
+    }
+
+    .tabItem {
+      width: 30vw;
+      height: 8vw;
+      border-radius: 1vw;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jbPopup">
+    <div class="all-bounce">
+      <div class="all-bounce-mark"></div>
+      <div class="all-bounce-area">
+        <div class="all-bounce-area-title">
+          <span>警报设置</span>
+          <img @click="go_back" src="../../image/icon/closeIcon.png" alt="">
+        </div>
+        <div class="all-bounce-area-content">
+          <div class="tabArea">
+            <div class="tabLine flex-sb">
+              <div class="tabItem flex-center" :style="{background:tabIndex==0?'#0081FF':'#EFF5FF'}"
+                @click="toggleTab(0)">
+                <span class="text-3 text-bold" :class="tabIndex==0?'col-whi':'col-b0b'">报警</span>
+              </div>
+              <div class="tabItem flex-center" :style="{background:tabIndex==1?'#0081FF':'#EFF5FF'}"
+                @click="toggleTab(1)">
+                <span class="text-3 text-bold" :class="tabIndex==1?'col-whi':'col-b0b'">STEL</span>
+              </div>
+              <div class="tabItem flex-center" :style="{background:tabIndex==2?'#0081FF':'#EFF5FF'}"
+                @click="toggleTab(2)">
+                <span class="text-3 text-bold" :class="tabIndex==2?'col-whi':'col-b0b'">TWA</span>
+              </div>
+            </div>
+          </div>
+          <div class="content" v-show="tabIndex==0" style="background:#E5F2FF">
+            <div class="inputLine flex-fs" style="height: 3vw;">
+              <span class=" text-3" style="width: 16vw;">上限值：</span>
+              <input class=" text-3 col-blue text-bold" type="number" v-model="upLimit" placeholder="请输入上限值">
+            </div>
+            <div class="inputLine flex-fs" style="height: 3vw;">
+              <span class=" text-3" style="width: 16vw;">下限值：</span>
+              <input class=" text-3 col-blue text-bold" type="number" v-model="downLimit" placeholder="请输入下限值">
+            </div>
+          </div>
+          <div class="content" v-show="tabIndex==1" style="background:#E5F2FF">
+            <div class="inputLine flex-fs" style="height: 3vw;">
+              <span class=" text-3" style="width: 16vw;">STEL限值：</span>
+              <input class=" text-3 col-blue text-bold" type="number" v-model="stelLimit" placeholder="请输入STEL警报值">
+            </div>
+            <div class="inputLine flex-fs" style="height: 3vw;"></div>
+          </div>
+          <div class="content" v-show="tabIndex==2" style="background:#E5F2FF">
+            <div class="inputLine flex-fs" style="height: 3vw;">
+              <span class=" text-3" style="width: 16vw;">TWA限值：</span>
+              <input class=" text-3 col-blue text-bold" type="number" v-model="twaLimit" placeholder="请输入TWA警报值">
+            </div>
+            <div class="inputLine flex-fs" style="height: 3vw;"></div>
+          </div>
+          <!-- <div class="blockIsSelected" :style="{background:reportSelected==0?'#E5F2FF':'#f8f8f8'}">
+                <div class="theme flex-sb" @click="selectedReport(0)">
+                    <span class="text-4 text-bold">不设置</span>
+                    <img class="w-h-5" v-if="reportSelected==0" src="../../image/icon/selectedIcon.png" alt="">
+                </div>
+            </div>
+            <div class="blockIsSelected" :style="{background:reportSelected==1?'#E5F2FF':'#f8f8f8'}">
+                <div class="theme flex-sb" @click="selectedReport(1)">
+                    <span class="text-4 text-bold">手动输入警报</span>
+                    <img class="w-h-5" v-if="reportSelected==1" src="../../image/icon/selectedIcon.png" alt="">
+                </div>
+                <div class="content" v-show="reportSelected==1">
+                  <div class="inputLine flex-fs">
+                    <p class=" text-3" style="width: 16vw;">上限值：</p>
+                    <input class=" text-3 col-blue text-bold" type="number" v-model="upLimit" placeholder="请输入上限值">
+                </div>
+                <div class="inputLine flex-fs">
+                    <p class=" text-3" style="width: 16vw;">下限值：</p>
+                    <input class=" text-3 col-blue text-bold" type="number" v-model="downLimit" placeholder="请输入下限值">
+                </div>
+                    <div class="inputLine flex-fs">
+                        <p class=" text-3" style="width: 16vw;">STEL限值：</p>
+                        <input class=" text-3 col-blue text-bold" type="number" v-model="stelLimit" placeholder="请输入STEL警报值">
+                    </div>
+                    <div class="inputLine flex-fs">
+                        <p class=" text-3" style="width: 16vw;">TWA限值：</p>
+                        <input class=" text-3 col-blue text-bold" type="number" v-model="twaLimit" placeholder="请输入TWA警报值">
+                    </div>
+                </div>
+            </div> -->
+        </div>
+        <div class="all-bounce-area-bottom" @click="sureSave">确定</div>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+var db;
+  apiready = function () {
+    db = api.require('db');
+    var map = api.require('bMap');
+    var vue = new Vue({
+      el: '#jbPopup',
+      data: {
+        reportSelected: 0,
+        stelLimit: '',
+        twaLimit: '',
+        upLimit: '',
+        downLimit: '',
+        tabIndex: 0,
+        userinfo:{},
+        curLon:'',
+        curLat:'',
+        curCity:'',
+        simpleName:'286',
+        yqinfData:{},//仪器信息
+      },
+      created() {
+        if (getPrefs('jbSetupStatus')) {
+          this.reportSelected = (getPrefs('jbSetupStatus') && JSON.parse(getPrefs('jbSetupStatus')).isJbSetup == true) ? 1 : 0
+          this.stelLimit = getPrefs('jbSetupStatus') && JSON.parse(getPrefs('jbSetupStatus')).stelLimit
+          this.twaLimit = getPrefs('jbSetupStatus') && JSON.parse(getPrefs('jbSetupStatus')).twaLimit
+          this.upLimit = getPrefs('jbSetupStatus') && JSON.parse(getPrefs('jbSetupStatus')).upLimit
+          this.downLimit = getPrefs('jbSetupStatus') && JSON.parse(getPrefs('jbSetupStatus')).downLimit
+        }
+        console.log('警报设置存储值' + getPrefs('jbSetupStatus'))
+        if(getPrefs('simpleName')){
+            this.simpleName = getPrefs('simpleName')
+          }else{
+            this.simpleName = '286'
+          }
+          this.userinfo = getPrefs('userInfo')
+          map.getLocation({
+              accuracy: '100m',
+              autoStop: true,
+              filter: 1
+          }, (ret1, err1) => {
+              // console.log(22222 + JSON.stringify(ret1) + JSON.stringify(err1))
+              if (ret1.status) {
+                  this.curLon = ret1.lon;
+                  this.curLat = ret1.lat;
+                  map.getNameFromCoords({
+                      lon: ret1.lon,
+                      lat: ret1.lat
+                  }, (ret4, err4) => {
+                      if (ret4.status) {
+                          // console.log(JSON.stringify(ret4));
+                          this.curCity = ret4.address + ret4.sematicDescription
+                      }
+                      // console.log(2111111+ JSON.stringify(ret4) + JSON.stringify(err4))
+                  })
+              } else {
+                  console.log('定位失败,离线定位功能需要手动打开GPS，并在无遮挡物的室外')
+              }
+          })
+      },
+      mounted() {
+        
+        //读取仪器信息
+        let yqinf = api.readFile({
+            sync: true,
+            path: 'fs://instrumentInformation.txt'
+        });
+        if(yqinf){
+            this.yqinfData = JSON.parse(yqinf)
+        }else{
+            api.alert({
+                msg: '请前往仪器设置页面进行设置'
+            });
+        }
+            // console.log('本仪器信息'+JSON.stringify(this.yqinfData))
+      },
+      methods: {
+        //取消返回
+        go_back() {
+          api.closeFrame()
+        },
+        toggleTab(num) {
+          this.tabIndex = num
+        },
+        selectedReport(num) {
+          this.reportSelected = num
+          if (this.reportSelected == 0) {
+            this.stelLimit = ''
+            this.twaLimit = ''
+          }
+        },
+        //确认保存设置
+        sureSave() {
+          if(this.tabIndex==0){//报警上下限值
+            if (this.upLimit == '') {
+              api.toast({
+                msg: '请输入上限值',
+                location: 'middle'
+              })
+              return
+            }else{
+              this.saveOperation()
+            }
+          }else if(this.tabIndex==1){//stel限值
+            if (this.stelLimit == '') {
+              api.toast({
+                msg: '请输入STEL警报值',
+                location: 'middle'
+              })
+              return
+            }else{
+              this.saveOperation()
+            }
+          }else{//twa限值
+            if (this.twaLimit == '') {
+              api.toast({
+                msg: '请输入TWA警报值',
+                location: 'middle'
+              })
+              return
+            }else{
+              this.saveOperation()
+            }
+          }
+          // if (this.reportSelected == 1) {
+          //   if (this.stelLimit == '') {
+          //     api.toast({
+          //       msg: '请输入STEL警报值',
+          //       location: 'middle'
+          //     })
+          //     return
+          //   } else if (this.twaLimit == '') {
+          //     api.toast({
+          //       msg: '请输入TWA警报值',
+          //       location: 'middle'
+          //     })
+          //     return
+          //   } else if (this.upLimit == '') {
+          //     api.toast({
+          //       msg: '请输入上限值',
+          //       location: 'middle'
+          //     })
+          //     return
+          //   } else if (this.downLimit == '') {
+          //     api.toast({
+          //       msg: '请输入下限值',
+          //       location: 'middle'
+          //     })
+          //     return
+          //   } else {
+          //     api.sendEvent({
+          //       name: 'jbSetup',
+          //       extra: {
+          //         isJbSetup: this.reportSelected == 1 ? true : false,
+          //         stelLimit: this.stelLimit,
+          //         twaLimit: this.twaLimit,
+          //       }
+          //     });
+          //     setPrefs('jbSetupStatus', JSON.stringify(
+          //       {
+          //         isJbSetup: this.reportSelected == 1 ? true : false,
+          //         stelLimit: this.stelLimit,
+          //         twaLimit: this.twaLimit,
+          //       }
+          //     ))
+          //   }
+          // }
+          // api.closeFrame()
+        },
+        //保存信息
+        saveOperation(){
+          let params = {
+              use_id: this.userinfo.id,
+              type: 'PID',
+              operator: this.userinfo.nickname,
+              instrument_code: this.yqinfData.code,
+              enterprise_name: '天瑞仪器',
+              address: this.curCity,
+              lat: this.curLat,
+              lng: this.curLon,
+              name: this.simpleName,
+              up_limit: this.upLimit,//上限值
+              down_limit: this.downLimit,//下限值
+              stel_limit: this.stelLimit,//stel限值
+              twa_limit: this.twaLimit,//twa限值
+              createtime: new Date().getTime(),
+              is_upload: 0,
+          };
+          var res = insert2('tr_voc_alarm_settings', params);
+          api.sendEvent({
+            name: 'jbSetup',
+            extra: {
+              upLimit:this.upLimit,
+              downLimit:this.downLimit,
+              stelLimit: this.stelLimit,
+              twaLimit: this.twaLimit,
+            }
+          });
+          setPrefs('jbSetupStatus', JSON.stringify(
+            {
+              upLimit:this.upLimit,
+              downLimit:this.downLimit,
+              stelLimit: this.stelLimit,
+              twaLimit: this.twaLimit,
+            }
+          ))
+          api.closeFrame()
+        }
+      }
+    })
+  }
+</script>
+
+</html>

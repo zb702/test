@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>仪器信息</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <style>
+      body,html{
+        background: rgba(255, 255, 255, 0);
+      }
+      input{
+          border:none;
+          outline: none;
+          width: 100%;
+          height: 100%;
+      }
+      .yqTheme{
+        width: 92vw;
+        height: 12vw;
+        background: #F5F6FA;
+        border: 1px solid #0081FF;
+        font-size: 4vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #0081FF;
+      }
+      .yqTable{
+        margin:3vw 0;
+        border:0.5px solid #eaeaea;
+      }
+      .tableLine{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .leftInf{
+        border:0.5px solid #eaeaea;
+        width: 19vw;
+        background-color: #fafafa;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 3vw;
+        color:#333333;
+        padding-right:4vw;
+        height: 8vw;
+      }
+      .rightInf{
+        border:0.5px solid #eaeaea;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        font-size: 3vw;
+        color:#333333;
+        width: 65vw;
+        padding-left: 4vw;
+        height: 8vw;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="yqPopup">
+      <div class="all-bounce">
+        <div class="all-bounce-mark"></div>
+        <div class="all-bounce-area">
+          <div class="all-bounce-area-title">
+            <span>仪器信息</span>
+            <img @click="go_back" src="../../image/icon/closeIcon.png" alt="">
+          </div>
+          <div class="all-bounce-area-content pad-0-1">
+            <div class="yqTheme">{{infData.name}}</div>
+            <div class="yqTable">
+              <div class="tableLine">
+                <p class="leftInf">型号</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.model" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">防爆标志</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.explosion_proof_tag" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">证书编号</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.certificate_no" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">工作环境</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.working_condition" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">充电电源</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.charge_voltage" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">测定对象</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.test_object" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">出厂日期</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.production_date" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">出厂编号</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.code" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">量程范围</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.range" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">客服电话</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.customer_tel" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">制造商</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.manufacturer" disabled>
+                </p>
+              </div>
+              <div class="tableLine">
+                <p class="leftInf">地址</p>
+                <p class="rightInf">
+                  <input type="text" v-model="infData.address" disabled>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="all-bounce-area-bottom" @click="sureyp">确定</div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript" src="../../script/db2.js"></script>
+  <script type="text/javascript">
+  var db;
+  apiready=function() {
+    db = api.require('db');
+    var vue = new Vue({
+        el: '#yqPopup',
+        data: {
+          infData:{}
+        },
+        mounted(){
+          let inf = api.readFile({
+              sync: true,
+              path: 'fs://instrumentInformation.txt'
+          });
+          if(inf){
+            this.infData = JSON.parse(inf)
+            // "CREATE TABLE tr_instrument(id int(10),
+            // tenant_id int(10),
+            // brand varchar(100),
+            // manufacturer varchar(50),
+            // address varchar(100),
+            // name varchar(100),
+            // model varchar(50),
+            // range varchar(100),
+            // test_object varchar(100),
+            // accuracy varchar(100),
+            // working_condition varchar(100),
+            // production_date date,
+            // code varchar(100),
+            // explosion_proof_grade varchar(100),
+            // certificate_no varchar(100),
+            // explosion_proof_tag varchar(100),
+            // charge_voltage varchar(50),
+            // delivery_date date,
+            // customer_tel varchar(50),
+            // status varchar(50),
+            // configure varchar(500),
+            // is_complete varchar(26),
+            // add_userid int(10),
+            // operator varchar(30),
+            // memo varchar(300),
+            // user_del varchar(26),
+            // createtime bigint(10),
+            // updatetime bigint(10));"
+            // var yqInstallTable = insert2('tr_instrument', this.infData);
+            // console.log('仪器信息是否添加到表中'+JSON.stringify(yqInstallTable))
+          }else{
+            api.alert({
+                msg: '请前往仪器设置页面进行设置'
+            });
+          }
+          // console.log('查看仪器信息'+JSON.stringify(this.infData))
+        },
+        methods: {
+          //取消返回
+          go_back(){
+            api.closeFrame()
+          },
+          sureyp(){
+            api.closeFrame()
+          }
+        }
+    })
+  }
+  </script>
+</html>

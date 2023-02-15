@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <style>
+        body{
+            background-color: #FFFFFF;
+        }
+        .reportTitle{
+            background: #FAFAFA;
+        }
+        .floatPopup{
+            position: fixed;
+            z-index: 99;
+            right:6vw;
+            bottom: 8vw;
+            width: 20vw;
+            height: 12vw;
+            padding:0 6vw;
+            background: #6C707B;
+            box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+            border-radius: 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .floatBtn{
+            text-align: center;
+        }
+        .floatBtn img{
+            width: 5vw;
+            height: 5vw;
+        }
+        .floatBtn p{
+            font-size: 2vw;
+            font-family: PingFang SC;
+            font-weight: 500;
+            color: #FFFFFF;
+        }
+        .floatLine{
+            width: 1px;
+            height: 5vw;
+            background: #8A8E99;
+        }
+    </style>
+</head>
+<body>
+    <div id="reportList">
+        <div class="reportArea">
+            <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;">
+                <p class="text-c text-3 text-bold col-333" style="width: 16%;">序号</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 28%;">任务名称</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 28%;">检测日期</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 28%;">检测人</p>
+            </div>
+            <div class="reportBody pad-0-5">
+                <ul>
+                    <li v-for="(item,index) in reportLists" :key="index" class="bord-b-f5 flex-sb text-3" style="height: 12vw;">
+                        <p class="text-c text-3 col-666" style="width: 16%;">
+                            {{index+1}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 28%;">
+                            {{item.rask_name}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 28%;">
+                            {{item.createtime | normalTime}}
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 28%;">
+                            {{item.operator}} 
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- <div class="floatPopup">
+            <div class="floatBtn" @click="exportExcel('print-content')">
+                <img src="../../image/icon/exportIcon.png" alt="">
+                <p>导出</p>
+            </div>
+            <div class="floatLine"></div>
+            <div class="floatBtn" @click="printExcel">
+                <img src="../../image/icon/printIcon.png" alt="">
+                <p>打印</p>
+            </div>
+        </div> -->
+        <!-- 导出excel内容，不可删除 -->
+        <div id="divcate" style="display: none;">
+            <table id="print-content" border="1">
+                <tr>
+                    <th style="background-color:#808080;color:#ffffff">序号</th>
+                    <th style="background-color:#808080;color:#ffffff">任务名称</th>
+                    <th style="background-color:#808080;color:#ffffff">检测日期</th>
+                    <th style="background-color:#808080;color:#ffffff">检测人</th>
+                </tr>
+                <tr v-for="(item,index) in reportLists" :key="index">
+                    <td>{{index+1}}</td>
+                    <td>{{item.taskname}}</td>
+                    <td>{{item.detecttime}}</td>
+                    <td>{{item.detectname}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript" src="../../script/db2.js"></script>
+  <script type="text/javascript">
+    var db;
+      apiready = function(){
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: 'rgba(255,255,255,0)'
+        });
+        db = api.require('db')
+        var fs = api.require('fs');
+        var vue = new Vue({
+            el: '#reportList',
+            data: {
+                reportLists:[],
+            },
+            filters: {
+                normalTime(value) {
+                    const time = new Date(parseInt(value)*1000);
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d}
+                    ${h}:${min}:${s}`
+                }
+            },
+            created(){
+                // this.reportLists = select2('tr_voc_report_rasks', {});
+                this.reportLists = []
+            },
+            methods:{
+                //打印
+                printExcel(){
+
+                },
+                //导出
+                exportExcel(tableid) {
+                    var excelContent = document.querySelector(tableid).innerHTML;
+                    var excelFile = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>";
+                    excelFile += "<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>记录</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>";
+                    excelFile += "<body>";
+                    excelFile += excelContent;
+                    excelFile += "</body>";
+                    excelFile += "</html>";
+                    //这里写fs创建文件、打开文件、写入文件那一套，写入的字符串为excelFile，创建的文件名为filename+年月日时分秒.elsx百分百可用
+                    // console.log(excelFile);
+                    var time = formatDate(parseInt(new Date().getTime() / 1000))
+                    fs.createFile({
+                        path: 'fs://record' + time + '.xlsx'
+                    }, function (ret, err) {
+                        if (ret.status) {
+                            fs.open({
+                                path: 'fs://record' + time + '.xlsx',
+                                flags: 'read_write'
+                            }, function (ret, err) {
+                                if (ret.status) {
+                                    var fd = ret.fd;
+                                    fs.write({
+                                        fd: fd,
+                                        data: excelFile,
+                                        offset: 0,
+                                        overwrite: true
+                                    }, function (ret, err) {
+                                        if (ret.status) {
+                                            alert('表格导出成功，请前往文件管理/UZMap/A6173193890462查看！')
+                                        } else {
+                                            console.log(JSON.stringify(err));
+                                        }
+                                    });
+                                } else {
+                                    console.log(JSON.stringify(err));
+                                }
+                            });
+                        } else {
+                            console.log(JSON.stringify(err));
+                        }
+                    });
+                },
+            }
+        })
+      };
+  </script>
+</html>

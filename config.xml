@@ -1,0 +1,64 @@
+<widget id="A6101279501112" version="0.0.1">
+
+	<name>voc2000</name>
+
+	<description>Example For APICloud.</description>
+
+	<application name="targetSdkVersion" value="28"/>
+
+	<author email="developer@apicloud.com" href="http://www.apicloud.com">Developer</author>
+
+	<preference name="avm" value="true"/>
+
+	<preference name="statusBarAppearance" value="true" />
+
+	<preference name="pageBounce" value="false"/>
+
+	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="windowBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="hScrollBarEnabled" value="false"/>
+
+	<preference name="vScrollBarEnabled" value="false"/>
+
+	<preference name="autoLaunch" value="true"/>
+
+	<preference name="fullScreen" value="false"/>
+
+	<preference name="autoUpdate" value="true"/>
+
+	<preference name="smartUpdate" value="true"/>
+
+	<preference name="debug" value="true"/>
+
+	<preference name="statusBarAppearance" value="true"/>
+
+	<content src="index.html"/>
+
+	<access origin="*"/>
+
+	<permission name="readPhoneState"/>
+
+	<permission name="camera"/>
+
+	<permission name="record"/>
+
+	<permission name="location"/>
+	
+	<meta-data name="com.baidu.lbsapi.API_KEY" value="ZqMG4boXFKw5GSiraUDsxVmxWCcmF7l4"/>
+	<feature name="bMap">
+		<param name="ios_api_key" value="dpKpGBdUlbddoRk8BTzVD52q0wt6esI1" />
+	</feature>
+
+	<permission name="fileSystem"/>
+
+	<permission name="internet"/>
+
+	<permission name="bootCompleted"/>
+
+	<permission name="hardware"/>
+
+</widget>

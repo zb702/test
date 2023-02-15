@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>记录列表头部</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <style>
+
+    </style>
+  </head>
+  <body>
+    <div id="reportListHeader">
+      <div class="allHeader pad-0-2 flex-sb">
+          <div class="leftHeader flex-fs" @click="go_back" style="width: 20vw;">
+            <img class="w-h-6" src="../../image/icon/arrowLeftIcon.png" alt="">
+            <span class="text-4">返回</span>
+          </div>
+          <div class="middleHeader">
+              <span class="text-5 text-bold">记录</span>
+          </div>
+          <div class="rightHeader flex-fe" style="width: 20vw;">
+            <span class="text-4 mar-r-3 col-blue" @click="beginReport">开始记录</span>
+          </div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript" src="../../script/db2.js"></script>
+  <script type="text/javascript">
+  var db;
+  apiready=function() {
+    db = api.require('db');
+    $api.fixStatusBar($api.dom('#reportListHeader'));
+    api.setStatusBarStyle({
+        style: 'dark',
+        color: 'rgba(255,255,255,0)'
+    });
+    var vue = new Vue({
+        el: '#reportListHeader',
+        data: {
+          recordStatus:{},
+          tasks_list:[],
+          raskInf:{},
+          pumpType:false,
+        },
+        mounted(){
+          var headerH = $api.byId('reportListHeader').offsetHeight
+          var winH = api.winHeight
+          var FrameH = winH - headerH
+            api.openFrame({
+                name: 'reportList',
+                url: './reportList.html',
+                rect: {
+                    x: 0,
+                    y: headerH,
+                    w: 'auto',
+                    h: winH-headerH
+                },
+                pageParam: {},
+                bounces: false,
+                reload:true,
+                bgColor: 'rgba(0,0,0,0)',
+            });
+        },
+        created(){
+          if(getPrefs('record')){
+            this.recordStatus = JSON.parse(getPrefs('record'))
+            console.log('设置记录状态'+getPrefs('record'))
+          }else{
+            this.recordStatus = {}
+          }
+          if(getPrefs('raskSelected')){
+            this.raskInf = JSON.parse(getPrefs('raskSelected'))
+            console.log('任务选择信息'+getPrefs('raskSelected'))
+          }else{
+            this.raskInf = {}
+          }
+          console.log('泵是否开启'+JSON.stringify(api.pageParam))
+          this.pumpType = api.pageParam.isPumpType;
+          this.tasks_list = select2('tr_voc_tasks', {})
+        },
+        methods: {
+          //返回
+          go_back(){
+            api.closeWin()
+          },
+          //开始记录
+          beginReport(){
+            if(JSON.stringify(this.recordStatus)=='{}'){
+              api.toast({
+                msg:'前往管理页面进行记录设置!',
+                location:'middle'
+              })
+              return
+            }else if(JSON.stringify(this.recordStatus)!='{}'&&this.recordStatus.isJlSetup==0){
+              api.toast({
+                msg:'请选择手动记录或自动记录!',
+                location:'middle'
+              })
+              return
+            }else if(this.tasks_list.length==0){
+              api.toast({
+                msg:'您还没有创建任何任务!',
+                location:'middle'
+              })
+              return
+            }else if(JSON.stringify(this.raskInf)=='{}'||this.raskInf.rask_id=='请选择'){
+              api.toast({
+                msg:'请返回上个页面选择记录任务!',
+                location:'middle'
+              })
+              return
+            }else if(!this.pumpType){
+              api.toast({
+                msg:'记录开始之前请优先开泵!',
+                location:'middle'
+              })
+              return
+            }else{
+              console.log('开始记录')
+              api.sendEvent({
+                  name: 'startRecord',
+                  extra: {
+                      recordStatus:true
+                  }
+              });
+              api.closeWin()
+            }
+          }
+        }
+    })
+  }
+  </script>
+</html>

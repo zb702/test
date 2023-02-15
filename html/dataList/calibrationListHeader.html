@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>校准列表头部</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <style>
+
+    </style>
+  </head>
+  <body>
+    <div id="calibrationListHeader">
+      <div class="allHeader pad-0-2 flex-sb">
+          <div class="leftHeader flex-fs" @click="go_back" style="width: 20vw;">
+            <img class="w-h-6" src="../../image/icon/arrowLeftIcon.png" alt="">
+            <span class="text-4">返回</span>
+          </div>
+          <div class="middleHeader">
+              <span class="text-5 text-bold">校准</span>
+          </div>
+          <div class="rightHeader flex-fe" style="width: 20vw;"></div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript">
+  apiready=function() {
+    $api.fixStatusBar($api.dom('#calibrationListHeader'));
+    api.setStatusBarStyle({
+        style: 'dark',
+        color: 'rgba(255,255,255,0)'
+    });
+    new Vue({
+        el: '#calibrationListHeader',
+        data: {},
+        mounted(){
+          var headerH = $api.byId('calibrationListHeader').offsetHeight
+          var winH = api.winHeight
+          var FrameH = winH - headerH
+            api.openFrame({
+                name: 'calibrationList',
+                url: './calibrationList.html',
+                rect: {
+                    x: 0,
+                    y: headerH,
+                    w: 'auto',
+                    h: winH-headerH
+                },
+                pageParam: {},
+                bounces: false,
+                reload:true,
+                bgColor: 'rgba(0,0,0,0)',
+                
+            });
+
+        },
+        methods: {
+          //返回
+          go_back(){
+            api.closeWin()
+          },
+        }
+    })
+  }
+  </script>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>背景值设置</title>
+  <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+  <style>
+    body,
+    html {
+      background: rgba(255, 255, 255, 0);
+    }
+
+    .blockIsSelected {
+      margin: 1.5vw 3vw;
+      padding: 0 4vw;
+      border-radius: 3vw;
+    }
+
+    .theme {
+      height: 12vw;
+    }
+
+    .content {
+      padding: 2vw 3vw;
+    }
+
+    .inputLine {
+      padding: 2vw 0;
+    }
+
+    .smallReadNumBtn {
+      width: 13vw;
+      height: 6vw;
+      border: 1px solid #0081FF;
+      border-radius: 1vw;
+      color: #0081FF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3vw;
+    }
+
+    input {
+      border: none;
+      outline: none;
+      width: 30vw;
+    }
+
+    .reportPopup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 900;
+    }
+
+    .reportMask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      background-color: rgba(0, 0, 0, .3);
+    }
+
+    .reportContent {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 60vw;
+      height: 34vw;
+      z-index: 1100;
+      margin-top: -17vw;
+      margin-left: -30vw;
+      background-color: #ffffff;
+      border-radius: 3vw;
+      text-align: center;
+    }
+
+    .reportContent img {
+      width: 40vw;
+      height: 8.6vw;
+      object-fit: cover;
+      margin: 4vw 0 1vw 0;
+      animation: load 6.2s linear infinite;
+    }
+
+    @keyframes load {
+      0% {
+        width: 0vw;
+        height: 8.6vw;
+      }
+
+      50% {
+        width: 40vw;
+        height: 8.6vw;
+      }
+
+      100% {
+        width: 0vw;
+        height: 8.6vw;
+      }
+    }
+
+    .reportContent p {
+      font-size: 4.4vw;
+      color: #333333;
+      line-height: 6.4vw;
+      margin: 2vw 7vw;
+    }
+
+    [v-cloak] {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="bjzPopup" v-cloak>
+    <div class="all-bounce">
+      <div class="all-bounce-mark"></div>
+      <div class="all-bounce-area">
+        <div class="all-bounce-area-title">
+          <span>背景值设置</span>
+          <img @click="go_back" src="../../image/icon/closeIcon.png" alt="">
+        </div>
+        <div class="all-bounce-area-content">
+          <div class="blockIsSelected" :style="{background:reportSelected==0?'#E5F2FF':'#f8f8f8'}">
+            <div class="theme flex-sb" @click="selectedReport(0)">
+              <span class="text-4 text-bold">不计算背景值</span>
+              <img class="w-h-5" v-if="reportSelected==0" src="../../image/icon/selectedIcon.png" alt="">
+            </div>
+          </div>
+          <div class="blockIsSelected" :style="{background:reportSelected==1?'#E5F2FF':'#f8f8f8'}">
+            <div class="theme flex-sb" @click="selectedReport(1)">
+              <span class="text-4 text-bold">手动输入背景值</span>
+              <img class="w-h-5" v-if="reportSelected==1" src="../../image/icon/selectedIcon.png" alt="">
+            </div>
+            <div class="content" v-show="reportSelected==1">
+              <div class="inputLine flex-fs">
+                <p class=" text-3">背景值：</p>
+                <input style="margin-left:13vw;" v-model="bjzValue" class=" text-3 col-blue text-bold" type="text"
+                  placeholder="请输入">
+              </div>
+            </div>
+          </div>
+          <div class="blockIsSelected" :style="{background:reportSelected==2?'#E5F2FF':'#f8f8f8'}">
+            <div class="theme flex-sb" @click="selectedReport(2)">
+              <span class="text-4 text-bold">自动记录背景值</span>
+              <img class="w-h-5" v-if="reportSelected==2" src="../../image/icon/selectedIcon.png" alt="">
+            </div>
+            <div class="content" v-show="reportSelected==2">
+              <div class="inputLine flex-fs">
+                <p class=" text-3">检测左上背景值：</p>
+                <input style="margin-left:6vw;" v-model="bjzValue1" class=" text-3 col-blue text-bold" type="text"
+                  placeholder="点击读数自动获取" disabled>
+                <p class="smallReadNumBtn" @click="!begin&&getValue(1)">{{(begin&&curJS==1)?time:'读数'}}</p>
+              </div>
+              <div class="inputLine flex-fs">
+                <p class=" text-3">检测左下背景值：</p>
+                <input style="margin-left:6vw;" v-model="bjzValue2" class=" text-3 col-blue text-bold" type="text"
+                  placeholder="点击读数自动获取" disabled>
+                <p class="smallReadNumBtn" @click="!begin&&getValue(2)">{{(begin&&curJS==2)?time:'读数'}}</p>
+              </div>
+              <div class="inputLine flex-fs">
+                <p class=" text-3">检测右上背景值：</p>
+                <input style="margin-left:6vw;" v-model="bjzValue3" class=" text-3 col-blue text-bold" type="text"
+                  placeholder="点击读数自动获取" disabled>
+                <p class="smallReadNumBtn" @click="!begin&&getValue(3)">{{(begin&&curJS==3)?time:'读数'}}</p>
+              </div>
+              <div class="inputLine flex-fs">
+                <p class=" text-3">检测右下背景值：</p>
+                <input style="margin-left:6vw;" v-model="bjzValue4" class=" text-3 col-blue text-bold" type="text"
+                  placeholder="点击读数自动获取" disabled>
+                <p class="smallReadNumBtn" @click="!begin&&getValue(4)">{{(begin&&curJS==4)?time:'读数'}}</p>
+              </div>
+              <div class="inputLine flex-fs">
+                <p class=" text-3">检测中心背景值：</p>
+                <input style="margin-left:6vw;" v-model="bjzValue5" class=" text-3 col-blue text-bold" type="text"
+                  placeholder="点击读数自动获取" disabled>
+                <p class="smallReadNumBtn" @click="!begin&&getValue(5)">{{(begin&&curJS==5)?time:'读数'}}</p>
+              </div>
+              <div class="inputLine flex-fs">
+                <p class=" text-3">背景最大值：</p>
+                <input style="margin-left:6vw;" v-model="bjzValue" class=" text-3 col-blue text-bold" type="text"
+                  placeholder="自动计算" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="all-bounce-area-bottom" @click="sure">确定</div>
+      </div>
+    </div>
+    <!-- <div class="reportPopup" v-if="isReportPopup">
+      <div class="reportMask"></div>
+      <div class="reportContent">
+        <img src="../../image/normalLogo.png" alt="">
+        <p>正在自动记录背景值，请勿其他操作</p>
+      </div>
+    </div> -->
+  </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+  var db;
+  apiready = function () {
+    db = api.require('db');
+    var map = api.require('bMap');
+    api.addEventListener({
+      name: 'PIDjcSend'
+    }, function (ret) {
+      console.log('监听返回Pid' + JSON.stringify(ret))
+      vue.bjzArray.push(ret.value.PID)
+    })
+    var vue = new Vue({
+      el: '#bjzPopup',
+      data: {
+        reportSelected: 0,
+        bjzValue: '',
+        bjzStatus: {},
+        // isReportPopup: false,
+        time: 5,
+        begin: false,
+        bjzValue1: '',
+        bjzValue2: '',
+        bjzValue3: '',
+        bjzValue4: '',
+        bjzValue5: '',
+        bjzArray: [],
+        curJS: 0,
+        jc: null,
+        userinfo: {},
+        curLon: '',
+        curLat: '',
+        curCity: '',
+        simpleName: '286',
+        yqinfData: {},//仪器信息
+      },
+      created() {
+        if (getPrefs('bjzSetup')) {
+          this.bjzStatus = JSON.parse(getPrefs('bjzSetup'))
+          this.reportSelected = this.bjzStatus.isbjzSetup
+          this.bjzValue = this.bjzStatus.bjzValue
+        } else {
+          this.bjzStatus = {}
+        }
+        if (getPrefs('simpleName')) {
+          this.simpleName = getPrefs('simpleName')
+        } else {
+          this.simpleName = '286'
+        }
+        this.userinfo = getPrefs('userInfo')
+        map.getLocation({
+          accuracy: '100m',
+          autoStop: true,
+          filter: 1
+        }, (ret1, err1) => {
+          // console.log(22222 + JSON.stringify(ret1) + JSON.stringify(err1))
+          if (ret1.status) {
+            this.curLon = ret1.lon;
+            this.curLat = ret1.lat;
+            map.getNameFromCoords({
+              lon: ret1.lon,
+              lat: ret1.lat
+            }, (ret4, err4) => {
+              if (ret4.status) {
+                // console.log(JSON.stringify(ret4));
+                this.curCity = ret4.address + ret4.sematicDescription
+              }
+              // console.log(2111111+ JSON.stringify(ret4) + JSON.stringify(err4))
+            })
+          } else {
+            console.log('定位失败,离线定位功能需要手动打开GPS，并在无遮挡物的室外')
+          }
+        })
+      },
+      watch: {
+        bjzValue1() {
+          setTimeout(() => {
+            let arr = [this.bjzValue1, this.bjzValue2, this.bjzValue3, this.bjzValue4, this.bjzValue5];
+            console.log('查看数据' + JSON.stringify(arr))
+            console.log('查看数据最大值' + Math.max(arr))
+            this.bjzValue = Math.max(...arr)
+          }, 800);
+        },
+        bjzValue2() {
+          setTimeout(() => {
+            let arr = [this.bjzValue1, this.bjzValue2, this.bjzValue3, this.bjzValue4, this.bjzValue5];
+            console.log('查看数据' + JSON.stringify(arr))
+            console.log('查看数据最大值' + Math.max(arr))
+            this.bjzValue = Math.max(...arr)
+          }, 800);
+        },
+        bjzValue3() {
+          setTimeout(() => {
+            let arr = [this.bjzValue1, this.bjzValue2, this.bjzValue3, this.bjzValue4, this.bjzValue5];
+            console.log('查看数据' + JSON.stringify(arr))
+            console.log('查看数据最大值' + Math.max(arr))
+            this.bjzValue = Math.max(...arr)
+          }, 800);
+        },
+        bjzValue4() {
+          setTimeout(() => {
+            let arr = [this.bjzValue1, this.bjzValue2, this.bjzValue3, this.bjzValue4, this.bjzValue5];
+            console.log('查看数据' + JSON.stringify(arr))
+            console.log('查看数据最大值' + Math.max(arr))
+            this.bjzValue = Math.max(...arr)
+          }, 800);
+        },
+        bjzValue5() {
+          setTimeout(() => {
+            let arr = [this.bjzValue1, this.bjzValue2, this.bjzValue3, this.bjzValue4, this.bjzValue5];
+            console.log('查看数据' + JSON.stringify(arr))
+            console.log('查看数据最大值' + Math.max(arr))
+            this.bjzValue = Math.max(...arr)
+          }, 800);
+        },
+      },
+      mounted() {
+        //读取仪器信息
+        let yqinf = api.readFile({
+          sync: true,
+          path: 'fs://instrumentInformation.txt'
+        });
+        if (yqinf) {
+          this.yqinfData = JSON.parse(yqinf)
+        } else {
+          api.alert({
+            msg: '请前往仪器设置页面进行设置'
+          });
+        }
+        // console.log('本仪器信息'+JSON.stringify(this.yqinfData))
+      },
+      methods: {
+        //取消返回
+        go_back() {
+          api.closeFrame()
+        },
+        selectedReport(num) {
+          this.reportSelected = num
+        },
+        //获取读数
+        getValue(num) {
+          if (getPrefs('PumpChange')) {
+            this.pumpType = JSON.parse(getPrefs('PumpChange')).pumpType
+            if (this.pumpType) {
+              if (!this.begin) {
+                this.curJS = num
+                this.bjzArray = []
+                this.begin = true
+                this.time = 5
+                this.calcBjzTime(num)
+              }
+            } else {
+              api.toast({
+                msg: '请前往检测页面开泵',
+                location: 'middle'
+              })
+              return
+            }
+          } else {
+            api.toast({
+              msg: '请前往检测页面开泵',
+              location: 'middle'
+            })
+            return
+          }
+
+        },
+        calcBjzTime(num) {
+          console.log('第几次计算' + num)
+          clearInterval(this.jc)
+          this.jc = setInterval(() => {
+            if (this.time > 0) {
+              this.time--
+            } else {
+              this.time = 0
+              clearInterval(this.jc)
+              console.log('背景值数组' + num + '--' + JSON.stringify(this.bjzArray))
+              var sum = 0;
+              this.bjzArray.forEach(e => {
+                sum += Number(e)
+              })
+              if (num == 1) {
+                this.bjzValue1 = Number((sum / this.bjzArray.length).toFixed(1))
+              } else if (num == 2) {
+                this.bjzValue2 = Number((sum / this.bjzArray.length).toFixed(1))
+              } else if (num == 3) {
+                this.bjzValue3 = Number((sum / this.bjzArray.length).toFixed(1))
+              } else if (num == 4) {
+                this.bjzValue4 = Number((sum / this.bjzArray.length).toFixed(1))
+              } else if (num == 5) {
+                this.bjzValue5 = Number((sum / this.bjzArray.length).toFixed(1))
+              }
+              this.bjzArray = []
+              this.begin = false
+              this.curJS = 0
+            }
+          }, 1000)
+        },
+        sure() {
+          if (this.reportSelected == 0) {
+            this.bjzValue = ''
+          } else if (this.reportSelected == 1) {
+            if (this.bjzValue == '') {
+              api.toast({
+                msg: '请填入背景值',
+                location: 'middle    '
+              })
+              return
+            }
+          } else {
+            // console.log(this.bjzValue1+'---'+(this.bjzValue1 === ''))
+            if (this.bjzValue1 === '') {
+              api.toast({
+                msg: '检查位置左上读数不能为空',
+                location: 'middle    '
+              })
+              return
+            } else if (this.bjzValue2 === '') {
+              api.toast({
+                msg: '检查位置左下读数不能为空',
+                location: 'middle    '
+              })
+              return
+            } else if (this.bjzValue3 === '') {
+              api.toast({
+                msg: '检查位置右上读数不能为空',
+                location: 'middle    '
+              })
+              return
+            } else if (this.bjzValue4 === '') {
+              api.toast({
+                msg: '检查位置右下读数不能为空',
+                location: 'middle    '
+              })
+              return
+            } else if (this.bjzValue5 === '') {
+              api.toast({
+                msg: '检查位置中心读数不能为空',
+                location: 'middle    '
+              })
+              return
+            }
+          }
+          let params = {
+            use_id: this.userinfo.id,
+            type: 'PID',
+            operator: this.userinfo.nickname,
+            instrument_code: this.yqinfData.code,
+            enterprise_name: '天瑞仪器',
+            address: this.curCity,
+            lat: this.curLat,
+            lng: this.curLon,
+            name: this.simpleName,
+            isBJZSetup: this.reportSelected,//背景值设置
+            position_a: this.bjzValue1,//左上
+            position_b: this.bjzValue2,//左下
+            position_c: this.bjzValue3,//右上
+            position_d: this.bjzValue4,//右下
+            position_e: this.bjzValue5,//中心
+            average_value: this.bjzValue,//最大背景值
+            createtime: new Date().getTime(),
+            is_upload: 0,
+          };
+          var res = insert2('tr_voc_background_value', params);
+          setPrefs('bjzSetup', {
+            isbjzSetup: this.reportSelected,
+            bjzValue: this.bjzValue,//背景值
+          })
+          api.sendEvent({
+            name: 'bjzSetup',
+            extra: {
+              isbjzSetup: this.reportSelected,
+              bjzValue: this.bjzValue,//背景值
+            }
+          })
+          api.closeFrame()
+        }
+      }
+    })
+  }
+</script>
+
+</html>

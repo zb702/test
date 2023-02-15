@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+</head>
+<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+<link rel="stylesheet" type="text/css" href="../../css/common.css" />
+<link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+<style>
+    body {
+        background-color: #F5F6FA;
+    }
+
+    .floatPopup {
+        position: fixed;
+        z-index: 99;
+        right: 6vw;
+        bottom: 8vw;
+        width: 20vw;
+        height: 12vw;
+        padding: 0 6vw;
+        background: #6C707B;
+        box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+        border-radius: 6vw;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .floatBtn {
+        text-align: center;
+    }
+
+    .floatBtn img {
+        width: 5vw;
+        height: 5vw;
+    }
+
+    .floatBtn p {
+        font-size: 2vw;
+        font-family: PingFang SC;
+        font-weight: 500;
+        color: #FFFFFF;
+    }
+
+    .floatLine {
+        width: 1px;
+        height: 5vw;
+        background: #8A8E99;
+    }
+
+    .blueLine {
+        width: 5vw;
+        height: 1vw;
+        background: #0081FF;
+        border-radius: 0.5vw;
+    }
+
+    .whiteLine {
+        width: 5vw;
+        height: 1vw;
+        background: #FFFFFF;
+        border-radius: 0.5vw;
+    }
+
+    .tabArea {
+        height: 10vw;
+        padding: 3vw 4vw;
+        background-color: #FFFFFF;
+    }
+
+    .tabLine {
+        width: 90vw;
+        height: 8vw;
+        background: #EFF5FF;
+        border-radius: 1vw;
+        padding: 1vw;
+    }
+
+    .tabItem {
+        width: 22vw;
+        height: 8vw;
+        border-radius: 1vw;
+    }
+
+    .baseInfArea {
+        background-color: #FFFFFF;
+        padding: 3.5vw 0;
+    }
+
+    .baseInfLine {
+        width: 1px;
+        height: 10vw;
+        background: #F2F2F2;
+    }
+
+    .baseInfItem {
+        padding: 0 7vw;
+        line-height: 6vw;
+        text-align: left;
+        width: 35vw;
+    }
+
+    .smallSelect {
+        width: 20vw;
+        background-color: #FFFFFF;
+        outline: none;
+        font-size: 3vw;
+        border: 1px solid #f3f3f3;
+        border-radius: 2px;
+    }
+
+    .reportTitle {
+        background-color: #fafafa;
+    }
+
+    .reportBody {
+        background-color: #FFFFFF;
+    }
+
+    [v-cloak] {
+        display: none;
+    }
+</style>
+
+<body>
+    <div id="frame2" v-cloak>
+        <van-sticky>
+            <div class="bg-whi flex-sa" style="height: 12vw;">
+                <div class="text-c" @click="toggleNav(1)">
+                    <P class="text-4 text-bold" :class="navIndex==1?'col-blue':'col-aaa'">历史记录数据</P>
+                    <p :class="navIndex==1?'blueLine':'whiteLine'" class="mar-c"></p>
+                </div>
+                <div class="text-c" @click="toggleNav(2)">
+                    <p class="text-4 text-bold" :class="navIndex==2?'col-blue':'col-aaa'">仪器运行数据</p>
+                    <p :class="navIndex==2?'blueLine':'whiteLine'" class="mar-c"></p>
+                </div>
+                <div class="text-c" @click="toggleNav(0)">
+                    <p class="text-4 text-bold" :class="navIndex==0?'col-blue':'col-aaa'">任务数据</p>
+                    <p :class="navIndex==0?'blueLine':'whiteLine'" class="mar-c"></p>
+                </div>
+            </div>
+        </van-sticky>
+        <!-- 任务数据 -->
+        <div v-if="navIndex==0">
+            <div class="tabArea">
+                <div class="tabLine flex-sb">
+                    <div class="tabItem flex-center" :style="{background:tabIndex==0?'#0081FF':'#EFF5FF'}"
+                        @click="toggleTab(0)">
+                        <span class="text-3 text-bold" :class="tabIndex==0?'col-whi':'col-b0b'">监测记录</span>
+                    </div>
+                    <div class="tabItem flex-center" :style="{background:tabIndex==1?'#0081FF':'#EFF5FF'}"
+                        @click="toggleTab(1)">
+                        <span class="text-3 text-bold" :class="tabIndex==1?'col-whi':'col-b0b'">STEL</span>
+                    </div>
+                    <div class="tabItem flex-center" :style="{background:tabIndex==2?'#0081FF':'#EFF5FF'}"
+                        @click="toggleTab(2)">
+                        <span class="text-3 text-bold" :class="tabIndex==2?'col-whi':'col-b0b'">TWA</span>
+                    </div>
+                    <div class="tabItem flex-center" :style="{background:tabIndex==3?'#0081FF':'#EFF5FF'}"
+                        @click="toggleTab(3)">
+                        <span class="text-3 text-bold" :class="tabIndex==3?'col-whi':'col-b0b'">报告</span>
+                    </div>
+                </div>
+            </div>
+            <div class="baseInfArea mar-2-0 flex-sb" v-show="tabIndex==0">
+                <div class="baseInfItem">
+                    <p class="text-3 col-333 flex-fs">任务名称：
+                        <select class="smallSelect" v-model="tasks_id" @change="selectValue(event)">
+                            <option value="请选择">请选择：</option>
+                            <option :value="item.id" v-for="(item,index) in tasksList" :key="index">{{item.tasks_name}}
+                            </option>
+                        </select>
+                    </p>
+                    <p class="text-3 col-333">标准编号：<span
+                            class="text-3 text-bold">{{relatedStandards.standard_code}}</span></p>
+                </div>
+                <div class="baseInfLine"></div>
+                <div class="baseInfItem">
+                    <p class="text-3 col-333">执行单位：<span
+                            class="text-3 text-bold">{{selectedTasks.tasks_department}}</span></p>
+                    <p class="text-3 col-333">标准限值：<span
+                            class="text-3 text-bold col-blue">{{relatedStandards.standard_limit}}</span></p>
+                </div>
+            </div>
+            <div class="baseInfArea mar-2-0 flex-sb" v-show="tabIndex==1">
+                <div class="baseInfItem">
+                    <p class="text-3 col-333">STEL限值：<span
+                            class="text-3 text-bold col-blue">{{jbSetup.stelLimit==''?'暂无设置':jbSetup.stelLimit}}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="baseInfArea mar-2-0 flex-sb" v-show="tabIndex==2">
+                <div class="baseInfItem">
+                    <p class="text-3 col-333">TWA限值：<span
+                            class="text-3 text-bold col-blue">{{jbSetup.twaLimit==''?'暂无设置':jbSetup.twaLimit}}</span>
+                    </p>
+                </div>
+            </div>
+            <!-- 监测记录 -->
+            <div class="reportArea mar-t-2" v-show="tabIndex==0">
+                <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;width: 90vw;">
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">序号</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">时间</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">最大值</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">结果</p>
+                </div>
+                <div class="reportBody pad-0-5">
+                    <ul>
+                        <li v-for="(item,index) in reportRasksDatas" :key="index" class="bord-b-f5 flex-sb text-3"
+                            style="height: 12vw;width: 90vw;">
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{index+1}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.createtime | normalTimes}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.max_value}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                <span class="text-3"
+                                    :class="item.standard_limit==''?'col-red':Number(item.max_value)>=Number(item.standard_limit)?'col-red':'col-green'">{{item.standard_limit==''?'无法判断':Number(item.max_value)>=Number(item.standard_limit)?'超标':'合格'}}</span>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- stel -->
+            <div class="reportArea mar-t-2" v-show="tabIndex==1">
+                <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;width: 90vw;">
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">序号</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">时间</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">检测值</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">结果</p>
+                </div>
+                <div class="reportBody pad-0-5">
+                    <ul>
+                        <li v-for="(item,index) in stelReportList" class="bord-b-f5 flex-sb text-3"
+                            style="height: 12vw;width: 90vw;">
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{index+1}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.createtime | normalTimes}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.report_value}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                <span class=" text-3"
+                                    :class="jbSetup.stelLimit==''?'col-red':Number(item.report_value)>=Number(jbSetup.stelLimit)?'col-red':'col-green'">{{jbSetup.stelLimit==''?'无法判断':Number(item.report_value)>=Number(jbSetup.stelLimit)?'超标':'合格'}}</span>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- twa -->
+            <div class="reportArea mar-t-2" v-show="tabIndex==2">
+                <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;width: 90vw;">
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">序号</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">时间</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">监测值</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">结果</p>
+                </div>
+                <div class="reportBody pad-0-5">
+                    <ul>
+                        <li v-for="(item,index) in twaReportList" class="bord-b-f5 flex-sb text-3"
+                            style="height: 12vw;width: 90vw;">
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{index+1}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.createtime | normalTimes}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.report_value}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                <span class=" text-3"
+                                    :class="jbSetup.twaLimit==''?'col-red':Number(item.report_value)>=Number(jbSetup.twaLimit)?'col-red':'col-green'">{{jbSetup.twaLimit==''?'无法判断':Number(item.report_value)>=Number(jbSetup.twaLimit)?'超标':'合格'}}</span>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 报告 -->
+            <div class="reportArea mar-t-2" v-show="tabIndex==3">
+                <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;width: 90vw;">
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">序号</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">时间</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">任务名称</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">执行单位</p>
+                </div>
+                <div class="reportBody pad-0-5">
+                    <ul>
+                        <li v-for="(item,index) in reportAllDatas" class="bord-b-f5 flex-sb text-3"
+                            @click="gotoReportDetail(item)" style="height: 12vw;width: 90vw;">
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{index+1}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.createtime | normalTime}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.rask_name==''?'无关联任务':item.rask_name}}
+                            </p>
+                            <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                {{item.rask_department==''?'天瑞仪器':item.rask_department}}
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- 仪器运行数据 -->
+        <div v-else-if="navIndex==2">
+            <div class="reportArea">
+                <div class="baseInfArea mar-2-0 flex-sb">
+                    <div class="conditionalFiltering pad-0-5">
+                        <p class="text-3 col-333 flex-fs" @click="conditionalDateShow = true">日期查询：
+                            <input type="text"
+                                style="border:1px solid #f3f3f3;border-radius:2px;width:26vw;text-align: center;"
+                                placeholder="请选择想要查询的日期" disabled v-model="standardTimeConversion(conditionalDate)">
+                        </p>
+                    </div>
+                    <div class="conditionalFiltering pad-0-5"></div>
+                </div>
+                <div style="width: 100vw;overflow-x: auto;" class=" bg-whi">
+                    <div class="reportTitle flex-sb" style="height: 11vw;width: 112.5vw;">
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">序号</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">开始时间</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">结束时间</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">用户</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">地址</p>
+                    </div>
+                    <div class="reportBody">
+                        <ul>
+                            <li v-for="(item,index) in instrumentUsageData" class="bord-b-f5 flex-sb text-3"
+                                style="height: 12vw;width: 112.5vw;">
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{index+1}}
+                                </p>
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{item.startup_time | normalTime}}
+                                </p>
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{item.shutdown_time | normalTime}}
+                                </p>
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{item.operator}}
+                                </p>
+                                <p class="text-c text-3 col-666"
+                                    style="width: 22.5vw;overflow-x: scroll;white-space: nowrap;">
+                                    {{item.address}}
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 历史记录数据 -->
+        <div v-else>
+            <div class="reportArea">
+                <div class="baseInfArea mar-2-0 flex-sb">
+                    <div class="conditionalFiltering pad-0-5">
+                        <p class="text-3 col-333 flex-fs" @click="conditionalDateShow = true">日期查询：
+                            <input type="text"
+                                style="border:1px solid #f3f3f3;border-radius:2px;width:26vw;text-align: center;"
+                                placeholder="请选择想要查询的日期" disabled v-model="standardTimeConversion(conditionalDate)">
+                        </p>
+                    </div>
+                    <div class="conditionalFiltering pad-0-5">
+                        <p class="text-3 col-333 flex-fe" @click="toggleReportTimeInt">默认记录时间间隔<span
+                                class="col-blue">{{defaultTimeInter}}s</span></p>
+                    </div>
+                </div>
+                <div style="width: 100vw;overflow-x: auto;" class=" bg-whi">
+                    <div class="reportTitle flex-sb" style="height: 11vw;width: 157.5vw;">
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">序号</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">时间</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">最大值</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">最小值</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">平均值</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">监测结果</p>
+                        <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">地址</p>
+                    </div>
+                    <div class="reportBody">
+                        <ul>
+                            <li v-for="(item,index) in basicAllDatas" class="bord-b-f5 flex-sb text-3"
+                                style="height: 12vw;width: 157.5vw;">
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{index+1}}
+                                </p>
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{item.createtime | normalTimes}}
+                                </p>
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{item.max_value}}
+                                </p>
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{item.min_value}}
+                                </p>
+                                <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                                    {{item.averageValue}}
+                                </p>
+                                <p class=" text-3 text-c col-666" style="width: 22.5vw;"
+                                    :class="item.standard_limit==''?'col-red':Number(item.max_value)>=Number(item.standard_limit)?'col-red':'col-green'">
+                                    {{item.standard_limit==''?'无法判断':Number(item.max_value)>=Number(item.standard_limit)?'超标':'合格'}}
+                                </p>
+                                <p class="text-c text-3 col-666"
+                                    style="width: 22.5vw;overflow-x: scroll;white-space: nowrap;">
+                                    {{item.address}}
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="floatPopup" v-if="navIndex==2||navIndex==1">
+            <div class="floatBtn" @click="exportExcel">
+                <img src="../../image/icon/exportIcon.png" alt="">
+                <p>导出</p>
+            </div>
+            <div class="floatLine"></div>
+            <div class="floatBtn" @click="printExcel">
+                <img src="../../image/icon/printIcon.png" alt="">
+                <p>打印</p>
+            </div>
+        </div>
+        <van-calendar v-model="conditionalDateShow" row-height="36" :show-confirm="false"
+            :min-date="new Date(parseInt(new Date().getFullYear())-5, 0, 31)" :max-date="new Date()" color="#0081FF"
+            @confirm="dateConfirm" />
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+    var db, fs, BluetoothPrinter;
+    apiready = function () {
+        db = api.require('db');
+        fs = api.require('fs');
+        BluetoothPrinter = api.require('djyPrinter');
+        BluetoothPrinter.disconnectBT();
+        api.addEventListener({
+            name: 'refreshPage'
+        }, (ret, err) => {
+            let res = db.selectSqlSync({
+                name: 'tianrui_offline',
+                sql: "SELECT * FROM tr_voc_tasks WHERE status == 3"
+            });
+            this.tasksList = res.data
+        });
+        api.addEventListener({
+            name: 'sendBasicReport'
+        }, (ret, err) => {
+            vue.toggleNav(vue.navIndex)
+        });
+        api.addEventListener({
+            name: 'sendtaskReport'
+        }, (ret, err) => {
+            // console.log('任务记录刷新数据')
+            vue.toggleNav(vue.navIndex)
+        })
+        api.addEventListener({
+            name: 'jbSetup'
+        }, (ret) => {
+            // console.log('警报设置状态'+JSON.stringify(ret))
+            vue.jbSetup = ret.value
+        })
+        api.addEventListener({
+            name:'reportFinish'
+        }, (ret)=>{
+            if(ret.value.isFinishReport){
+                vue.toggleNav(vue.navIndex)
+                // vue.reportRasksDatas = select2('tr_voc_report_rasks', {});
+            }
+        })
+        api.addEventListener({
+            name: 'isPumpType'
+        }, (ret) => {
+            console.log('关泵刷新数据')
+            vue.toggleNav(vue.navIndex)
+        })
+        // api.addEventListener({
+        //     name:'raskSelected'
+        // }, (ret)=>{
+        //     console.log('任务选择'+JSON.stringify(ret))
+        //     if(ret.value){
+        //         vue.tasks_id = ret.value.rask_id
+        //         vue.rask_name = ret.value.rask_name
+        //         if(vue.tasksList.length>0){
+        //             vue.tasksList.forEach(e=>{
+        //                 if(e.id==vue.tasks_id){
+        //                     vue.selectedTasks = e
+        //                     vue.standard_list.forEach(e1=>{
+        //                         if(e1.id==vue.selectedTasks.relatedStandardsId){
+        //                             vue.relatedStandards = e1
+        //                         }
+        //                     })
+        //                 }
+        //             })
+        //         }
+        //         let ret1 = db.selectSqlSync({
+        //             name: 'tianrui_offline',
+        //             sql: "SELECT * FROM tr_voc_report_rasks WHERE rask_id == '"+vue.tasks_id+"'"
+        //         });
+        //         console.log('返回数据'+JSON.stringify(ret1))
+        //         if(ret1.status){
+        //             vue.reportRasksDatas = ret1.data
+        //         }else{
+        //             vue.reportRasksDatas = []
+        //         }
+        //     }
+        // })
+        var vue = new Vue({
+            el: '#frame2',
+            data: {
+                tabIndex: 0,
+                navIndex: 1,
+                tasks_id: '请选择',
+                rask_name: '',
+                tasksList: [],//任务列表
+                standard_list: [],
+                selectedTasks: {},
+                relatedStandards: {},
+                jbSetup: {
+                    upLimit: '',
+                    downLimit: '',
+                    stelLimit: '',
+                    twaLimit: ''
+                },//预警设置值
+                jlSetupInf: {
+                    isJlSetup: 0,
+                    test_times: '',
+                    test_duration: '',
+                },
+                bjzSetup: {
+                    isbjzSetup: false,
+                    bjzValue: '',
+                },
+                // allreportList:[],
+                reportRasksDatas: [],
+                reportAllDatas: [],//报告
+                basicAllDatas: [],//历史记录数据
+                pageNum: 1,
+                pageSize: 10,
+                isHasMore: true,
+                reportTimeDatas: [],
+                stelReportList: [],//stel记录数据
+                twaReportList: [],//twa记录数据
+                conditionalDateShow: false,
+                conditionalDate: new Date().getTime(),
+                defaultTimeInter: 3,
+                pumpType: false,//泵是否开关
+                instrumentUsageData: [],//仪器运行数据
+                isContentBluetooth: false,
+            },
+            filters: {
+                normalTimes(value) {
+                    const time = new Date(parseInt(value) * 1000);
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d}
+                    ${h}:${min}:${s}`
+                },
+                normalTime(value) {
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d}
+                    ${h}:${min}:${s}`
+                }
+            },
+            watch: {
+                tasks_id() {
+                    if (this.tasks_id == '请选择') {
+                        this.selectedTasks = {}
+                        this.relatedStandards = {}
+                    } else {
+                        if (this.tasksList.length > 0) {
+                            this.tasksList.forEach(e => {
+                                if (e.id == this.tasks_id) {
+                                    this.selectedTasks = e
+                                    this.standard_list.forEach(e1 => {
+                                        if (e1.id == this.selectedTasks.relatedStandardsId) {
+                                            this.relatedStandards = e1
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    }
+                }
+            },
+            created() {
+                console.log('数据页面')
+                // this.instrumentUsageData = select2('tr_voc_user_report', {});
+                // console.log('记录使用时长列表' + JSON.stringify(reportTimeDatas))
+                this.reportTimeDatas = select2('tr_voc_user_report', {});
+                // 查询状态为已完成的任务列表
+                let res = db.selectSqlSync({
+                    name: 'tianrui_offline',
+                    sql: "SELECT * FROM tr_voc_tasks WHERE status == 3"
+                });
+                this.tasksList = res.data
+                //查询标准列表
+                let ret = db.selectSqlSync({
+                    name: 'tianrui_offline',
+                    sql: "SELECT * FROM tr_voc_standard"
+                });
+                this.standard_list = ret.data
+                //警报、记录、背景值设置存储值
+                if (getPrefs('jbSetupStatus')) {
+                    this.jbSetup = JSON.parse(getPrefs('jbSetupStatus'))
+                }
+                if (getPrefs('record')) {
+                    this.jlSetupInf = JSON.parse(getPrefs('record'))
+                }
+                if (getPrefs('bjzSetup')) {
+                    this.bjzSetup = JSON.parse(getPrefs('bjzSetup'))
+                }
+
+                this.toggleNav(1)
+                // if (this.tasksList.length > 0) {
+                //     if(getPrefs('raskSelected')){//有任务时
+                //         console.log('任务选择信息'+JSON.parse(getPrefs('raskSelected')).rask_name)
+                //         this.tasks_id = JSON.parse(getPrefs('raskSelected')).rask_id;
+                //         this.rask_name = JSON.parse(getPrefs('raskSelected')).rask_name;
+                //         if(this.tasks_id!='请选择'){
+                //             this.tasksList.forEach(e=>{
+                //                 if(e.id==this.tasks_id){
+                //                     this.selectedTasks = e
+                //                     this.standard_list.forEach(e1=>{
+                //                         if(e1.id==this.selectedTasks.relatedStandardsId){
+                //                             this.relatedStandards = e1
+                //                         }
+                //                     })
+                //                 }
+                //             })
+                //             this.toggleNav(1)
+                //         }else{
+                //             this.toggleNav(1)
+                //         }
+                //     }else{
+                //         this.toggleNav(1)
+                //     }
+                // }else{
+                //     this.toggleNav(1)
+                // }
+            },
+            mounted() {
+                if (this.isHasMore) {
+                    api.addEventListener({
+                        name: 'scrolltobottom',
+                        extra: { threshold: 50 }
+                    }, (ret, err) => {
+                        // console.log('上拉加载历史数据'+JSON.stringify(ret))
+                        this.pageNum += 1
+                        if (this.navIndex == 1) {
+                            this.getHistoryReportDatas()
+                        } else if (this.navIndex == 2) {
+                            this.getInstrumentUsageDatas()
+                        } else {
+                            // this.getTasksDatas()
+                            this.toggleTab(this.tabIndex)
+                        }
+                    });
+                }
+            },
+            methods: {
+                //历史数据或者仪器运行记录   时间筛查
+                dateConfirm(e) {
+                    console.log('日期选择' + new Date(e) + new Date(e).getTime())
+                    this.conditionalDateShow = false
+                    this.conditionalDate = new Date(e).getTime()
+                    this.pageNum = 1
+                    this.isHasMore = true
+                    if (this.navIndex == 1) {
+                        this.basicAllDatas = []
+                        this.getHistoryReportDatas()
+                    } else if (this.navIndex == 2) {
+                        this.instrumentUsageData = []
+                        this.getInstrumentUsageDatas()
+                    }
+                },
+                standardTimeConversion(value) {
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d}`
+                },
+                //历史记录数据默认记录时间间隔切换
+                toggleReportTimeInt() {
+                    if (getPrefs('PumpChange')) {
+                        this.pumpType = JSON.parse(getPrefs('PumpChange')).pumpType
+                        if (this.pumpType) {
+                            api.toast({
+                                msg: '开泵期间不允许切换记录时间间隔',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                        } else {
+                            this.defaultTimeInter = this.defaultTimeInter == 3 ? 5 : (this.defaultTimeInter == 5 ? 10 : 3)
+                            setPrefs('recordTimeInter', {
+                                defaultTimeInter: this.defaultTimeInter
+                            })
+                            api.sendEvent({
+                                name: 'recordTimeInterChange',
+                                extra: {
+                                    defaultTimeInter: this.defaultTimeInter
+                                }
+                            })
+                        }
+                    } else {
+                        this.defaultTimeInter = this.defaultTimeInter == 3 ? 5 : (this.defaultTimeInter == 5 ? 10 : 3)
+                        setPrefs('recordTimeInter', {
+                            defaultTimeInter: this.defaultTimeInter
+                        })
+                        api.sendEvent({
+                            name: 'recordTimeInterChange',
+                            extra: {
+                                defaultTimeInter: this.defaultTimeInter
+                            }
+                        })
+                    }
+                },
+                //切换一级导航栏
+                toggleNav(num) {
+                    this.navIndex = num
+                    if (num == 1) {//历史记录
+                        this.pageNum = 1
+                        this.isHasMore = true
+                        this.basicAllDatas = []
+                        this.getHistoryReportDatas()
+                    } else if (num == 2) {//仪器运行
+                        this.pageNum = 1
+                        this.isHasMore = true
+                        this.instrumentUsageData = []
+                        this.getInstrumentUsageDatas()
+                    } else {//任务数据
+                        this.pageNum = 1
+                        this.toggleTab(this.tabIndex)
+                    }
+                },
+                //任务数据下二级导航栏
+                toggleTab(num) {
+                    if (this.tabIndex != num) {
+                        this.pageNum = 1
+                        this.tabIndex = num
+                    } else {}
+                    if (this.tabIndex == 3) {//报告数据
+                        // this.reportAllDatas = []
+                        this.getReportAllDatas()
+                    } else if (this.tabIndex == 0) {//监测记录
+                        // this.reportRasksDatas = []
+                        this.getTasksDatas()
+                    } else if (this.tabIndex == 1) {//stel记录
+                        // this.stelReportList = []
+                        this.getStelReportDatas()
+                    } else if (this.tabIndex == 2) {//twa记录
+                        // this.twaReportList = []
+                        this.getTwaReportDatas()
+                    }
+                },
+                //任务数据下报告数据
+                getReportAllDatas() {
+                    let page = (this.pageNum - 1) * 30;
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_user_report order by createtime desc limit " + page + ",30"
+                    });
+                    // console.log('记录使用时长列表' + JSON.stringify(ret.data))
+                    if (ret.data.length == 0) {
+                        if (this.pageNum > 1) {
+                            api.toast({
+                                msg: '暂无更多数据了',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                            this.isHasMore = false
+                        } else {
+                            this.isHasMore = false
+                        }
+                    } else {
+                        this.reportAllDatas = this.pageNum == 1 ? ret.data : this.reportAllDatas.concat(ret.data)
+                    }
+                    // this.reportAllDatas = this.reportTimeDatas
+                    // console.log('总报告数据'+JSON.stringify(this.reportAllDatas))
+                },
+                //仪器运行记录
+                getInstrumentUsageDatas() {
+                    let page = (this.pageNum - 1) * this.pageSize;
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_user_report WHERE createtime > " + new Date(new Date(this.conditionalDate).setHours(0, 0, 0, 0)).getTime() + " and createtime <" + new Date(new Date(this.conditionalDate).setHours(23, 59, 59, 999)).getTime() + " order by createtime desc limit " + page + "," + this.pageSize
+                    });
+                    var instrumentUseDatas = ret.data;
+                    // console.log('仪器使用记录列表' + JSON.stringify(instrumentUseDatas))
+                    if (instrumentUseDatas.length == 0) {
+                        if (this.pageNum > 1) {
+                            api.toast({
+                                msg: '暂无更多数据了',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                            this.isHasMore = false
+                        } else {
+                            this.isHasMore = false
+                        }
+                    } else {
+                        this.instrumentUsageData = this.pageNum == 1 ? instrumentUseDatas : this.instrumentUsageData.concat(instrumentUseDatas)
+                    }
+                },
+                //获取历史记录数据
+                getHistoryReportDatas() {
+                    let page = (this.pageNum - 1) * this.pageSize;
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_basic_report WHERE createtime > " + (new Date(new Date(this.conditionalDate).setHours(0, 0, 0, 0)).getTime() / 1000).toFixed(0) + " and createtime <" + (new Date(new Date(this.conditionalDate).setHours(23, 59, 59, 999)).getTime() / 1000).toFixed(0) + " order by createtime desc limit " + page + "," + this.pageSize
+                    });
+                    var basicDatas = ret.data;
+                    // console.log('基础记录列表' + JSON.stringify(basicDatas))
+                    if (basicDatas.length == 0) {
+                        if (this.pageNum > 1) {
+                            api.toast({
+                                msg: '暂无更多数据了',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                            this.isHasMore = false
+                        } else {
+                            this.isHasMore = false
+                        }
+                    } else {
+                        this.basicAllDatas = this.pageNum == 1 ? basicDatas : this.basicAllDatas.concat(basicDatas)
+                    }
+                },
+                //获取监测记录
+                getTasksDatas() {
+                    let page = (this.pageNum - 1) * 30;
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_task_report WHERE rask_id == '" + this.tasks_id + "' " + " order by id desc " + "limit " + page + "," + 30
+                    });
+                    // console.log('任务数据'+JSON.stringify(ret))
+                    if (ret.data.length == 0) {
+                        if (this.pageNum > 1) {
+                            api.toast({
+                                msg: '暂无更多数据了',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                            this.isHasMore = false
+                        } else {
+                            this.isHasMore = false
+                        }
+                    } else {
+                        this.reportRasksDatas = this.pageNum == 1 ? ret.data : this.reportRasksDatas.concat(ret.data)
+                    }
+                },
+                //获取stel记录数据
+                getStelReportDatas() {
+                    let page = (this.pageNum - 1) * 30;
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_stel_report order by createtime desc limit " + page + "," + 30
+                    });
+                    if (ret.data.length == 0) {
+                        if (this.pageNum > 1) {
+                            api.toast({
+                                msg: '暂无更多数据了',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                            this.isHasMore = false
+                        } else {
+                            this.isHasMore = false
+                        }
+
+                    } else {
+                        // console.log('任务stel数据'+JSON.stringify(ret.data))
+                        let arr1 = [];
+                        this.reportTimeDatas.forEach(e => {
+                            let arr2 = [];
+                            ret.data.forEach(e1 => {
+                                if (((Number(e1.createtime) * 1000) >= Number(e.startup_time)) && ((Number(e1.createtime) * 1000) <= Number(e.shutdown_time))) {
+                                    arr2.push(e1)
+                                }
+                            })
+                            // console.log('新数组2'+JSON.stringify(arr2))
+                            if (arr2.length >= 1) {
+                                arr1.push(arr2)
+                            }
+                        })
+                        // console.log('新数组1'+JSON.stringify(arr1))
+                        let arr4 = [];
+                        arr1.forEach(e2 => {
+                            let arr3 = [];
+                            for (let i = 0; i < e2.length; i += 3) {
+                                arr3.push(e2.slice(i, i + 3));
+                            }
+                            // console.log('新数组3'+JSON.stringify(arr3))
+                            arr4.push(arr3)
+                        })
+                        // console.log('新数组4'+JSON.stringify(arr4))
+                        let arr5 = [];
+                        arr4.forEach(e3 => {
+                            e3.forEach(e4 => {
+                                let obj2 = {};
+                                let totalValue = 0;
+                                let max_value = 0;
+                                let min_value = 0;
+                                e4.forEach(e5 => {
+                                    totalValue += Number(e5.report_value)
+                                    max_value = max_value >= e5.report_value ? max_value : e5.report_value
+                                    min_value = min_value <= e5.report_value ? min_value : e5.report_value
+                                    obj2 = e5
+                                })
+                                obj2.max_value = max_value;
+                                obj2.min_value = min_value;
+                                obj2.averageValue = (totalValue / e4.length).toFixed(2)
+                                arr5.push(obj2)
+                            })
+                        })
+                        // console.log('新数组5'+JSON.stringify(arr5))
+                        this.stelReportList = this.pageNum == 1 ? arr5 : this.stelReportList.concat(arr5)
+                    }
+                },
+                //获取twa记录数据
+                getTwaReportDatas() {
+                    console.log('任务id' + this.tasks_id)
+                    let page = (this.pageNum - 1) * 320;
+                    let ret = db.selectSqlSync({
+                        name: 'tianrui_offline',
+                        sql: "SELECT * FROM tr_voc_twa_report order by createtime desc limit " + page + "," + 320
+                    });
+                    if (ret.data.length == 0) {
+                        if (this.pageNum > 1) {
+                            api.toast({
+                                msg: '暂无更多数据了',
+                                duration: 2000,
+                                location: 'bottom'
+                            })
+                            this.isHasMore = false
+                        } else {
+                            this.isHasMore = false
+                        }
+                    } else {
+                        // console.log('任务twa数据'+JSON.stringify(ret.data))
+                        let arr1 = [];
+                        this.reportTimeDatas.forEach(e => {
+                            let arr2 = [];
+                            ret.data.forEach(e1 => {
+                                if (((Number(e1.createtime) * 1000) >= Number(e.startup_time)) && ((Number(e1.createtime) * 1000) <= Number(e.shutdown_time))) {
+                                    arr2.push(e1)
+                                }
+                            })
+                            // console.log('新数组2'+JSON.stringify(arr2))
+                            if (arr2.length >= 1) {
+                                arr1.push(arr2)
+                            }
+                        })
+                        // console.log('新数组1'+JSON.stringify(arr1))
+                        let arr4 = [];
+                        arr1.forEach(e2 => {
+                            let arr3 = [];
+                            for (let i = 0; i < e2.length; i += 32) {
+                                arr3.push(e2.slice(i, i + 32));
+                            }
+                            // console.log('新数组3'+JSON.stringify(arr3))
+                            arr4.push(arr3)
+                        })
+                        // console.log('新数组4'+JSON.stringify(arr4))
+                        let arr5 = [];
+                        arr4.forEach(e3 => {
+                            e3.forEach(e4 => {
+                                let obj2 = {};
+                                let totalValue = 0;
+                                let max_value = 0;
+                                let min_value = 0;
+                                e4.forEach(e5 => {
+                                    totalValue += Number(e5.report_value)
+                                    max_value = max_value >= e5.report_value ? max_value : e5.report_value
+                                    min_value = min_value <= e5.report_value ? min_value : e5.report_value
+                                    obj2 = e5
+                                })
+                                obj2.max_value = max_value;
+                                obj2.min_value = min_value;
+                                obj2.averageValue = (totalValue / e4.length).toFixed(2)
+                                arr5.push(obj2)
+                            })
+                        })
+                        // console.log('新数组5'+JSON.stringify(arr5))
+                        this.twaReportList = this.pageNum == 1 ? arr5 : this.twaReportList.concat(arr5)
+                    }
+                },
+                //选择任务名称
+                selectValue(e) {
+                    // console.log('切换任务'+JSON.stringify(e)+this.tasks_id)
+                    this.pageNum = 1
+                    this.getTasksDatas()
+                },
+                //前往报告详情
+                gotoReportDetail(e) {
+                    // console.log('查看详情'+JSON.stringify(e))
+                    api.openWin({
+                        name: 'reportDetailHeader',
+                        url: '../dataList/reportDetailHeader.html',
+                        pageParam: {
+                            reportDetail: e
+                        }
+                    })
+                },
+                //导出
+                exportExcel() {
+                    api.confirm({
+                        title: '提示',
+                        msg: '确定要导出' + (this.navIndex == 2 ? '仪器运行数据' : '历史记录数据') + '?',
+                        buttons: ['确定', '取消']
+                    }, (ret, err) => {
+                        if (ret.buttonIndex == 1) {
+                            api.showProgress({
+                                text: '努力导出数据中...',
+                                modal: true
+                            })
+                            this.createTableExcelElement((this.navIndex == 1 ? this.basicAllDatas : this.instrumentUsageData), this.navIndex == 2 ? '仪器运行数据' : '历史记录数据')
+                        }
+                    });
+                },
+                createTableExcelElement(data, filename) {
+                    // 填充数据
+                    let excelFile = `
+                    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${filename}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>
+                    <style>.table{border: 2px solid #000;}thead th{height:40px;font-size: 24px;}th,td{text-align: center;height: 30px;font-size:16px;}td{padding:10px}td img{margin:0 auto;}</style><![endif]--></head>
+                <body>
+                    <table class="table" id="print-content" style="table-layout:fixed;" border='1' cellpadding="0" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th colspan="${this.navIndex == 1 ? 8 : 6}">${this.navIndex == 1 ? '历史记录数据单' : '仪器运行数据单'}</th>
+                            </tr>
+                        </thead>`
+                    // 生成Element
+                    if (this.navIndex == 1) {
+                        excelFile += `<tr height="30" style="text-align: center;font-size:12px">
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 100px;height: 30px;">序号</td>
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 200px;height: 30px;">仪器编号</td>
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 200px;height: 30px;">记录时间</td>
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 125px;height: 30px;">最大值</td>
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 125px;height: 30px;">最小值</td>
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 125px;height: 30px;">平均值</td>
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 125px;height: 30px;">检测结果</td>
+                                <td style="font-weight: bold;background-color: #808080;color: #ffffff;width: 500px;height: 30px;">地址</td>
+                                </tr>
+                                `;
+                        data.forEach((val, index) => {
+                            excelFile += `
+                                <tr height="24" style="text-align: center;font-size:12px">
+                                    <td style="width: 100px;height: 24px;">${index + 1}</td>
+                                    <td style="width: 200px;height: 24px;">${val.instrument_code}</td>
+                                    <td style="width: 200px;height: 24px;">${this.tableTimes(val.createtime * 1000)}</td>
+                                    <td style="width: 125px;height: 24px;">${val.max_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.min_value}</td>
+                                    <td style="width: 125px;height: 24px;">${val.averageValue}</td>
+                                    <td style="width: 125px;height: 24px;">${val.standard_limit == '' ? '无法判断' : Number(val.max_value) >= Number(val.standard_limit) ? '超标' : '合格'}</td>
+                                    <td style="width: 500px;height: 24px;overflow-x:scorll;">${val.address}</td>
+                                </tr>`
+                        });
+                    } else {
+                        excelFile += `<tr height="30" style="text-align: center;font-size:12px">
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 100px;height: 30px;">序号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">仪器编号</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">开始时间</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 200px;height: 30px;">结束时间</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 125px;height: 30px;">用户</td>
+                                <td style="font-weight: bold;background-color:#808080;color:#ffffff;width: 500px;height: 30px;">地址</td>
+                                </tr>`;
+                        data.forEach((val, index) => {
+                            excelFile += `
+                                <tr height="24" style="text-align: center;font-size:12px">
+                                    <td style="width: 100px;height: 24px;">${index + 1}</td>
+                                    <td style="width: 200px;height: 24px;">${val.instrument_code}</td>
+                                    <td style="width: 200px;height: 24px;">${this.tableTimes(val.startup_time)}</td>
+                                    <td style="width: 200px;height: 24px;">${this.tableTimes(val.shutdown_time)}</td>
+                                    <td style="width: 125px;height: 24px;">${val.operator}</td>
+                                    <td style="width: 500px;height: 24px;overflow-x:scorll;">${val.address}</td>
+                                </tr>`
+                        });
+                    }
+                    excelFile += `   
+                            </table>
+                        </body>
+                    </html>`
+                    this.exportTable(excelFile, filename)
+                },
+                //时间格式化
+                tableTimes(value) {
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d} ${h}:${min}:${s}`
+                },
+                //导出表
+                exportTable(excelEle, filename) {
+                    var time = formatDate(parseInt(new Date().getTime() / 1000))
+                    fs.createFile({
+                        path: 'fs://record' + filename + time + '.xlsx'
+                    }, (ret, err) => {
+                        if (ret.status) {
+                            fs.open({
+                                path: 'fs://record' + filename + time + '.xlsx',
+                                flags: 'read_write'
+                            }, (ret1, err1) => {
+                                if (ret1.status) {
+                                    var fd = ret1.fd;
+                                    api.hideProgress()
+                                    fs.write({
+                                        fd: fd,
+                                        data: excelEle,
+                                        offset: 0,
+                                        overwrite: true
+                                    }, (ret2, err2) => {
+                                        if (ret2.status) {
+                                            alert('表格导出成功，请前往文件管理/UZMap/A6101279501112查看！')
+                                        } else {
+                                            console.log(JSON.stringify(err2));
+                                        }
+                                    });
+                                } else {
+                                    console.log(JSON.stringify(err1));
+                                }
+                            });
+                        } else {
+                            console.log(JSON.stringify(err));
+                        }
+                    });
+                },
+                //连接蓝牙打印设备
+                contentBluetooth() {
+                    BluetoothPrinter.scan({}, (ret1, err1) => {
+                        console.log('初始化蓝牙' + JSON.stringify(ret1) + JSON.stringify(err1))
+                        if (ret1.status) {
+                            BluetoothPrinter.listBT({}, (ret2, err2) => {
+                                // console.log('搜索蓝牙列表' + JSON.stringify(ret2) + JSON.stringify(err2))
+                                let isHasCC2 = false;
+                                let BTAddress = '';
+                                let BTName = '';
+                                api.showProgress({
+                                    title: '搜索蓝牙中',
+                                    text: '请稍后...',
+                                    modal: true
+                                })
+                                if (JSON.stringify(ret2) == '{}') {
+                                    api.toast({
+                                        msg: '暂时没有搜索到你想要连接的设备，请前往蓝牙设置连接匹配。'
+                                    })
+                                    api.hideProgress()
+                                } else {
+                                    if (ret2.msg == 'No Bluetooth Device Found') {
+                                        api.toast({
+                                            msg: '暂时没有搜索到你想要连接的设备，请前往蓝牙设置连接匹配。'
+                                        })
+                                        api.hideProgress()
+                                    } else {
+                                        (ret2.length > 0) && ret2.forEach(e => {
+                                            if (e.name && (e.name.indexOf("CC2") != -1)) {
+                                                isHasCC2 = true
+                                                BTAddress = e.address
+                                                BTName = e.name
+                                            }
+                                        })
+                                        if (isHasCC2) {
+                                            BluetoothPrinter.connect({
+                                                name: BTName
+                                            }, (ret3, err3) => {
+                                                // console.log('连接蓝牙设备' + JSON.stringify(ret3) + JSON.stringify(err3))
+                                                this.isContentBluetooth = true
+                                                this.startPrintExcel()
+                                            });
+                                        }
+                                    }
+
+                                }
+                            })
+                        }
+                    })
+                },
+                //打印
+                printExcel() {
+                    console.log('==' + this.isContentBluetooth)
+                    if (!this.isContentBluetooth) {
+                        this.contentBluetooth()
+                    } else {
+                        this.startPrintExcel()
+                    }
+                },
+                //开始打印数据
+                startPrintExcel() {
+                    console.log('开始打印数据' + this.navIndex)
+                    let tableInf = '';
+                    if (this.navIndex == 2) {
+                        this.instrumentUsageData.forEach(e => {
+                            tableInf += String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                this.formalTime(Number(e.startup_time)) +
+                                this.formalTime(Number(e.shutdown_time)) +
+                                e.address + "\n"
+                        })
+                        BluetoothPrinter.printPOSCommand({
+                            msg:
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(17) + //字体放大
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(1) + //居中
+                                "仪器运行记录单\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "执行单位:" + '天瑞仪器' + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "操作人:" + this.instrumentUsageData[0].operator + "\n" + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "开始时间     结束时间     地址" + "\n" +
+                                "--------------------------------" + "\n" +
+                                tableInf +
+                                "--------------------------------" + "\n" + "\n"
+                        }, (ret4, err4) => {
+                            console.log('提交打印' + JSON.stringify(ret4) + JSON.stringify(err4))
+                            api.hideProgress()
+                            if (ret4.msg == 'no connectBT') {
+                                api.toast({
+                                    msg: '设备蓝牙连接异常，请重试'
+                                })
+                            } else if (ret4.status) {
+
+                            }
+                        });
+                    } else if (this.navIndex == 1) {
+                        this.basicAllDatas.forEach(e => {
+                            tableInf += String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                this.formalTime(Number(e.createtime) * 1000) + '' +
+                                e.max_value + '' +
+                                (e.standard_limit == '' ? '无法判断' : Number(e.max_value) >= Number(e.standard_limit) ? '超标' : '合格') +
+                                e.address + "\n"
+                        })
+                        BluetoothPrinter.printPOSCommand({
+                            msg:
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(17) + //字体放大
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(1) + //居中
+                                "回测记录单\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "执行单位:" + '天瑞仪器' + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "执行人:" + getPrefs('userInfo').nickname + "\n" + "\n" +
+                                String.fromCharCode(29) + String.fromCharCode(33) + String.fromCharCode(0) +
+                                String.fromCharCode(27) + String.fromCharCode(97) + String.fromCharCode(0) +
+                                "时间   最大值  结果  地址" + "\n" +
+                                "--------------------------------" + "\n" +
+                                tableInf +
+                                "--------------------------------" + "\n" + "\n"
+                        }, (ret4, err4) => {
+                            console.log('提交打印' + JSON.stringify(ret4) + JSON.stringify(err4))
+                            api.hideProgress()
+                            if (ret4.msg == 'no connectBT') {
+                                api.toast({
+                                    msg: '设备蓝牙连接异常，请重试'
+                                })
+                            } else if (ret4.status) {
+
+                            }
+                        });
+                    }
+                },
+                formalTime(value) {
+                    const time = new Date(parseInt(value));
+                    // 获取年月日时分秒
+                    let y = time.getFullYear()
+                    let m = (time.getMonth() + 1).toString().padStart(2, '0')
+                    let d = time.getDate().toString().padStart(2, '0')
+                    let h = time.getHours().toString().padStart(2, '0')
+                    let min = time.getMinutes().toString().padStart(2, '0')
+                    let s = time.getSeconds().toString().padStart(2, '0')
+                    return `${y}-${m}-${d} ${h}:${min}:${s}`
+                },
+            }
+        })
+    };
+</script>
+
+</html>

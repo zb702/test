@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>voc2000</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/vant.css" />
+    <style>
+        body {
+            background-color: #FFFFFF;
+        }
+
+        .reportTitle {
+            background: #FAFAFA;
+        }
+
+        .titleItem {
+            width: 23vw;
+            display: inline-block;
+            /* margin: 0; */
+            line-height: 11vw;
+        }
+
+        .bodyItem {
+            width: 23vw;
+            display: inline-block;
+            line-height: 12vw;
+        }
+
+        .smallCalibrationBtn {
+            width: 13vw;
+            height: 7vw;
+            border: 1px solid #0081FF;
+            border-radius: 1vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3vw;
+            font-family: PingFang SC;
+            font-weight: 500;
+            color: #0081FF;
+            margin: auto;
+        }
+
+        .pingArea {
+            height: 10vw;
+            background: #F5F6FA;
+            padding: 0 4vw;
+            line-height: 10vw;
+        }
+
+        .calibrationBtnArea {
+            background: #FFFFFF;
+        }
+
+        .calibrationBtnItem {
+            width: 21vw;
+            height: 12vw;
+            box-shadow: 0px 0px 3vw 0px rgba(218, 222, 230, 0.8600);
+            border-radius: 1vw;
+            padding-top: 3vw;
+        }
+
+        .floatPopup {
+            position: fixed;
+            z-index: 99;
+            right: 6vw;
+            bottom: 8vw;
+            width: 20vw;
+            height: 12vw;
+            padding: 0 6vw;
+            background: #6C707B;
+            box-shadow: 0px 1vw 2vw 0px rgba(108, 112, 123, 0.3);
+            border-radius: 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .floatBtn {
+            text-align: center;
+        }
+
+        .floatBtn img {
+            width: 5vw;
+            height: 5vw;
+        }
+
+        .floatBtn p {
+            font-size: 2vw;
+            font-family: PingFang SC;
+            font-weight: 500;
+            color: #FFFFFF;
+        }
+
+        .floatLine {
+            width: 1px;
+            height: 5vw;
+            background: #8A8E99;
+        }
+
+        .reportAreas {
+            width: 100vw;
+            overflow-x: scroll;
+        }
+
+        .reportTitles {
+            width: 138vw;
+            white-space: nowrap;
+            background: #FAFAFA;
+        }
+
+        .reportBodys {
+            width: 138vw;
+            white-space: nowrap;
+        }
+        .blueLine{
+            width: 5vw;
+            height: 1vw;
+            background: #0081FF;
+            border-radius: 0.5vw;
+        }
+        .whiteLine{
+            width: 5vw;
+            height: 1vw;
+            background: #FFFFFF;
+            border-radius: 0.5vw;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="calibrationList">
+        <div class="pingArea">
+            <p>信号值：<span class="col-green">1232132123</span></p>
+        </div>
+        <div class="calibrationBtnArea pad-0-4 flex-sb" style="height: 27vw;">
+            <div class="calibrationBtnItem text-c" @click="addData">
+                <img class="w-h-5" src="../../image/icon/addcalibrationIcon.png" alt="">
+                <p class="text-3 col-7a7">新增</p>
+            </div>
+            <div class="calibrationBtnItem text-c" :style="{background:curIndex==1?'#0081FF':'#FFFFFF'}"
+                @click="toggleIndex(1)">
+                <img class="w-h-5"
+                    :src="curIndex==1?'../../image/icon/normalcalibrationactiveIcon.png':'../../image/icon/normalcalibrationIcon.png'"
+                    alt="">
+                <p class="text-3" :class="curIndex==1?'col-whi':'col-7a7'">日常校准</p>
+            </div>
+            <div class="calibrationBtnItem text-c" :style="{background:curIndex==2?'#0081FF':'#FFFFFF'}"
+                @click="toggleIndex(2)">
+                <img class="w-h-5"
+                    :src="curIndex==2?'../../image/icon/nextcalibrationactiveIcon.png':'../../image/icon/nextcalibrationIcon.png'"
+                    alt="">
+                <p class="text-3" :class="curIndex==2?'col-whi':'col-7a7'">回测</p>
+            </div>
+            <div class="calibrationBtnItem text-c" :style="{background:curIndex==3?'#0081FF':'#FFFFFF'}"
+                @click="toggleIndex(3)">
+                <img class="w-h-5"
+                    :src="curIndex==3?'../../image/icon/reportcalibrationactiveIcon.png':'../../image/icon/reportcalibrationIcon.png'"
+                    alt="">
+                <p class="text-3" :class="curIndex==3?'col-whi':'col-7a7'">记录</p>
+            </div>
+        </div>
+        <div class="reportArea" v-show="curIndex==1">
+            <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;width: 90vw;">
+                <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">标气浓度</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">信号值</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">校准</p>
+                <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">校准时间</p>
+            </div>
+            <div class="reportBody pad-0-5">
+                <ul>
+                    <li v-for="item in 20" class="bord-b-f5 flex-sb text-3" style="height: 12vw;width: 90vw;">
+                        <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                            1
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                            62.2
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                            <span class="smallCalibrationBtn">校准</span>
+                        </p>
+                        <p class="text-c text-3 col-666" style="width: 22.5vw;">
+                            2022:12:22
+                            18:00:00
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="reportAreas" v-show="curIndex==2">
+            <div class="reportTitles flex-fs pad-0-5">
+                <p class="titleItem text-c text-3 text-bold col-333">标气浓度</p>
+                <p class="titleItem text-c text-3 text-bold col-333">标准信号值</p>
+                <p class="titleItem text-c text-3 text-bold col-333">回测信号值</p>
+                <p class="titleItem text-c text-3 text-bold col-333">回测值</p>
+                <p class="titleItem text-c text-3 text-bold col-333">开始</p>
+                <p class="titleItem text-c text-3 text-bold col-333">结果</p>
+            </div>
+            <div class="reportBodys pad-0-5">
+                <ul>
+                    <li v-for="item in 20" class="bord-b-f5 flex-sb text-3" style="height: 12vw;">
+                        <p class="bodyItem text-c text-3 col-666">
+                            1
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            62.2
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            1
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            62.2
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            <span class="smallCalibrationBtn">回测</span>
+                        </p>
+                        <p class="bodyItem text-c text-3 col-666">
+                            通过
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div v-show="curIndex==3">
+            <div class=" flex-sa" style="height: 12vw;">
+                <div class="text-c" @click="toggleTab(0)">
+                    <p class="text-4 text-bold" :class="tabIndex==0?'col-blue':'col-aaa'">校准记录</p>
+                    <p :class="tabIndex==0?'blueLine':'whiteLine'" class="mar-c"></p>
+                </div>
+                <div class="text-c" @click="toggleTab(1)">
+                    <P class="text-4 text-bold" :class="tabIndex==1?'col-blue':'col-aaa'">回测记录</P>
+                    <p :class="tabIndex==1?'blueLine':'whiteLine'" class="mar-c"></p>
+                </div>
+            </div>
+            <div class="reportAreas" v-show="tabIndex==0">
+                <div class="reportTitle flex-sb pad-0-5" style="height: 11vw;width: 90vw;">
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">序号</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">任务名称</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">校准日期</p>
+                    <p class="text-c text-3 text-bold col-333" style="width: 22.5vw;">校准人</p>
+                </div>
+                <div class="reportBody pad-0-5">
+                    <ul>
+                        <li v-for="item in 20" class="bord-b-f5 flex-sb text-3" style="height: 12vw;">
+                            <p class=" text-c text-3 col-666" style="width: 22.5vw;">
+                                1
+                            </p>
+                            <p class=" text-c text-3 col-666" style="width: 22.5vw;">
+                                62.2执法
+                            </p>
+                            <p class=" text-c text-3 col-666" style="width: 22.5vw;">
+                                2022/12/12
+                            </p>
+                            <p class=" text-c text-3 col-666" style="width: 22.5vw;">
+                                马云
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="reportAreas" v-show="tabIndex==1">
+                <div class="reportTitles flex-fs pad-0-5">
+                    <p class="titleItem text-c text-3 text-bold col-333">序号</p>
+                    <p class="titleItem text-c text-3 text-bold col-333">任务名称</p>
+                    <p class="titleItem text-c text-3 text-bold col-333">回测日期</p>
+                    <p class="titleItem text-c text-3 text-bold col-333">回测人</p>
+                    <p class="titleItem text-c text-3 text-bold col-333">误差</p>
+                    <p class="titleItem text-c text-3 text-bold col-333">回测结果</p>
+                </div>
+                <div class="reportBodys pad-0-5">
+                    <ul>
+                        <li v-for="item in 20" class="bord-b-f5 flex-sb text-3" style="height: 12vw;">
+                            <p class="bodyItem text-c text-3 col-666">
+                                1
+                            </p>
+                            <p class="bodyItem text-c text-3 col-666">
+                                62.2执法
+                            </p>
+                            <p class="bodyItem text-c text-3 col-666">
+                                2022/12/12
+                            </p>
+                            <p class="bodyItem text-c text-3 col-666">
+                                马云
+                            </p>
+                            <p class="bodyItem text-c text-3 col-666">
+                                <=+-5%
+                            </p>
+                            <p class="bodyItem text-c text-3 col-666">
+                                通过
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/vant.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: 'rgba(255,255,255,0)'
+        });
+        var vue = new Vue({
+            el: '#calibrationList',
+            data: {
+                token: '',
+                curIndex: 1,
+                tabIndex:0,
+            },
+            created() {
+                this.token = api.getGlobalData({ key: 'token' });
+
+            },
+            methods: {
+                toggleIndex(num) {
+                    this.curIndex = num
+                },
+                addData() { },
+                toggleTab(num){
+                    this.tabIndex = num
+                }
+            }
+        })
+    };
+</script>
+
+</html>

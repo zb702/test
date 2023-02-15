@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>记录设置</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <style>
+      body,html{
+        background: rgba(255, 255, 255, 0);
+      }
+      .blockIsSelected{
+          margin:1.5vw 3vw;
+          padding:0 4vw;
+          border-radius: 3vw;
+      }
+      .theme{
+          height: 12vw;
+      }
+      .content{
+          padding:2vw 3vw;
+      }
+      .inputLine{
+          padding:2vw 0;
+      }
+      input{
+          border:none;
+          outline: none;
+          margin-left:13vw;
+      }
+      .selectedItem{
+        color:#0081FF;
+        border: 1px solid #0081FF;
+        width: 10vw;
+        height: 6vw;
+        border-radius: 1vw;
+        margin:0 1vw;
+        text-align: center;
+        line-height: 6vw;
+      }
+      .noselectedItem{
+        color: #AAADBA;
+        width: 10vw;
+        height: 6vw;
+        margin:0 1vw;
+        text-align: center;
+        line-height: 6vw;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="jlPopup">
+      <div class="all-bounce">
+        <div class="all-bounce-mark"></div>
+        <div class="all-bounce-area">
+          <div class="all-bounce-area-title">
+            <span>记录设置</span>
+            <img @click="go_back" src="../../image/icon/closeIcon.png" alt="">
+          </div>
+          <div class="all-bounce-area-content">
+            <div class="blockIsSelected" :style="{background:reportSelected==0?'#E5F2FF':'#f8f8f8'}">
+                <div class="theme flex-sb" @click="selectedReport(0)">
+                    <span class="text-4 text-bold">不记录</span>
+                    <img class="w-h-5" v-if="reportSelected==0" src="../../image/icon/selectedIcon.png" alt="">
+                </div>
+            </div>
+            <div class="blockIsSelected" :style="{background:reportSelected==1?'#E5F2FF':'#f8f8f8'}">
+                <div class="theme flex-sb" @click="selectedReport(1)">
+                    <span class="text-4 text-bold">手动记录次数</span>
+                    <img class="w-h-5" v-if="reportSelected==1" src="../../image/icon/selectedIcon.png" alt="">
+                </div>
+                <div class="content" v-show="reportSelected==1">
+                    <div class="inputLine flex-fs">
+                        <p class=" text-3">记录时长：</p>
+                        <input class=" text-3 col-blue text-bold" v-model="jlDuration" type="number" placeholder="请输入">
+                    </div>
+                    <div class="inputLine flex-fs">
+                        <p class=" text-3">记录次数：</p>
+                        <input class=" text-3 col-blue text-bold" v-model="jlTimes" type="number" placeholder="请输入">
+                    </div>
+                </div>
+            </div>
+            <div class="blockIsSelected" :style="{background:reportSelected==2?'#E5F2FF':'#f8f8f8'}">
+                <div class="theme flex-sb" @click="selectedReport(2)">
+                    <span class="text-4 text-bold">自动记录(循环记录)</span>
+                    <img class="w-h-5" v-if="reportSelected==2" src="../../image/icon/selectedIcon.png" alt="">
+                </div>
+                <div class="content" v-show="reportSelected==2">
+                  <div class="inputLine flex-fs">
+                      <p class=" text-3">默认自动记录间隔：</p>
+                      <p :class="curTimeInt==item?'selectedItem':'noselectedItem'" v-for="(item,index) in defaultTimerIntList" :key="index" @click="toggleTimeInt(item)">{{item}}s</p>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="all-bounce-area-bottom" @click="sureJl">确定</div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript" src="../../script/db2.js"></script>
+  <script type="text/javascript">
+  var db;
+  apiready=function() {
+    db = api.require('db');
+    var map = api.require('bMap');
+    var vue = new Vue({
+        el: '#jlPopup',
+        data: {
+            reportSelected:0,//默认不记录
+            jlDuration:'',
+            jlTimes:'',
+            recordStatus:{},
+            defaultTimerIntList:[3,5,10],
+            curTimeInt:3,
+            userinfo:{},
+            curLon:'',
+            curLat:'',
+            curCity:'',
+            simpleName:'286',
+            yqinfData:{},//仪器信息
+        },
+        created(){
+          if(getPrefs('record')){
+            this.recordStatus = JSON.parse(getPrefs('record'))
+            console.log('设置记录状态'+getPrefs('record'))
+            this.reportSelected = this.recordStatus.isJlSetup
+            this.curTimeInt = this.recordStatus.test_duration
+            this.jlDuration = this.recordStatus.test_duration
+            this.jlTimes = this.recordStatus.test_times
+          }else{
+            this.recordStatus = {}
+          }
+          if(getPrefs('simpleName')){
+            this.simpleName = getPrefs('simpleName')
+          }else{
+            this.simpleName = '286'
+          }
+          this.userinfo = getPrefs('userInfo')
+          map.getLocation({
+              accuracy: '100m',
+              autoStop: true,
+              filter: 1
+          }, (ret1, err1) => {
+              // console.log(22222 + JSON.stringify(ret1) + JSON.stringify(err1))
+              if (ret1.status) {
+                  this.curLon = ret1.lon;
+                  this.curLat = ret1.lat;
+                  map.getNameFromCoords({
+                      lon: ret1.lon,
+                      lat: ret1.lat
+                  }, (ret4, err4) => {
+                      if (ret4.status) {
+                          // console.log(JSON.stringify(ret4));
+                          this.curCity = ret4.address + ret4.sematicDescription
+                      }
+                      // console.log(2111111+ JSON.stringify(ret4) + JSON.stringify(err4))
+                  })
+              } else {
+                  console.log('定位失败,离线定位功能需要手动打开GPS，并在无遮挡物的室外')
+              }
+          })
+        },
+        mounted(){
+          //读取仪器信息
+          let yqinf = api.readFile({
+              sync: true,
+              path: 'fs://instrumentInformation.txt'
+          });
+          if(yqinf){
+              this.yqinfData = JSON.parse(yqinf)
+          }else{
+              api.alert({
+                  msg: '请前往仪器设置页面进行设置'
+              });
+          }
+              // console.log('本仪器信息'+JSON.stringify(this.yqinfData))
+        },
+        methods: {
+          //取消返回
+          go_back(){
+            api.closeFrame()
+          },
+          selectedReport(num){
+            this.reportSelected = num
+          },
+          toggleTimeInt(e){
+            this.curTimeInt = e
+          },
+          //确认
+          sureJl(){
+            if(this.reportSelected==1){
+              if(this.jlDuration==''){
+                api.toast({
+                    msg: '请输入记录时长',
+                    location: 'middle'
+                });
+                return
+              }else if(this.jlDuration<=3){
+                api.toast({
+                    msg: '记录时长请大于3秒',
+                    location: 'middle'
+                });
+                return
+              }else if(this.jlTimes==''){
+                api.toast({
+                    msg: '请输入记录次数',
+                    location: 'middle'
+                });
+                return 
+              }else{
+                this.jlTimes
+                this.jlDuration
+              }
+            }else if(this.reportSelected==2){//自动记录
+              this.jlTimes = ''
+              this.jlDuration = this.curTimeInt
+            }else{//不记录
+              this.jlTimes = ''
+              this.jlDuration = ''
+            }
+            setPrefs('record', {
+                isJlSetup: this.reportSelected,
+                test_times: this.jlTimes,//检测次数
+                test_duration: this.jlDuration,//检测时间
+            })
+            let params = {
+              use_id: this.userinfo.id,
+              type: 'PID',
+              operator: this.userinfo.nickname,
+              instrument_code: this.yqinfData.code,
+              enterprise_name: '天瑞仪器',
+              address: this.curCity,
+              lat: this.curLat,
+              lng: this.curLon,
+              name: this.simpleName,
+              isJlSetup: this.reportSelected,//记录设置
+              test_times: this.jlTimes,//记录次数
+              test_duration: this.jlDuration,//记录间隔
+              createtime: new Date().getTime(),
+              is_upload: 0,
+          };
+          var res = insert2('tr_voc_record_settings', params);
+          // console.log('保存数据'+JSON.stringify(res))
+          // var aat = select2('tr_voc_record_settings',{})
+          // console.log('查询数据'+JSON.stringify(aat))
+            api.sendEvent({
+              name:'recordChange',
+              extra: {
+                  isJlSetup: this.reportSelected,
+                  test_times: this.jlTimes,//检测次数
+                  test_duration: this.jlDuration,//检测时间
+              }
+            })
+            api.closeFrame()
+          }
+        }
+    })
+  }
+  </script>
+</html>

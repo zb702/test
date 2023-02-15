@@ -1,0 +1,341 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>底部导航</title>
+  <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/common.css" />
+  <style>
+    /* header {
+       background-color: #fff; 
+    } */
+
+    header ul li {
+      height: 12vw;
+      line-height: 12vw;
+      text-align: center;
+      display: none;
+      font-weight: bold;
+      font-size: 5vw;
+    }
+
+    header ul li.active {
+      display: block;
+    }
+
+    #index {
+      height: 100vh;
+      /* margin-bottom: 10vw; */
+    }
+
+    #footer {
+      background-color: #fff;
+      /* position: fixed;
+      z-index: 999;
+      bottom:0;
+      left:0;
+      width: 100vw; */
+    }
+
+    #footer ul li {
+      padding-top: 10vw;
+      padding-bottom: 2vw;
+      background: url() no-repeat center 2vw;
+      background-size: auto 8vw;
+      text-align: center;
+      color: #333333;
+    }
+
+    #footer ul li.active {
+      color: #0081FF;
+    }
+
+    #footer ul li:nth-child(1) {
+      background-image: url(../../image/tarbar/frame0.png);
+    }
+
+    #footer ul li:nth-child(2) {
+      background-image: url(../../image/tarbar/frame1.png);
+    }
+
+    #footer ul li:nth-child(3) {
+      background-image: url(../../image/tarbar/frame2.png);
+    }
+
+    #footer ul li:nth-child(4) {
+      background-image: url(../../image/tarbar/frame3.png);
+    }
+
+    #footer ul li:nth-child(1).active {
+      background-image: url(../../image/tarbar/frame0_active.png);
+    }
+
+    #footer ul li:nth-child(2).active {
+      background-image: url(../../image/tarbar/frame1_active.png);
+    }
+
+    #footer ul li:nth-child(3).active {
+      background-image: url(../../image/tarbar/frame2_active.png);
+    }
+
+    #footer ul li:nth-child(4).active {
+      background-image: url(../../image/tarbar/frame3_active.png);
+    }
+
+    .flex-con {
+      overflow: auto
+    }
+
+    .header {
+      position: relative;
+    }
+
+    .imgIcon {
+      position: absolute;
+      top: 2vw;
+      left: 2vw;
+      width: auto;
+      height: 8vw;
+      object-fit: cover;
+    }
+
+    .header .name {
+      line-height: 12vw;
+    }
+
+    .blue {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .blueIcon {
+      width: 18px;
+      height: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="index" class="flex-wrap flex-vertical">
+    <header>
+      <ul>
+        <li class="border-b active">
+          <div class="header blue">
+            <img class="imgIcon" src="../../image/normalLogo.png" alt="">
+            <div class="blueIcon"></div>
+            <span class="name">检测</span>
+            <img class="blueIcon" v-if="!blueon" src="../../image/icon/blue.png" @click="openBlue(blueon)" alt="">
+            <img class="blueIcon" v-else src="../../image/icon/blue2.png" @click="openBlue(blueon)" alt="">
+          </div>
+        </li>
+        <li class="border-b">
+          <div class="header">
+            <img class="imgIcon" src="../../image/normalLogo.png" alt="">
+            <span class="name">数据</span>
+          </div>
+        </li>
+        <li class="border-b">
+          <div class="header">
+            <img class="imgIcon" src="../../image/normalLogo.png" alt="">
+            <span class="name">统计</span>
+          </div>
+        </li>
+        <li class="border-b">
+          <div class="header">
+            <img class="imgIcon" src="../../image/normalLogo.png" alt="">
+            <span class="name">管理</span>
+          </div>
+        </li>
+      </ul>
+    </header>
+    <div id="main" class="flex-con"></div>
+    <footer>
+      <div id="footer">
+        <ul class="flex-wrap">
+          <li onclick="randomSwitchBtn( this );" class="text-3 flex-con active">检测</li>
+          <li onclick="randomSwitchBtn( this );" class="text-3 flex-con">数据</li>
+          <li onclick="randomSwitchBtn( this );" class="text-3 flex-con">统计</li>
+          <li onclick="randomSwitchBtn( this );" class="text-3 flex-con">管理</li>
+        </ul>
+      </div>
+    </footer>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/vue.min.js"></script>
+<script type="text/javascript" src="../../script/common.js"></script>
+<script type="text/javascript" src="../../script/db2.js"></script>
+<script type="text/javascript">
+  var db, vm;
+  var openFrame = false, frameName = ''
+  var ci = 0;
+  var time1, time2;
+  apiready = function () {
+    db = api.require('db');
+    vm = new Vue({
+      el: '#index',
+      data: {
+        blueon: false
+      },
+      created() { },
+      mounted() { },
+      methods: {
+        openBlue() {
+          if (this.blueon) {
+            api.showProgress({
+              title: '连接查询中',
+              modal: true
+            })
+          }
+
+          openFrame = true
+          frameName = 'connectBle'
+          api.sendEvent({
+            name: 'openblue',
+            extra: {
+              blueon: this.blueon
+            }
+          })
+        }
+      }
+    })
+    api.addEventListener({
+      name: 'blueon'
+    }, function (ret) {
+      vm.blueon = ret.value.blueon
+    })
+    var ret = db.openDatabaseSync({
+      name: 'tianrui_offline',
+      path: 'fs://tianrui_offline.db'
+    });
+
+    //查看任务列表是否有状态为未开始和进行中的任务
+    var taskLists = db.selectSqlSync({
+      name: 'tianrui_offline',
+      sql: 'SELECT * FROM tr_voc_tasks WHERE status < 2'
+    });
+    // console.log('当前仪器中任务列表状态为未开始和进行中的任务' + (taskLists.status ? '存在' : '不存在')+JSON.stringify(taskLists))
+    //一进入的时候判断任务来更改任务状态
+    if (taskLists.data.length >= 1) {
+      taskLists.data.forEach(e => {
+        // console.log('当前时间' + new Date() + (new Date().getTime() > e.finishtime))
+        if (new Date().getTime() > e.finishtime) {
+          // this.$set(e,'status',2)
+          e.status = 2
+          update2('tr_voc_tasks', e)
+        }
+      })
+    }
+    $api.fixStatusBar($api.dom('header'));
+    api.setStatusBarStyle({
+      style: 'dark',
+      color: 'rgba(255,255,255,0)'
+    });
+    funIniGroup();
+    api.addEventListener({
+      name: 'keyback'
+    }, function (ret, err) {
+      if (openFrame) {
+        openFrame = false
+        frameName = ''
+        api.closeFrame({ name: 'connect_ble' })
+        return
+      }
+      if (ci == 0) {
+        time1 = new Date().getTime();
+        ci = 1;
+        api.toast({ msg: '再按一次返回键退出' });
+      } else if (ci == 1) {
+        time2 = new Date().getTime();
+        if (time2 - time1 < 3000) {
+          api.sendEvent({
+            name: 'closePump'
+          })
+          api.closeWidget({
+            id: 'A6101279501112', //这里改成自己的应用ID
+            retData: { name: 'closeWidget' },
+            silent: true
+          });
+        } else {
+          ci = 0;
+          api.toast({ msg: '再按一次返回键退出' });
+        }
+      }
+    });
+
+  }
+
+
+  function funIniGroup() {
+    var eHeaderLis = $api.domAll('header li'),
+      frames = [];
+    for (var i = 0, len = eHeaderLis.length; i < len; i++) {
+      frames.push({
+        name: 'frame' + i,
+        url: './frame' + i + '.html',
+        bgColor: 'rgba(0,0,0,0.2)',
+        bounces: false
+      })
+    }
+
+    // //判断是否有仪器信息
+    // let inf = api.readFile({
+    //     sync: true,
+    //     path: 'fs://instrumentInformation.txt'
+    // });
+    // if(inf){//本地有存储的仪器信息
+    //   this.infData = JSON.parse(inf)
+    // }else{
+    //   api.alert({
+    //       msg: '请前往仪器设置页面进行设置'
+    //   });
+    // }
+    // console.log('查看仪器信息'+JSON.stringify(this.infData))
+
+    api.openFrameGroup({
+      name: 'group',
+      scrollEnabled: false,
+      rect: {
+        x: 0,
+        y: $api.dom('header').offsetHeight,
+        w: api.winWidth,
+        h: $api.dom('#main').offsetHeight
+      },
+      index: 0,
+      frames: frames
+    }, function (ret, err) {
+      // console.log(1111+JSON.stringify(ret)+JSON.stringify(err))
+    });
+  }
+
+  // 随意切换按钮
+  function randomSwitchBtn(tag) {
+    if (tag == $api.dom('#footer li.active')) return;
+    var eFootLis = $api.domAll('#footer li'),
+      eHeaderLis = $api.domAll('header li'),
+      index = 0;
+    for (var i = 0, len = eFootLis.length; i < len; i++) {
+      if (tag == eFootLis[i]) {
+        index = i;
+      } else {
+        $api.removeCls(eFootLis[i], 'active');
+        $api.removeCls(eHeaderLis[i], 'active');
+      }
+    }
+    // console.log('默认打开页面下标'+JSON.stringify(index))
+    $api.addCls(eFootLis[index], 'active');
+    $api.addCls(eHeaderLis[index], 'active');
+    api.setFrameGroupIndex({
+      name: 'group',
+      index: index
+    });
+  }
+</script>

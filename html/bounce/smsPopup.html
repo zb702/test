@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>说明书信息</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/common.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/vant.css"/>
+    <style>
+      body,html{
+        background: rgba(255, 255, 255, 1);
+      }
+      .smsContent{
+        padding: 0 3vw;
+        height: 128vw;
+        overflow-y: auto;
+      }
+      .smsImage{
+        width: 94vw;
+        height: auto;
+        object-fit: cover;
+        margin-top: 3vw;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="smsPopup">
+        <div class="allHeader pad-0-2 flex-sb">
+            <div class="leftHeader flex-fs" @click="go_back" style="width: 20vw;">
+              <img class="w-h-6" src="../../image/icon/arrowLeftIcon.png" alt="">
+              <span class="text-4">返回</span>
+            </div>
+            <div class="middleHeader">
+                <span class="text-5 text-bold">说明书</span>
+            </div>
+            <div class="rightHeader flex-fe" style="width: 20vw;"></div>
+        </div>
+        <div class="smsContent">
+          <img @click="checkBigPic(index)" v-for="(item,index) in imageLists" :key="index" class="smsImage" :src="item" alt="">
+        </div>
+        <van-image-preview v-model="previewImage" :startPosition="curPage" :images="imageLists" @change="changePic">
+        </van-image-preview>
+    </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/vue.min.js"></script>
+  <script type="text/javascript" src="../../script/common.js"></script>
+  <script type="text/javascript" src="../../script/vant.js"></script>
+  <script type="text/javascript">
+  apiready=function() {
+    $api.fixStatusBar($api.dom('#smsPopup'));
+    api.setStatusBarStyle({
+        style: 'dark',
+        color: 'rgba(255,255,255,0)'
+    });
+    var vue = new Vue({
+        el: '#smsPopup',
+        data: {
+          previewImage:false,
+          imageLists:[],
+          curPage:0,
+        },
+        created(){
+          for(let i = 0; i <= 18; i++){ 
+            if(i<=8){
+              this.imageLists.push('../../image/image/VOC-2000manual0'+Number(i+1)+'.jpg')
+            }else{
+              this.imageLists.push('../../image/image/VOC-2000manual'+Number(i+1)+'.jpg')
+            }
+          }
+        },
+        mounted(){},
+        methods: {
+          //查看大图
+          checkBigPic(num){
+            this.previewImage = true
+            this.curPage = num
+          },
+          //预览图片切换
+          changePic(e){
+            this.curPage.value = e
+          },
+          //取消返回
+          go_back(){
+            api.closeFrame()
+          },
+        }
+    })
+  }
+  </script>
+</html>
